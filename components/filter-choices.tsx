@@ -1,0 +1,3 @@
+'use client';
+import {selectedValues} from '@/modules/catalog/taxonomy';
+export function FilterChoices({label,value,onChange,options}:{label:string;value:string;onChange:(v:string)=>void;options:{value:string;label:string}[]}){const selected=selectedValues(value);return <fieldset className="filter-choices"><legend>{label}</legend><div className="filter-choice-buttons"><button type="button" aria-pressed={!selected.length} onClick={()=>onChange('all')}>Semua</button>{options.map(o=><button type="button" key={o.value} aria-pressed={selected.includes(o.value)} onClick={()=>{const next=selected.includes(o.value)?selected.filter(v=>v!==o.value):[...selected,o.value];onChange(next.join('|')||'all')}}>{o.label}</button>)}</div></fieldset>}

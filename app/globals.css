@@ -1,0 +1,28 @@
+@import "../styles/catalog.css";
+@import "../styles/order.css";
+@import "../styles/ongkir.css";
+
+.elite-admin-nav{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:16px 24px;background:#071f3a;color:#fff;font:13px Arial,sans-serif}
+.elite-admin-nav a{text-decoration:none;min-height:28px;display:flex;align-items:center}
+.elite-admin-nav a:hover{text-decoration:underline;text-underline-offset:4px}
+.owner-login{max-width:480px;margin:64px auto;padding:0 24px;text-align:center}
+.owner-brand{display:block;margin-bottom:28px;color:#071f3a;font-size:34px}
+.owner-card{background:#fff;border:1px solid #d7dfe5;border-radius:10px;padding:32px;text-align:left;margin-bottom:20px}
+.owner-card h1{font:normal 28px Georgia,serif;color:#071f3a;line-height:1.25}
+.owner-card p{color:#6c7781;font-size:14px;line-height:1.6}
+.owner-card label{display:block;margin:18px 0;font-size:14px;font-weight:500}
+.owner-card input{display:block;width:100%;margin-top:6px;border:1px solid #d7dfe5;border-radius:6px;min-height:46px;padding:10px 12px;font:16px Arial,sans-serif}
+.owner-card button{margin-top:10px;min-height:44px}
+.management{max-width:1080px;margin:48px auto;padding:0 24px}
+.management h1{font:normal 36px Georgia,serif;line-height:1.25;color:#071f3a}
+.management>p{color:#6c7781;margin:12px 0}
+.management-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:32px}
+.management-grid>a{background:white;border:1px solid #d7dfe5;border-radius:8px;padding:28px;text-decoration:none;color:#071f3a;transition:border-color .15s}
+.management-grid>a:hover{border-color:#071f3a}
+.management-grid span{font-size:12px;letter-spacing:2px;color:#6c7781}
+.management-grid h2{font:normal 23px Georgia,serif;margin:20px 0 12px}
+.management-grid p{font-size:14px;line-height:1.6;color:#6c7781}
+.shipping-key-form{margin-top:20px;border-top:1px solid #d7dfe5;padding-top:18px}
+.shipping-key-form label{display:block;font-size:14px;margin-bottom:8px}
+@media(max-width:760px){.elite-admin-nav{gap:14px;padding:12px 18px;font-size:12px}.management-grid{grid-template-columns:1fr}.management{margin:32px auto}.management h1{font-size:30px}.owner-login{margin-top:40px}.owner-card{padding:24px}}
+@media print{.elite-admin-nav{display:none!important}}

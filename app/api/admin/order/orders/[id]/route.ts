@@ -1,0 +1,7 @@
+import { api,json,owner,originCheck,body,db,bucket,notify,AppError } from "@/modules/order/order-server";
+import { synchronizeCatalogStock } from "@/modules/order/catalog-bridge";
+export const GET=(r:Request,ctx:{params:Promise<{id:string}>})=>api(async()=>{await owner(r);const {id}=await ctx.params;const o=await db().prepare("SELECT proof_key,proof_mime FROM orders WHERE id=?").bind(id).first<{proof_key:string;proof_mime:string}>();if(!o?.proof_key)throw new AppError(404,"Bukti tidak ditemukan.");const f=await bucket().get(o.proof_key);if(!f)throw new AppError(404,"Bukti tidak tersedia.");return new Response(f.body,{headers:{"Content-Type":o.proof_mime,"Cache-Control":"no-store","Content-Disposition":`attachment; filename=bukti-${id}.${o.proof_mime==="image/png"?"png":o.proof_mime==="image/webp"?"webp":"jpg"}`,"X-Content-Type-Options":"nosniff"}});});
+export const POST=(r:Request,ctx:{params:Promise<{id:string}>})=>api(async()=>{originCheck(r);await owner(r);const {id}=await ctx.params;const v=await body(r);if(v.action==="stock-sync"){return json(await synchronizeCatalogStock(id));}if(v.action==="retry"){const sent=await notify(id);return json({ok:sent,error:sent?undefined:"Belum terkirim. Periksa koneksi Telegram atau tunggu dua menit jika sedang dikirim."});}throw new AppError(400,"Tindakan tidak valid.");});
+
+export const runtime="nodejs";
+export const dynamic="force-dynamic";

@@ -1,0 +1,8 @@
+'use client';
+import { useEffect,useRef,useState } from 'react';
+import { BrandLogo } from '@/components/brand-logo';
+export default function TeamLogin(){const token=useRef('');const [available,setAvailable]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState('');
+ useEffect(()=>{token.current=window.location.hash.slice(1);setAvailable(/^[a-f0-9]{64}$/.test(token.current));window.history.replaceState(null,'','/akses-tim')},[]);
+ async function enter(){setBusy(true);setError('');try{const r=await fetch('/api/team/session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:token.current})}),v=await r.json() as {error?:string};if(!r.ok)throw new Error(v.error||'Akses belum dapat dibuka.');token.current='';window.location.replace('/admin/katalog')}catch(e){setError((e as Error).message);setBusy(false)}}
+ return <main className="catalog-shell"><header className="masthead"><a className="wordmark" href="/"><BrandLogo/><small>CURATED VINTAGE</small></a></header><section className="panel team-login"><p className="eyebrow">AKSES TIM</p><h1>Kelola katalog ELITE.VTG</h1><p>Tambahkan barang, perbarui stok, dan terbitkan produk.</p>{available?<><p className="help-text">Gunakan tautan yang diberikan pemilik kepada Anda. Pengaturan pembayaran tetap khusus pemilik.</p><button className="button primary" disabled={busy} onClick={()=>void enter()}>{busy?'Membuka…':'Masuk ke katalog'}</button></>:<p className="notice error">Buka tautan akses lengkap dari pemilik. Alamat halaman ini saja tidak memberikan akses.</p>}{error&&<p className="notice error" role="alert">{error}</p>}<a className="text-button" href="/">Kembali ke katalog</a></section></main>
+}

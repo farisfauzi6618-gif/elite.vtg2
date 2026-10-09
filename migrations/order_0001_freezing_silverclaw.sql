@@ -1,0 +1,1 @@
+CREATE INDEX `idx_orders_session` ON `orders` (`session_hash`);

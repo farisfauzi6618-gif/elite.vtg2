@@ -1,0 +1,4 @@
+'use client';
+import {Checkbox} from '@/components/ui/checkbox';
+import {FEATURE_GROUPS,type Feature} from '@/modules/catalog/taxonomy';
+export function FeaturePicker({features,selected,onChange,disabled=false}:{features:Feature[];selected:string[];onChange:(ids:string[])=>void;disabled?:boolean}){return <div className="feature-picker">{FEATURE_GROUPS.map(group=>{const options=features.filter(f=>f.groupId===group.id);return options.length?<fieldset key={group.id} className="feature-fieldset" disabled={disabled}><legend>{group.label}</legend><div className="fit-checkboxes">{options.map(f=><label className={'fit-check '+(selected.includes(f.id)?'selected':'')} key={f.id}><Checkbox disabled={disabled} checked={selected.includes(f.id)} onCheckedChange={checked=>onChange(checked===true?[...new Set([...selected,f.id])]:selected.filter(id=>id!==f.id))}/><span>{f.label}</span></label>)}</div></fieldset>:null})}</div>}
