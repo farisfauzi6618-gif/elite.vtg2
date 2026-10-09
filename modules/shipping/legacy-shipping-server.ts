@@ -48,6 +48,7 @@ async function initializedConfig() {
 export async function status() {
   configSecret();
   const row = await initializedConfig();
+  if(row){try{await decrypt(row.encrypted_key);}catch(error){if(error instanceof ShippingError&&error.code==='KEY_UNAVAILABLE')return {connected:false,origin:JSON.parse(row.origin_json) as Location,checkedAt:row.updated_at,needsReconnect:true};throw error;}}
   return { connected: !!row, origin: row ? JSON.parse(row.origin_json) as Location : null, checkedAt: row?.updated_at || null };
 }
 async function configuration() {
