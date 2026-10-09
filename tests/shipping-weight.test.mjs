@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+const require=createRequire(import.meta.url);
+const esbuild=require('esbuild');
+globalThis.__weightCalls=[];
+globalThis.__weightLinked={lines:[{quantity:3},{quantity:1}]};
+const result=await esbuild.build({stdin:{contents:"export {POST} from './app/api/shipping/route';export {orderShippingGrams} from './modules/order/order-items';",resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'esm',platform:'node',write:false,plugins:[{name:'shipping-fixtures',setup(b){
+ b.onResolve({filter:/modules\/order\/order-server$/},()=>({path:'server',namespace:'fixture'}));
+ b.onResolve({filter:/modules\/order\/checkout-shipping$/},()=>({path:'shipping',namespace:'fixture'}));
+ b.onResolve({filter:/modules\/order\/catalog-bridge$/},()=>({path:'catalog',namespace:'fixture'}));
+ b.onLoad({filter:/.*/,namespace:'fixture'},args=>({contents:args.path==='server'?`export class AppError extends Error {constructor(status,message){super(message);this.status=status}}export async function api(f){try{return await f()}catch(e){return Response.json({error:e.message},{status:e.status||503})}}export const json=Response.json.bind(Response);export const body=r=>r.json();export function originCheck(r){if(r.headers.get('origin')!==new URL(r.url).origin)throw new AppError(403,'Origin')}export async function rate(){}`:args.path==='catalog'?`export async function catalogQuote(){return globalThis.__weightLinked}`:`export async function searchDestinations(){return []}export async function shippingQuotes(id,grams){globalThis.__weightCalls.push({id,grams});return [{id:'q',grams,amount:grams*10}]}export async function shippingQuote(id,grams){return (await shippingQuotes(id,grams))[0]}`}));
+}}]});
+mkdirSync('.test-runtime/tests',{recursive:true});const file=path.resolve('.test-runtime/tests/shipping-weight.mjs');writeFileSync(file,result.outputFiles[0].contents);const m=await import(pathToFileURL(file));
+const rates=input=>m.POST(new Request('https://order.test/api/shipping',{method:'POST',headers:{origin:'https://order.test','content-type':'application/json'},body:JSON.stringify({action:'rates',destinationId:9,...input})}));
+test('Berat 1–3=1 kg, 4–6=2 kg, 7–9=3 kg, sampai 20 barang',()=>{for(let n=1;n<=20;n++)assert.equal(m.orderShippingGrams(n),Math.ceil(n/3)*1000);for(const n of [0,21,-1,1.5,'4',null])assert.throws(()=>m.orderShippingGrams(n));});
+test('Tarif publik menghitung berat dari jumlah, mengabaikan berat buatan browser',async()=>{for(const [quantity,grams] of [[1,1000],[3,1000],[4,2000],[6,2000],[7,3000],[20,7000]]){const r=await rates({quantity,grams:100});assert.equal(r.status,200);assert.equal((await r.json()).quotes[0].grams,grams);}});
+test('Tarif katalog memakai jumlah seluruh unit di server, termasuk beberapa size',async()=>{let r=await rates({catalogToken:'test',quantity:1,grams:1000});assert.equal(r.status,200);assert.equal((await r.json()).quotes[0].grams,2000);globalThis.__weightLinked={lines:[{quantity:3},{quantity:4}]};r=await rates({catalogToken:'test',quantity:99,grams:30000});assert.equal((await r.json()).quotes[0].grams,3000);});
+test('Jumlah manual hilang atau di luar batas tidak memanggil penyedia ongkir',async()=>{for(const quantity of [undefined,0,21,1.2,'4']){const count=globalThis.__weightCalls.length;assert.equal((await rates({quantity,grams:1000})).status,400);assert.equal(globalThis.__weightCalls.length,count);}});
