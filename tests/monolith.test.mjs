@@ -52,6 +52,7 @@ const compiled = await build({
     export {POST as qrisAdminPost} from './app/api/admin/order/qris/route';
     export {paymentConfig} from './modules/order/payment-config';
     export {POST as proofPost} from './app/api/order/proof/route';
+    export {POST as resumeInvoice} from './app/api/order/resume/route';
   `, resolveDir: process.cwd(), loader: 'ts' },
   bundle: true, platform: 'node', format: 'esm', write: false,
   external: ['@libsql/client', '@vercel/blob', '@hyzyla/pdfium'],
@@ -293,4 +294,23 @@ test('migrated team links remain manageable without invalidating existing access
     assert.ok((await m.startTeamSession(token)).session);
   } finally { process.env.TEAM_ACCESS_SECRET = previous; }
   assert.deepEqual(await m.listTeam('https://elite.test'), before);
+});
+
+test('invoice migration requires the original bearer cookie and preserves payment and stock', async () => {
+  const token = orderCookie.split(';')[0].slice('elite_order='.length);
+  const before = await d.prepare('SELECT * FROM orders WHERE id=?').bind(invoiceId).first();
+  const stock = (await d.prepare('SELECT * FROM size_groups').all()).results;
+  const resume = (payload, origin = 'https://elite.test') => m.resumeInvoice(new Request('https://elite.test/api/order/resume', {method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify(payload)}));
+  assert.equal((await resume({token}, 'https://evil.test')).status, 403);
+  for (const input of [{id:invoiceId},{token:'invalid'},{token, id:invoiceId}]) assert.equal((await resume(input)).status, 400);
+  assert.equal((await resume({token:'0'.repeat(64)})).status, 404);
+  const response = await resume({token});
+  assert.equal(response.status,200);
+  assert.match(response.headers.get('set-cookie'), /HttpOnly; Secure; SameSite=Strict/);
+  assert.deepEqual(await response.json(),{ok:true});
+  assert.deepEqual(await d.prepare('SELECT * FROM orders WHERE id=?').bind(invoiceId).first(), before);
+  assert.deepEqual((await d.prepare('SELECT * FROM size_groups').all()).results, stock);
+  await d.prepare('UPDATE orders SET created_at=? WHERE id=?').bind(Date.now()-8*86400000,invoiceId).run();
+  try { assert.equal((await resume({token})).status,404); }
+  finally {await d.prepare('UPDATE orders SET created_at=? WHERE id=?').bind(before.created_at,invoiceId).run();}
 });

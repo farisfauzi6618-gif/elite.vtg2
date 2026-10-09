@@ -9,8 +9,8 @@
   "liveCatalogUrl": "https://elite-vtg-katalog.farisfzi.chatgpt.site/",
   "liveOrderUrl": "https://elite-vtg-order.farisfzi.chatgpt.site/",
   "monolithSourceDate": "2026-10-09",
-  "monolithStatus": "catalog-payment-synchronized-locally-verified",
-  "excluded": "Runtime secrets, local environment, databases, uploaded files, production payment assets, generated builds, old Git histories. Shipping live source is not present in this workspace.",
+  "monolithStatus": "production-data-connected-checkout-held-for-cutover",
+  "excluded": "Runtime secrets, local environment, databases, customer data, uploaded photos, private proofs, production payment assets, generated builds and old Git histories.",
   "files": [
     {
       "source": "monolith-2026-10-09",
@@ -363,8 +363,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "app/ongkir/calculator.tsx",
-      "sha256": "3d61a189745c04dee91987bc87aec4161b92a0a2f7f193b45ed6a09169212901",
-      "exportSha256": "3d61a189745c04dee91987bc87aec4161b92a0a2f7f193b45ed6a09169212901"
+      "sha256": "01559f7b7efd6714ee2d1638de62035f2d16bba272e88c2b1828f64b5a5537bc",
+      "exportSha256": "01559f7b7efd6714ee2d1638de62035f2d16bba272e88c2b1828f64b5a5537bc"
     },
     {
       "source": "monolith-2026-10-09",
@@ -855,8 +855,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "docs/SYNC_RELEASE.md",
-      "sha256": "4b298dcdde56ff18c81f2f60ce331dc284eb77573ad86bb7893cffaf3a0c1521",
-      "exportSha256": "4b298dcdde56ff18c81f2f60ce331dc284eb77573ad86bb7893cffaf3a0c1521"
+      "sha256": "159e66149b8468eeb0be32f02a780b7c29abe4ed020da453f94f45f5967f8eb7",
+      "exportSha256": "159e66149b8468eeb0be32f02a780b7c29abe4ed020da453f94f45f5967f8eb7"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1137,8 +1137,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "modules/catalog/team-access.ts",
-      "sha256": "a51b5996d4659fa1e964aecfedea77be5faaa1d1588b5eb5305efd3ca51379d3",
-      "exportSha256": "a51b5996d4659fa1e964aecfedea77be5faaa1d1588b5eb5305efd3ca51379d3"
+      "sha256": "d0e5357beec5543b26a6b0c08e925acdf4627400395545bbb3b18afb0986194e",
+      "exportSha256": "d0e5357beec5543b26a6b0c08e925acdf4627400395545bbb3b18afb0986194e"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1233,8 +1233,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "modules/order/order-server.ts",
-      "sha256": "203179272a7fc8b43257f23176027c152fbc43c94a908480f87304a76079beaa",
-      "exportSha256": "203179272a7fc8b43257f23176027c152fbc43c94a908480f87304a76079beaa"
+      "sha256": "cc2db1b02c25c13139588891e1e6f048f6704ff690fdc38255f544b550894f58",
+      "exportSha256": "cc2db1b02c25c13139588891e1e6f048f6704ff690fdc38255f544b550894f58"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1299,8 +1299,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "modules/shipping/legacy-shipping-server.ts",
-      "sha256": "f768a2476dc48779acd9a51db4b71d5897acabc6f1a164041bc42e01c758b805",
-      "exportSha256": "f768a2476dc48779acd9a51db4b71d5897acabc6f1a164041bc42e01c758b805"
+      "sha256": "985db026bb267d0e343a509c545f4e92c03c726b3cd6554da2d9299c6e9bfc00",
+      "exportSha256": "985db026bb267d0e343a509c545f4e92c03c726b3cd6554da2d9299c6e9bfc00"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1473,8 +1473,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "tests/monolith.test.mjs",
-      "sha256": "10b9743ae84ef51400833ec95b14ff74c54be954ab70d380f13fb18e959c37e5",
-      "exportSha256": "10b9743ae84ef51400833ec95b14ff74c54be954ab70d380f13fb18e959c37e5"
+      "sha256": "3e25a921f525628d4fd5c1394bf79db4d67562a117baf2a75aa7c324682e35c8",
+      "exportSha256": "3e25a921f525628d4fd5c1394bf79db4d67562a117baf2a75aa7c324682e35c8"
     },
     {
       "source": "monolith-2026-10-09",
@@ -3977,6 +3977,34 @@
       "path": "vite.config.ts",
       "sha256": "a1905de84f71be8ba09b2774e75a92c724a07265ef1325cd256c33ce4170960a",
       "exportSha256": "a1905de84f71be8ba09b2774e75a92c724a07265ef1325cd256c33ce4170960a"
+    },
+    {
+      "source": "monolith-2026-10-09",
+      "path": "app/api/order/resume/route.ts",
+      "sha256": "eb850912510e5ed6b609c48a41fd468a8a6b2de2b529f3dbc05e1a16073270b2",
+      "exportSha256": "eb850912510e5ed6b609c48a41fd468a8a6b2de2b529f3dbc05e1a16073270b2"
+    },
+    {
+      "source": "monolith-2026-10-09",
+      "path": "app/(orders)/order/lanjutkan/page.tsx",
+      "sha256": "45d6131c9e5fd09405adf10b1ba4c922f5d20065ee85d9c716bada3730ae809c",
+      "exportSha256": "45d6131c9e5fd09405adf10b1ba4c922f5d20065ee85d9c716bada3730ae809c"
     }
-  ]
+  ],
+  "runtimeCheckedDate": "2026-10-10",
+  "publishedCodeCommit": "7551202abc18fd299e4ce169df9378028aaab4d7",
+  "pendingSourceChanges": [
+    "app/api/order/resume/route.ts",
+    "app/(orders)/order/lanjutkan/page.tsx",
+    "app/ongkir/calculator.tsx",
+    "tests/monolith.test.mjs"
+  ],
+  "productionData": {
+    "products": 21,
+    "orders": 27,
+    "stockUnits": 20,
+    "photos": 139,
+    "proofs": 22,
+    "qris": 1
+  }
 }

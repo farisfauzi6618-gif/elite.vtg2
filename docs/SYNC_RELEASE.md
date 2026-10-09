@@ -24,7 +24,7 @@ Migration lama tidak diubah. `order_0012_tidy_silk_fever.sql` ditambahkan untuk 
 
 Pemeriksaan lokal pada 9 Oktober 2026 menggunakan Node.js 24.15.0 dan Next.js 16.3.8:
 
-- `node --test --test-concurrency=1 tests/*.test.mjs`: 134 tes lulus, tidak ada gagal atau dilewati. Mencakup katalog/paginasi, belanja ulang, checkout, auth pemilik/tim/pelanggan, tujuan pembayaran, upload bukti, konfirmasi stok dan pengiriman. Suite domain katalog juga memeriksa 22 skenario caption/filter di dalam suite tersebut.
+- `node --test --test-concurrency=1 tests/*.test.mjs`: 138 tes lulus, tidak ada gagal atau dilewati. Mencakup katalog/paginasi, belanja ulang, checkout, auth pemilik/tim/pelanggan, tujuan pembayaran, upload bukti, konfirmasi stok dan pengiriman. Suite domain katalog juga memeriksa 22 skenario caption/filter di dalam suite tersebut.
 - `node node_modules/next/dist/bin/next build --webpack`: build produksi berhasil, termasuk pemeriksaan TypeScript dan seluruh route gabungan.
 - `node node_modules/typescript/bin/tsc --noEmit`: lulus sesudah build.
 - `node tests/production-http.mjs`: 41 pemeriksaan HTTP lulus pada server hasil build dengan database/storage sementara. Mencakup halaman/aset, header, login/logout nyata, penolakan identitas palsu, tujuan pembayaran dari server, penolakan perubahan QRIS dan penolakan gambar dengan fingerprint berbeda.
@@ -33,8 +33,16 @@ Pemeriksaan lokal pada 9 Oktober 2026 menggunakan Node.js 24.15.0 dan Next.js 16
 
 Simulasi menggunakan data pembayaran contoh serta provider/bot tiruan; tidak melakukan transaksi, booking, perubahan situs aktif atau deployment Vercel. Masalah origin pada harness HTTP lokal diselesaikan dengan memakai `localhost`, sesuai normalisasi loopback NextRequest. Pemeriksaan tampilan dan transaksi pada deployment tujuan tetap diperlukan sebelum pengalihan pelanggan.
 
-## Yang masih perlu disiapkan sebelum menerima pembayaran pada domain baru
+## Runtime tujuan — pembaruan 10 Oktober 2026
 
-Source terbaru tidak berisi produk, foto unggahan, stok, pesanan, bukti pembayaran, QRIS merchant, kredensial server atau bot produksi. Target Turso/Blob/Vercel belum dikonfigurasi dan data produksi belum dipindahkan. Gunakan database, storage, dan bot uji terpisah; periksa di HP serta akun provider tujuan sebelum mengalihkan link pembeli dan webhook produksi.
+GitHub dan Vercel sudah terhubung. Turso, Blob privat, autentikasi pemilik, BCA dan QRIS asli sudah dipasang pada Production. Salinan terakhir memuat 21 produk, 27 pesanan, 20 unit stok dan 162 aset (139 foto, 22 bukti, 1 QRIS). Identitas/alamat pelanggan, unggahan dan kredensial tetap berada pada layanan privat; tidak dimasukkan ke GitHub.
 
-Reservasi stok saat checkout belum ditambahkan; konflik stok ditangani seperti situs aktif. Order manual tetap memakai harga kesepakatan yang harus diperiksa pemilik. Pengujian simulasi tidak menyatakan dana sudah masuk atau layanan provider produksi sudah aktif.
+Deployment commit 7551202abc18fd299e4ce169df9378028aaab4d7 lolos 72 pemeriksaan HTTP produksi pada 9 Oktober 2026, termasuk seluruh detail produk, fingerprint aset dan QRIS, ongkir J&T nyata, serta penolakan akses admin/bukti anonim. Pemilik berhasil masuk ke dashboard dengan password yang ditetapkan sendiri. Token bot dan RajaOngkir dari pemilik valid dan disimpan terenkripsi dengan konfigurasi target.
+
+Webhook Telegram masih di situs lama. Pembayaran baru pada Vercel sengaja ditahan sampai pengalihan selesai. Persiapan terbaru menambahkan pemulihan sesi invoice lama dengan token acak asli, tanpa mengubah pembayaran atau stok. Token dipindahkan melalui fragment HTTPS dan segera dihapus dari alamat, lalu disimpan sebagai cookie HttpOnly, Secure, SameSite=Strict. Endpoint menolak token palsu, sesi kedaluwarsa dan request lintas origin. Kalkulator menampilkan nama provider yang sedang aktif.
+
+138 tes Node dan build produksi webpack beserta TypeScript lulus pada 10 Oktober 2026. Tes memakai provider/bot tiruan dan tidak mengirim pesan atau membuat booking produksi. Perubahan persiapan ini masih perlu diterbitkan dan diverifikasi di Vercel.
+
+Sebelum cutover: tahan penulisan situs lama, ambil delta terakhir beserta aset, verifikasi setiap baris, lalu alihkan webhook tanpa membuang update tertunda. Link lama perlu diarahkan ke domain baru agar pelanggan melanjutkan invoice pada perangkat yang sama. Situs lama tetap menjadi sumber transaksi sampai rangkaian ini berhasil; jangan menjalankan ulang pembayaran, notifikasi, booking, atau pemotongan stok selama menyalin data.
+
+Booking KiriminAja belum aktif pada sumber lama maupun target; API key dan PIN KA Credit belum tersedia. RajaOngkir tetap menyediakan cek ongkir J&T. Reservasi stok saat checkout belum ditambahkan; konflik stok mengikuti perilaku toko sebelumnya. Harga order manual tetap perlu diverifikasi pemilik sebelum konfirmasi dana.
