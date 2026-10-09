@@ -46,3 +46,7 @@ Link katalog, order, ongkir serta admin lama kini mengarah ke halaman Vercel yan
 138 tes Node dan build produksi webpack/TypeScript lulus. Guard migrasi lolos 35 pemeriksaan. Pengujian menggunakan provider/bot tiruan untuk operasi bisnis dan tidak mengirim pesan, mengonfirmasi pembayaran atau membuat booking produksi.
 
 Booking KiriminAja belum aktif pada sumber lama maupun target; API key dan PIN KA Credit belum tersedia. RajaOngkir menyediakan cek ongkir J&T; pengiriman diurus manual sampai layanan booking disambungkan. Reservasi stok saat checkout belum ditambahkan; konflik stok mengikuti perilaku toko sebelumnya. Harga pesanan manual tetap diverifikasi pemilik sebelum konfirmasi dana.
+
+## Domain utama — 10 Oktober 2026
+
+Domain gratis elitevtg.vercel.app dipasang pada project dan database yang sama. SITE_ORIGIN produksi diperbarui. Proxy hanya mengalihkan halaman GET/HEAD dari elite-vtg2.vercel.app, mempertahankan path/query, serta membawa cookie invoice melalui fragment ke pemulihan sesi. POST, API, callback dan aset pada host sebelumnya tetap diproses oleh aplikasi yang sama agar formulir terbuka tidak terputus. Origin lain/preview tidak dialihkan. Tiga tes khusus memastikan pengalihan, pemulihan invoice dan kelanjutan request lama.

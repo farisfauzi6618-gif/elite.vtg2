@@ -7,8 +7,8 @@
     "sites-order": "911fda6f8b43b8d8c7ab2b34bb9f747f25fdd98c",
     "sites-shipping": "b7aa13349b65fc38c7ba445104eaab811cffbd36"
   },
-  "liveCatalogUrl": "https://elite-vtg2.vercel.app/",
-  "liveOrderUrl": "https://elite-vtg2.vercel.app/order",
+  "liveCatalogUrl": "https://elitevtg.vercel.app/",
+  "liveOrderUrl": "https://elitevtg.vercel.app/order",
   "monolithSourceDate": "2026-10-10",
   "monolithStatus": "production-cutover-complete-checkout-active",
   "excluded": "Runtime secrets, local environment, databases, customer data, uploaded photos, private proofs, production payment assets, generated builds and old Git histories.",
@@ -856,8 +856,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "docs/SYNC_RELEASE.md",
-      "sha256": "39dafac9c78b1907d967b3583b5dae79bdaf5a0664e57a7defaa2162be39ffad",
-      "exportSha256": "39dafac9c78b1907d967b3583b5dae79bdaf5a0664e57a7defaa2162be39ffad"
+      "sha256": "1814ed8ee28c8f331009ca60c91144c752fa375d622bd448cae8bec2b796b669",
+      "exportSha256": "1814ed8ee28c8f331009ca60c91144c752fa375d622bd448cae8bec2b796b669"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1588,8 +1588,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "README.md",
-      "sha256": "28e0cad1271ea76ad4bc741ea3da1822ff5ed3b2aa06f4e8c272048e1797ff26",
-      "exportSha256": "28e0cad1271ea76ad4bc741ea3da1822ff5ed3b2aa06f4e8c272048e1797ff26"
+      "sha256": "1717dc33cafd851e88974a8764bded826c8ae723832cad89fe046dc3ac90340c",
+      "exportSha256": "1717dc33cafd851e88974a8764bded826c8ae723832cad89fe046dc3ac90340c"
     },
     {
       "source": "monolith-2026-10-09",
@@ -3990,10 +3990,27 @@
       "path": "app/(orders)/order/lanjutkan/page.tsx",
       "sha256": "45d6131c9e5fd09405adf10b1ba4c922f5d20065ee85d9c716bada3730ae809c",
       "exportSha256": "45d6131c9e5fd09405adf10b1ba4c922f5d20065ee85d9c716bada3730ae809c"
+    },
+    {
+      "source": "monolith-2026-10-10-domain",
+      "path": "lib/canonical-domain.ts",
+      "sha256": "ee6a944fca7e5dc7ea8702f4e7714855ee57e90c5923466ad21fd1bd79e8be58",
+      "exportSha256": "ee6a944fca7e5dc7ea8702f4e7714855ee57e90c5923466ad21fd1bd79e8be58"
+    },
+    {
+      "source": "monolith-2026-10-10-domain",
+      "path": "proxy.ts",
+      "sha256": "5c403c8490eb676f21f265e939cd278a99b24bac22bbdbaa2ddc0c162eff2683",
+      "exportSha256": "5c403c8490eb676f21f265e939cd278a99b24bac22bbdbaa2ddc0c162eff2683"
+    },
+    {
+      "source": "monolith-2026-10-10-domain",
+      "path": "tests/canonical-domain.test.mjs",
+      "sha256": "98b824dd971c1f790d18af7215e95341fb12ac056b02159a8d86112af74e5ae2",
+      "exportSha256": "98b824dd971c1f790d18af7215e95341fb12ac056b02159a8d86112af74e5ae2"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
-  "publishedCodeCommit": "2780c4394463f9052df8599116270f7f2c556ebe",
   "pendingSourceChanges": [],
   "productionData": {
     "products": 21,
@@ -4013,5 +4030,16 @@
     "legacyWritesBlocked": true,
     "updatesDropped": false,
     "transactionsReplayed": false
+  },
+  "previousVercelOrigin": "https://elite-vtg2.vercel.app",
+  "canonicalDomain": "https://elitevtg.vercel.app",
+  "verifiedBaseCommit": "2780c4394463f9052df8599116270f7f2c556ebe",
+  "domainRelease": {
+    "date": "2026-10-10",
+    "primary": "https://elitevtg.vercel.app",
+    "previous": "https://elite-vtg2.vercel.app",
+    "invoiceSessionPreserved": true,
+    "testsPassed": 3,
+    "webpackAndTypeScriptPassed": true
   }
 }
