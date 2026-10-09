@@ -1557,8 +1557,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "next.config.ts",
-      "sha256": "6c8921c4e0fb5604738f793cedc9d747be3371577d2e41025ccbaeb6fe872146",
-      "exportSha256": "6c8921c4e0fb5604738f793cedc9d747be3371577d2e41025ccbaeb6fe872146"
+      "sha256": "f7f31ab315b2bce6278d9c5ec64eb03cb648be5e9b3162cc17792f0ab44b6e40",
+      "exportSha256": "f7f31ab315b2bce6278d9c5ec64eb03cb648be5e9b3162cc17792f0ab44b6e40"
     },
     {
       "source": "monolith-2026-10-09",
