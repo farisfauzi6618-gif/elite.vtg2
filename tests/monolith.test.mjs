@@ -35,7 +35,9 @@ const compiled = await build({
     export {catalogQuote,synchronizeCatalogStock} from './modules/order/catalog-bridge';
     export {registerCustomer,currentCustomer} from './modules/catalog/customers';
     export {listTeam,startTeamSession} from './modules/catalog/team-access';
-    export {encrypt} from './modules/order/order-server';
+    export {encrypt,ready,settings} from './modules/order/order-server';
+    export {status as legacyShippingStatus} from './modules/shipping/legacy-shipping-server';
+    export {GET as publicConfig} from './app/api/config/route';
     export {createManualDraft} from './modules/catalog/catalog-service';
     export {POST as ownerLogin} from './app/api/auth/owner/route';
     export {GET as catalogAdmin} from './app/api/admin/katalog/route';
@@ -179,7 +181,7 @@ test('checkout gets the real provider rate at 2 kg for four catalog units, ignor
 });
 test('unified order creation uses verified catalog totals and rejects expired or mismatched quotes', async () => {
   const cipher=await m.encrypt('SIMULATED_TELEGRAM_TOKEN');
-  await d.prepare("UPDATE settings SET qris_key='qris-simulation',bot_cipher=?,chat_id='12345',webhook_active=1 WHERE id=1").bind(cipher).run();
+  await d.prepare("UPDATE settings SET qris_key='qris-simulation',bot_cipher=?,chat_id='12345',webhook_cipher=?,webhook_active=1 WHERE id=1").bind(cipher,await m.encrypt('SIMULATED_WEBHOOK_SECRET')).run();
   const base={name:'PEMBELI SIMULASI',phone:'081234567890',address:'Jl. Jendral Urip No. 24, Tengah',postcode:'78243',itemAmount:1,consent:true,catalogToken:checkoutToken,quoteId:globalThis.__monolithQuote.id};
   const bad=await m.orderPost(request('/api/order',{...base,postcode:'40375'})); assert.equal(bad.status,409);
   const response=await m.orderPost(request('/api/order',base)); assert.equal(response.status,201);
@@ -215,7 +217,7 @@ test('switching payment methods cannot change destination, total, or verificatio
 
 test('proof upload submits the order without confirming funds or booking a shipment', async () => {
   const cipher=await m.encrypt('SIMULATED_TELEGRAM_TOKEN');
-  await d.prepare("UPDATE settings SET qris_key='qris-simulation',bot_cipher=?,chat_id='12345',webhook_active=1 WHERE id=1").bind(cipher).run();
+  await d.prepare("UPDATE settings SET qris_key='qris-simulation',bot_cipher=?,chat_id='12345',webhook_cipher=?,webhook_active=1 WHERE id=1").bind(cipher,await m.encrypt('SIMULATED_WEBHOOK_SECRET')).run();
   const form=new FormData(); form.set('paymentMethod','bca_transfer'); form.set('file',new Blob([png],{type:'image/png'}),'proof.png');
   const response=await m.proofPost(new Request('https://elite.test/api/order/proof',{method:'POST',headers:{Origin:'https://elite.test',Cookie:orderCookie},body:form}));
   assert.equal(response.status,200); assert.equal((await response.json()).status,'submitted');
@@ -243,4 +245,52 @@ test('shared owner authentication revokes sessions on password rotation and logo
   const response=await m.ownerLogin(request('/api/auth/owner',{action:'logout'},ownerCookie)); assert.equal(response.status,200);
   assert.equal(await m.getOwnerFromCookie(ownerCookie),null);
   assert.match(response.headers.get('set-cookie'),/Max-Age=0/);
+});
+
+test('migrated Telegram ciphertext cannot enable payments under a different server secret', async () => {
+  const previous = process.env.CONFIG_SECRET, s = await m.settings(), calls = providerCalls;
+  assert.equal(await m.ready(s), true);
+  assert.equal(await m.ready({...s,webhook_active:0}),false);
+  assert.equal(await m.ready({...s,webhook_cipher:'malformed'}),false);
+  try {
+    process.env.CONFIG_SECRET = 'e'.repeat(64);
+    assert.equal(await m.ready(s), false);
+    assert.equal(await m.ready({ ...s, bot_cipher: 'malformed' }), false);
+    const response = await m.publicConfig(), configuration = await response.json();
+    assert.equal(response.status, 200); assert.equal(configuration.ready, false);
+    assert.equal(configuration.payment.bca.accountNumber, '1234567890');
+    assert.equal(providerCalls, calls);
+    assert.equal((await m.settings()).bot_cipher, s.bot_cipher);
+  } finally { process.env.CONFIG_SECRET = previous; }
+  assert.equal(await m.ready(s), true);
+});
+
+test('migrated RajaOngkir ciphertext reports reconnection without changing the saved origin or key', async () => {
+  const previous = process.env.RAJAONGKIR_CONFIG_SECRET;
+  const row = await d.prepare('SELECT * FROM shipping_config WHERE id=1').first(), calls = providerCalls;
+  assert.equal((await m.legacyShippingStatus()).connected, true);
+  try {
+    process.env.RAJAONGKIR_CONFIG_SECRET = 'f'.repeat(64);
+    const state = await m.legacyShippingStatus();
+    assert.equal(state.connected, false); assert.equal(state.needsReconnect, true);
+    assert.equal(state.origin.id, 10);
+    assert.equal(providerCalls, calls);
+    assert.deepEqual(await d.prepare('SELECT * FROM shipping_config WHERE id=1').first(), row);
+    assert.doesNotMatch(JSON.stringify(state), /encrypted_key|SIMULATED_RATE_KEY/);
+  } finally { process.env.RAJAONGKIR_CONFIG_SECRET = previous; }
+  assert.equal((await m.legacyShippingStatus()).connected, true);
+});
+
+test('migrated team links remain manageable without invalidating existing access', async () => {
+  const previous = process.env.TEAM_ACCESS_SECRET, before = await m.listTeam('https://elite.test');
+  const token = before[0].link.split('#')[1];
+  const rows = (await d.prepare('SELECT * FROM team_access ORDER BY slot').all()).results;
+  try {
+    process.env.TEAM_ACCESS_SECRET = 'f'.repeat(64);
+    const members = await m.listTeam('https://elite.test');
+    assert.equal(members.length, 3); assert.ok(members.every(member => member.link === null));
+    assert.deepEqual((await d.prepare('SELECT * FROM team_access ORDER BY slot').all()).results, rows);
+    assert.ok((await m.startTeamSession(token)).session);
+  } finally { process.env.TEAM_ACCESS_SECRET = previous; }
+  assert.deepEqual(await m.listTeam('https://elite.test'), before);
 });
