@@ -1,6 +1,6 @@
 # Penyelarasan source gabungan — 9 Oktober 2026
 
-Acuan katalog: commit `3f17ffb2d5b18d419a7765df1f3a6a0e561a5f6c`. Acuan order: commit `2b2bf019e7004842e3f3857f1ae8b0f41a20d991`. Perubahan diterapkan pada source gabungan, tanpa deployment atau perubahan konfigurasi/data situs aktif.
+Acuan katalog: commit `3f17ffb2d5b18d419a7765df1f3a6a0e561a5f6c`. Acuan order: commit `2b2bf019e7004842e3f3857f1ae8b0f41a20d991`. Perubahan diterapkan pada source gabungan. Migrasi dan publikasi produksi berikutnya selesai pada 10 Oktober 2026, seperti dicatat pada pembaruan runtime di bawah.
 
 ## Perilaku yang diselaraskan
 
@@ -35,14 +35,14 @@ Simulasi menggunakan data pembayaran contoh serta provider/bot tiruan; tidak mel
 
 ## Runtime tujuan — pembaruan 10 Oktober 2026
 
-GitHub dan Vercel sudah terhubung. Turso, Blob privat, autentikasi pemilik, BCA dan QRIS asli sudah dipasang pada Production. Salinan terakhir memuat 21 produk, 27 pesanan, 20 unit stok dan 162 aset (139 foto, 22 bukti, 1 QRIS). Identitas/alamat pelanggan, unggahan dan kredensial tetap berada pada layanan privat; tidak dimasukkan ke GitHub.
+GitHub dan Vercel sudah terhubung. Turso, Blob privat, autentikasi pemilik, BCA dan QRIS asli terpasang pada Production. Migrasi final memuat 21 produk, 27 pesanan, 20 unit stok dan 162 aset (139 foto, 22 bukti, 1 QRIS). Data pelanggan, unggahan dan kredensial berada pada layanan privat; tidak dimasukkan ke GitHub.
 
-Deployment commit 7551202abc18fd299e4ce169df9378028aaab4d7 lolos 72 pemeriksaan HTTP produksi pada 9 Oktober 2026, termasuk seluruh detail produk, fingerprint aset dan QRIS, ongkir J&T nyata, serta penolakan akses admin/bukti anonim. Pemilik berhasil masuk ke dashboard dengan password yang ditetapkan sendiri. Token bot dan RajaOngkir dari pemilik valid dan disimpan terenkripsi dengan konfigurasi target.
+Rilis kode 2780c4394463f9052df8599116270f7f2c556ebe berhasil diterbitkan. Pemeriksaan produksi pada 10 Oktober 2026 mencakup 72 pemeriksaan HTTP: seluruh detail produk, fingerprint foto/QRIS, ongkir J&T nyata dan penolakan akses admin/bukti anonim. Pemilik sudah berhasil membuka dashboard memakai password yang ditetapkan sendiri. Token bot dan RajaOngkir disimpan terenkripsi dengan konfigurasi target.
 
-Webhook Telegram masih di situs lama. Pembayaran baru pada Vercel sengaja ditahan sampai pengalihan selesai. Persiapan terbaru menambahkan pemulihan sesi invoice lama dengan token acak asli, tanpa mengubah pembayaran atau stok. Token dipindahkan melalui fragment HTTPS dan segera dihapus dari alamat, lalu disimpan sebagai cookie HttpOnly, Secure, SameSite=Strict. Endpoint menolak token palsu, sesi kedaluwarsa dan request lintas origin. Kalkulator menampilkan nama provider yang sedang aktif.
+Pembelian baru di Vercel sudah aktif. Sebelum aktivasi, seluruh write pada tiga situs lama ditahan dan diverifikasi, snapshot final dibaca melalui database native, lalu delta diterapkan dalam satu transaksi dengan pemeriksaan setiap hash baris dan foreign key. Satu checkout terbaru disalin; tidak ada penghapusan, replay pesanan, konfirmasi dana, pemotongan stok, notifikasi ulang atau booking selama migrasi. Webhook Telegram dipindahkan dengan chat pemilik tetap dan drop_pending_updates=false.
 
-138 tes Node dan build produksi webpack beserta TypeScript lulus pada 10 Oktober 2026. Tes memakai provider/bot tiruan dan tidak mengirim pesan atau membuat booking produksi. Perubahan persiapan ini masih perlu diterbitkan dan diverifikasi di Vercel.
+Link katalog, order, ongkir serta admin lama kini mengarah ke halaman Vercel yang tepat. Penulisan melalui formulir lama ditolak dengan HTTP 409 agar tidak terjadi transaksi ganda. Invoice lama dipulihkan memakai token acak asli melalui fragment HTTPS yang segera dihapus, lalu cookie HttpOnly, Secure dan SameSite=Strict. Token palsu, sesi kedaluwarsa dan request lintas origin ditolak; nomor invoice saja tidak memberikan akses. Pengalihan produksi, checkout aktif dan penolakan webhook tanpa secret telah diverifikasi.
 
-Sebelum cutover: tahan penulisan situs lama, ambil delta terakhir beserta aset, verifikasi setiap baris, lalu alihkan webhook tanpa membuang update tertunda. Link lama perlu diarahkan ke domain baru agar pelanggan melanjutkan invoice pada perangkat yang sama. Situs lama tetap menjadi sumber transaksi sampai rangkaian ini berhasil; jangan menjalankan ulang pembayaran, notifikasi, booking, atau pemotongan stok selama menyalin data.
+138 tes Node dan build produksi webpack/TypeScript lulus. Guard migrasi lolos 35 pemeriksaan. Pengujian menggunakan provider/bot tiruan untuk operasi bisnis dan tidak mengirim pesan, mengonfirmasi pembayaran atau membuat booking produksi.
 
-Booking KiriminAja belum aktif pada sumber lama maupun target; API key dan PIN KA Credit belum tersedia. RajaOngkir tetap menyediakan cek ongkir J&T. Reservasi stok saat checkout belum ditambahkan; konflik stok mengikuti perilaku toko sebelumnya. Harga order manual tetap perlu diverifikasi pemilik sebelum konfirmasi dana.
+Booking KiriminAja belum aktif pada sumber lama maupun target; API key dan PIN KA Credit belum tersedia. RajaOngkir menyediakan cek ongkir J&T; pengiriman diurus manual sampai layanan booking disambungkan. Reservasi stok saat checkout belum ditambahkan; konflik stok mengikuti perilaku toko sebelumnya. Harga pesanan manual tetap diverifikasi pemilik sebelum konfirmasi dana.

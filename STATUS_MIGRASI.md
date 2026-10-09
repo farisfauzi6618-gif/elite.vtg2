@@ -1,11 +1,13 @@
 # Status ELITE.VTG — 10 Oktober 2026
 
-[GitHub elite.vtg2](https://github.com/farisfauzi6618-gif/elite.vtg2) sudah terhubung ke [Vercel ELITE.VTG](https://elite-vtg2.vercel.app/). Paket Vercel tetap Hobby.
+[GitHub elite.vtg2](https://github.com/farisfauzi6618-gif/elite.vtg2) terhubung ke [Vercel ELITE.VTG](https://elite-vtg2.vercel.app/). Paket Vercel tetap Hobby. **Pembelian di alamat baru sudah aktif.**
 
-Runtime Production sudah memakai Turso, Blob privat, login pemilik, rekening BCA dan QRIS asli. Pemilik berhasil membuka dashboard. Katalog dan detail produk tampil; RajaOngkir telah memberi tarif J&T produksi. Salinan data terakhir: 21 produk, 27 pesanan, 20 unit stok, 139 foto, 22 bukti dan 1 QRIS. Data pelanggan, aset pembayaran, password serta token tidak diunggah ke GitHub.
+Katalog, keranjang, form order, invoice, ongkir J&T dan admin memakai satu runtime Production dengan Turso serta Blob privat. Pemilik sudah berhasil login. Migrasi final memuat 21 produk, 27 pesanan, 20 unit stok dan 162 aset terverifikasi: 139 foto, 22 bukti pembayaran dan QRIS asli. Seluruh perubahan terakhir tersalin tanpa menghapus data atau menjalankan ulang transaksi.
 
-**Transaksi baru di Vercel belum dibuka.** Bot Telegram masih menerima konfirmasi di situs lama. Pengalihan harus menjaga invoice lama dan mengambil perubahan data terakhir agar konfirmasi tidak terpisah dari stok.
+Webhook bot Telegram sudah dipindahkan ke Vercel dengan akun/chat pemilik yang sama dan tanpa membuang update tertunda. Link katalog, order, invoice, admin dan ongkir lama dialihkan ke halaman tujuan. Formulir lama menolak penulisan agar tidak membuat transaksi ganda. Invoice pada perangkat pemesan dipulihkan menggunakan token sesi asli; nomor invoice saja tidak memberikan akses.
 
-Deployment produksi commit 7551202abc18fd299e4ce169df9378028aaab4d7 telah lolos 72 pemeriksaan HTTP. Persiapan pemulihan invoice dari link lama, pencegahan penulisan ganda dan label ongkir yang sesuai provider telah lolos 138 tes serta build webpack/TypeScript. Perubahan terbaru masih menunggu penerbitan dan validasi produksi.
+Rekening BCA dan QRIS berasal dari konfigurasi server. Fingerprint QRIS asli diverifikasi; dashboard hanya dapat membacanya. Data pelanggan, aset pembayaran, password dan token tetap privat serta tidak diunggah ke GitHub.
 
-Detail perilaku, pengujian dan batas layanan terdapat pada [docs/SYNC_RELEASE.md](docs/SYNC_RELEASE.md). KiriminAja belum terhubung; cek ongkir tetap menggunakan RajaOngkir. Gunakan situs lama sampai cutover dinyatakan selesai.
+Rilis kode 2780c4394463f9052df8599116270f7f2c556ebe berhasil diterbitkan dan lolos 72 pemeriksaan HTTP produksi. Implementasi lolos 138 tes Node, build webpack/TypeScript dan 35 pemeriksaan guard migrasi. Pengalihan produksi serta aktivasi checkout juga telah diverifikasi. Pengujian tidak membuat pesanan, mengonfirmasi pembayaran, mengirim pesan atau memesan pengiriman produksi.
+
+Booking/resi otomatis KiriminAja belum terhubung pada sumber maupun target; cek ongkir J&T memakai RajaOngkir. Pengiriman dapat diurus manual. Harga pesanan manual tetap perlu diverifikasi pemilik sebelum konfirmasi dana. Detail perubahan dan batas layanan ada di [docs/SYNC_RELEASE.md](docs/SYNC_RELEASE.md).

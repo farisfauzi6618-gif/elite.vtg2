@@ -1,15 +1,16 @@
 {
-  "preparedDate": "2026-10-09",
+  "preparedDate": "2026-10-10",
   "timezone": "Asia/Jakarta",
   "application": "ELITE.VTG",
   "liveSiteCommits": {
-    "sites-catalog": "3f17ffb2d5b18d419a7765df1f3a6a0e561a5f6c",
-    "sites-order": "2b2bf019e7004842e3f3857f1ae8b0f41a20d991"
+    "sites-catalog": "932cc842b1491549e27958bab9c9e0dba6bc86fd",
+    "sites-order": "911fda6f8b43b8d8c7ab2b34bb9f747f25fdd98c",
+    "sites-shipping": "b7aa13349b65fc38c7ba445104eaab811cffbd36"
   },
-  "liveCatalogUrl": "https://elite-vtg-katalog.farisfzi.chatgpt.site/",
-  "liveOrderUrl": "https://elite-vtg-order.farisfzi.chatgpt.site/",
-  "monolithSourceDate": "2026-10-09",
-  "monolithStatus": "production-data-connected-checkout-held-for-cutover",
+  "liveCatalogUrl": "https://elite-vtg2.vercel.app/",
+  "liveOrderUrl": "https://elite-vtg2.vercel.app/order",
+  "monolithSourceDate": "2026-10-10",
+  "monolithStatus": "production-cutover-complete-checkout-active",
   "excluded": "Runtime secrets, local environment, databases, customer data, uploaded photos, private proofs, production payment assets, generated builds and old Git histories.",
   "files": [
     {
@@ -855,8 +856,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "docs/SYNC_RELEASE.md",
-      "sha256": "159e66149b8468eeb0be32f02a780b7c29abe4ed020da453f94f45f5967f8eb7",
-      "exportSha256": "159e66149b8468eeb0be32f02a780b7c29abe4ed020da453f94f45f5967f8eb7"
+      "sha256": "39dafac9c78b1907d967b3583b5dae79bdaf5a0664e57a7defaa2162be39ffad",
+      "exportSha256": "39dafac9c78b1907d967b3583b5dae79bdaf5a0664e57a7defaa2162be39ffad"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1587,8 +1588,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "README.md",
-      "sha256": "d07bb8b05968ec72ee1483e7929511a933da68129f5b79c36c80d92bfc7b6260",
-      "exportSha256": "4d6aff869b7b4bebc3b0a4a321eeb3f0466a734efb380c12ed2f4b52b8516ef8"
+      "sha256": "28e0cad1271ea76ad4bc741ea3da1822ff5ed3b2aa06f4e8c272048e1797ff26",
+      "exportSha256": "28e0cad1271ea76ad4bc741ea3da1822ff5ed3b2aa06f4e8c272048e1797ff26"
     },
     {
       "source": "monolith-2026-10-09",
@@ -3992,13 +3993,8 @@
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
-  "publishedCodeCommit": "7551202abc18fd299e4ce169df9378028aaab4d7",
-  "pendingSourceChanges": [
-    "app/api/order/resume/route.ts",
-    "app/(orders)/order/lanjutkan/page.tsx",
-    "app/ongkir/calculator.tsx",
-    "tests/monolith.test.mjs"
-  ],
+  "publishedCodeCommit": "2780c4394463f9052df8599116270f7f2c556ebe",
+  "pendingSourceChanges": [],
   "productionData": {
     "products": 21,
     "orders": 27,
@@ -4006,5 +4002,16 @@
     "photos": 139,
     "proofs": 22,
     "qris": 1
+  },
+  "legacyCatalogUrl": "https://elite-vtg-katalog.farisfzi.chatgpt.site/",
+  "legacyOrderUrl": "https://elite-vtg-order.farisfzi.chatgpt.site/",
+  "cutover": {
+    "date": "2026-10-10",
+    "checkoutActive": true,
+    "telegramWebhookMoved": true,
+    "legacyLinksRedirect": true,
+    "legacyWritesBlocked": true,
+    "updatesDropped": false,
+    "transactionsReplayed": false
   }
 }

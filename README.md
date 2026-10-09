@@ -1,11 +1,11 @@
-> **STATUS 9 OKTOBER 2026: SOURCE KATALOG DAN PEMBAYARAN TELAH DISELARASKAN.** Pengujian, build dan pemeriksaan HTTP lokal tercatat di [docs/SYNC_RELEASE.md](docs/SYNC_RELEASE.md). Data toko dan konfigurasi produksi belum dipindahkan. Baca [STATUS_MIGRASI.md](STATUS_MIGRASI.md) dan [tutorial](TUTORIAL_GITHUB_VERCEL.md) sebelum deploy. Upload source ke repo GitHub baru tidak mengubah situs aktif.
+> **STATUS 10 OKTOBER 2026: MIGRASI SELESAI DAN PEMBELIAN AKTIF.** [Buka ELITE.VTG](https://elite-vtg2.vercel.app/). GitHub terhubung ke Vercel, data dan aset sudah dipindahkan, serta link lama dialihkan. Paket Vercel tetap Hobby. Baca [STATUS_MIGRASI.md](STATUS_MIGRASI.md) untuk validasi dan batas layanan.
 # ELITE.VTG — satu aplikasi untuk katalog, order, dan ongkir
 
-Source gabungan ini telah diselaraskan pada 9 Oktober 2026 dengan perubahan katalog dan pembayaran pada situs aktif: kartu ringkas, 40 barang per halaman, size tag/fit, belanja ulang, serta BCA dan QRIS dari konfigurasi server. Lihat [catatan penyelarasan](docs/SYNC_RELEASE.md). Penyelarasan source tidak memindahkan data toko atau mengubah situs yang sedang aktif.
+Source gabungan ini telah diselaraskan pada 9 Oktober 2026 dengan perubahan katalog dan pembayaran pada situs aktif: kartu ringkas, 40 barang per halaman, size tag/fit, belanja ulang, serta BCA dan QRIS dari konfigurasi server. Lihat [catatan penyelarasan](docs/SYNC_RELEASE.md). Migrasi produksi selesai pada 10 Oktober 2026; situs baru menerima transaksi dan link lama mengarah ke halaman tujuan.
 
 Satu aplikasi Next.js, satu `package.json`, satu repo GitHub, satu project Vercel, satu database Turso, dan satu penyimpanan Vercel Blob privat. Katalog, pembayaran, stok, akun pelanggan, kalkulator ongkir, pelacakan, dan pengelolaan resi memakai backend yang sama.
 
-Ini adalah source versi gabungan. Konfigurasi rahasia, isi database produksi lama, foto barang yang diunggah, QRIS, dan bukti pembayaran tidak disertakan. Pemindahan source ini belum memindahkan data atau mengubah aplikasi lama yang sedang live.
+Ini adalah source versi gabungan. Konfigurasi rahasia, isi database produksi lama, foto barang yang diunggah, QRIS, dan bukti pembayaran tidak disertakan. Data dan aset tersebut sudah dipindahkan ke layanan produksi privat secara terpisah dari repository source.
 
 ## Halaman
 
