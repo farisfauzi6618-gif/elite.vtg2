@@ -13,7 +13,7 @@ async function unseal(value:string){const [iv,data]=value.split('.');return new 
 export async function listTeam(origin:string){
  for(let slot=1;slot<=3;slot++){if(await db().prepare('SELECT id FROM team_access WHERE slot=?').bind(slot).first())continue;const secret=token();await db().prepare('INSERT INTO team_access(id,slot,name,token_hash,token_cipher,created_at,expires_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(slot) DO NOTHING').bind(crypto.randomUUID(),slot,'Tim '+slot,await hashTeam(secret),await seal(secret),now(),now()+LINK_DAYS*86400000).run()}
  const rows=await db().prepare('SELECT * FROM team_access ORDER BY slot').all<Access>();
- return Promise.all(rows.results.map(async r=>({id:r.id,slot:r.slot,name:r.name,active:r.active===1,expiresAt:r.expires_at,link:r.active&&r.expires_at>now()?origin+'/akses-tim#'+await unseal(r.token_cipher):null})));
+ return Promise.all(rows.results.map(async r=>{let link:string|null=null;if(r.active&&r.expires_at>now()){try{link=origin+'/akses-tim#'+await unseal(r.token_cipher);}catch{/* Existing token hashes remain valid; the owner can renew an unreadable link. */}}return {id:r.id,slot:r.slot,name:r.name,active:r.active===1,expiresAt:r.expires_at,link};}));
 }
 export async function editTeam(value:unknown){
  const v=value as {id?:unknown;action?:unknown;name?:unknown};if(!v||typeof v.id!=='string')throw new AppError(400,'Pilih akses tim.');
