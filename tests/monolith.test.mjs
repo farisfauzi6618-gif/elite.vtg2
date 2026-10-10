@@ -32,6 +32,7 @@ const compiled = await build({
     export {storage} from './lib/storage';
     export {getOwnerFromCookie,safeReturnPath} from './lib/auth/owner';
     export {createCheckout,quoteCheckout,applyCheckoutSale} from './modules/catalog/checkout';
+    export {checkoutDestination} from './modules/catalog/checkout-navigation';
     export {catalogQuote,synchronizeCatalogStock} from './modules/order/catalog-bridge';
     export {registerCustomer,currentCustomer} from './modules/catalog/customers';
     export {listTeam,startTeamSession} from './modules/catalog/team-access';
@@ -168,7 +169,9 @@ test('one shared storage serves published photos while private drafts stay prote
 test('catalog checkout carries the customer and server prices directly to /order', async () => {
   const response = await m.checkoutPost(request('/api/checkout', { lines:[{productId,groupId,quantity:4}],amount:1 }, customerCookie));
   assert.equal(response.status,201); const checkout = await response.json(); assert.match(checkout.url,/^\/order\?catalog=[a-f0-9]{64}$/);
-  checkoutToken = checkout.url.split('=')[1];
+  const basket=crypto.randomUUID(),target=m.checkoutDestination(checkout.url,process.env.SITE_ORIGIN,basket);
+  assert.equal(target.origin,process.env.SITE_ORIGIN); assert.equal(target.pathname,'/order'); assert.equal(target.searchParams.get('basket'),basket);
+  checkoutToken = target.searchParams.get('catalog');
   const quoted = await m.catalogQuote(checkoutToken); checkoutId=quoted.id;
   assert.equal(quoted.amount,1200000); assert.equal(quoted.customer.name,'PEMBELI SIMULASI');
   assert.equal(forbiddenHttp,0);

@@ -16,8 +16,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "app/catalog.tsx",
-      "sha256": "7430e81c514ede3caee44001e6ccb525b75d054de01d4f7f4d1c19505861e573",
-      "exportSha256": "7430e81c514ede3caee44001e6ccb525b75d054de01d4f7f4d1c19505861e573"
+      "sha256": "0e8f1cc0af5f774dfb6192975e9de9325846f9abf70826995029d3a55febb7a6",
+      "exportSha256": "0e8f1cc0af5f774dfb6192975e9de9325846f9abf70826995029d3a55febb7a6"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1474,8 +1474,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "tests/monolith.test.mjs",
-      "sha256": "3e25a921f525628d4fd5c1394bf79db4d67562a117baf2a75aa7c324682e35c8",
-      "exportSha256": "3e25a921f525628d4fd5c1394bf79db4d67562a117baf2a75aa7c324682e35c8"
+      "sha256": "8a649a56b0d0a06517ad8e037a119f39b15cc386fb278a3563df74b76753b4d8",
+      "exportSha256": "8a649a56b0d0a06517ad8e037a119f39b15cc386fb278a3563df74b76753b4d8"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4008,6 +4008,18 @@
       "path": "tests/canonical-domain.test.mjs",
       "sha256": "98b824dd971c1f790d18af7215e95341fb12ac056b02159a8d86112af74e5ae2",
       "exportSha256": "98b824dd971c1f790d18af7215e95341fb12ac056b02159a8d86112af74e5ae2"
+    },
+    {
+      "source": "monolith-2026-10-10-checkout-fix",
+      "path": "modules/catalog/checkout-navigation.ts",
+      "sha256": "1aaf44b28677569ed423312400c46aba4a25afa04964c1a404e2fea55c6804f4",
+      "exportSha256": "1aaf44b28677569ed423312400c46aba4a25afa04964c1a404e2fea55c6804f4"
+    },
+    {
+      "source": "monolith-2026-10-10-checkout-fix",
+      "path": "tests/checkout-navigation.test.mjs",
+      "sha256": "ed55b7b1df2f18c41775ca20c1b6114e786535e1a037cc5b535f5183803ec1bc",
+      "exportSha256": "ed55b7b1df2f18c41775ca20c1b6114e786535e1a037cc5b535f5183803ec1bc"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -4040,6 +4052,13 @@
     "previous": "https://elite-vtg2.vercel.app",
     "invoiceSessionPreserved": true,
     "testsPassed": 3,
+    "webpackAndTypeScriptPassed": true
+  },
+  "checkoutNavigationFix": {
+    "date": "2026-10-10",
+    "relativeUrlResolved": true,
+    "sameOriginRequired": true,
+    "regressionTestsPassed": 24,
     "webpackAndTypeScriptPassed": true
   }
 }
