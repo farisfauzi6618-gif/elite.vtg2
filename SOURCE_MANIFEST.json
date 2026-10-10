@@ -1418,10 +1418,10 @@
       "exportSha256": "fedad814f583ef6e1be06696c19aa5780378d2f0b06ad32185bdaec422dba391"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-10-promotions-and-scheduled-sales",
       "path": "styles/catalog.css",
-      "sha256": "4d909e0b5997d38392bac9339b3a19406688634021ad67117f0eabf9ac76106d",
-      "exportSha256": "4d909e0b5997d38392bac9339b3a19406688634021ad67117f0eabf9ac76106d"
+      "sha256": "63774034c2e14ae7090d4cac0aed0ff0a0e7df8e5511b027e16d33a7055bdc14",
+      "exportSha256": "63774034c2e14ae7090d4cac0aed0ff0a0e7df8e5511b027e16d33a7055bdc14"
     },
     {
       "source": "monolith-2026-10-09",

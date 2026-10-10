@@ -314,7 +314,7 @@ h3{font-size:1rem;font-weight:600}
 .customer-account-dialog{width:min(480px,calc(100vw - 32px));max-width:480px;max-height:calc(100dvh - 32px);overflow:auto;background:#fff;color:var(--navy);border:1px solid var(--border);border-radius:16px;padding:28px;display:block;font-size:1rem;line-height:1.5}
 .customer-account-dialog [data-slot=dialog-header]{text-align:left;padding-right:22px;gap:12px;margin-bottom:22px}
 .customer-account-dialog [data-slot=dialog-title]{font-family:Georgia,serif;font-size:1.75rem;line-height:1.2;font-weight:400;margin:0}
-.customer-account-dialog [data-slot=dialog-description]{font-size:.9375rem;line-height:1.6;color:var(--muted)}
+.customer-account-dialog [data-slot=dialog-description]{font-size:.9375rem;line-height:1.6;color:var(--muted-foreground)}
 .customer-account-form>label{display:block;font-size:.875rem;margin:0 0 18px;font-weight:500}
 .customer-account-form input:not([type=checkbox]),.account-birthday select{width:100%;min-height:50px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--navy);font:inherit;font-size:1rem;padding:11px 12px;margin-top:7px;outline:none}
 .customer-account-form input:focus,.account-birthday select:focus{border-color:#456c94;box-shadow:0 0 0 3px #dce7f0}
@@ -322,21 +322,21 @@ h3{font-size:1rem;font-weight:600}
 .account-input-icon{position:relative}
 .account-input-icon>svg{position:absolute;left:13px;top:23px;pointer-events:none}
 .account-input-icon input:not([type=checkbox]){padding-left:41px;padding-right:46px}
-.account-password-toggle{position:absolute;right:3px;top:10px;min-width:44px;min-height:44px;border:0;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+.account-password-toggle{position:absolute;right:3px;top:10px;min-width:44px;min-height:44px;border:0;background:transparent;color:var(--muted-foreground);display:grid;place-items:center;cursor:pointer}
 .account-birthday{margin:6px 0 18px;padding:0;border:0;min-width:0}
 .account-birthday legend{font-size:.875rem;margin-bottom:4px}
-.account-birthday legend span{color:var(--muted)}
+.account-birthday legend span{color:var(--muted-foreground)}
 .account-birthday>div{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px}
 .account-birthday select{padding:9px 7px;font-size:.875rem;min-width:0}
-.customer-account-form .account-consent{display:flex;gap:10px;align-items:flex-start;line-height:1.5;font-size:.875rem;color:var(--muted);font-weight:400}
+.customer-account-form .account-consent{display:flex;gap:10px;align-items:flex-start;line-height:1.5;font-size:.875rem;color:var(--muted-foreground);font-weight:400}
 .account-consent input{flex:0 0 18px;width:18px;height:18px;margin:2px 0;accent-color:var(--navy)}
 .account-submit{width:100%;min-height:48px;font-size:.9375rem}
 .account-switch{display:flex;align-items:center;justify-content:center;gap:4px;font-size:.875rem;margin:16px 0 5px;flex-wrap:wrap}
 .account-switch .text-button{font:inherit;min-height:44px;padding:4px;font-weight:600}
-.account-guest-note{font-size:.875rem;text-align:center;color:var(--muted);margin:4px 0 0}
+.account-guest-note{font-size:.875rem;text-align:center;color:var(--muted-foreground);margin:4px 0 0}
 .customer-profile dl{margin:0 0 24px}
 .customer-profile dl>div{padding:14px 0;border-bottom:1px solid var(--border)}
-.customer-profile dt{font-size:.875rem;color:var(--muted);margin-bottom:4px}
+.customer-profile dt{font-size:.875rem;color:var(--muted-foreground);margin-bottom:4px}
 .customer-profile dd{font-size:1rem;margin:0;overflow-wrap:anywhere}
 @media(max-width:480px){.header-links{gap:14px}.account-trigger{font-size:.875rem}.customer-account-dialog{padding:24px 20px}}
 
