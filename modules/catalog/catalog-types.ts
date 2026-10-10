@@ -12,7 +12,7 @@ export type CatalogFilters={q?:string;size?:string|string[];brand?:string|string
 export function matchesProduct(p:Product,f:CatalogFilters,terms:Feature[]=DEFAULT_FEATURES){
  if(p.status!=='published'||!availableGroups(p).length)return false;
  const selected=terms.filter(t=>(p.features??[]).includes(t.id));
- const haystack=normalizeSearch([p.name,p.category,...selected.map(t=>t.label)].join(' '),terms);
+ const haystack=normalizeSearch([p.name,p.brand,p.category,p.legacyCategory??'',p.color,p.description??'',...(p.features??[]),...selected.map(t=>t.label)].join(' '),terms);
  if(f.q&&!normalizeSearch(f.q,terms).split(' ').filter(Boolean).every(word=>haystack.includes(word)))return false;
  const brands=selectedValues(f.brand),categories=selectedValues(f.category);
  if(brands.length&&!brands.includes(p.brand))return false;

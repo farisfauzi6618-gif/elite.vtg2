@@ -64,6 +64,19 @@ test('hidden categories remain searchable and filters apply before paging',()=>{
  assert.equal(catalogPage(filtered,1).items.length,40);
  assert.equal(catalogPage(filtered,2).items.length,1);
 });
+test('search combines brand, color, model and feature metadata across fields',()=>{
+ const item={...product,name:'Textured Collar',brand:'DISCOAT',color:'Black',description:'Model ribbed knit',features:['quarter-zip','long-sleeve']};
+ for(const q of ['black quarter zip','discoat black','RIBBED knit','long sleeve black','textured discoat'])assert.equal(matchesProduct(item,{q}),true,q);
+ for(const q of ['black full zip','black beanpole','white quarter zip'])assert.equal(matchesProduct(item,{q}),false,q);
+ assert.equal(matchesProduct({...item,legacyCategory:'Vintage outerwear'},{q:'vintage discoat'}),true);
+});
+test('metadata search preserves structured filters and available size/price matching',()=>{
+ const item={...product,color:'Black',features:['half-button','long-sleeve'],groups:[{id:'s',fits:['S'],qty:1,price:155000},{id:'xl',fits:['XL'],qty:0,price:100000}]};
+ assert.equal(matchesProduct(item,{q:'black beanpole long sleeve',size:'S',brand:'BEANPOLE',category:'Sweater & Knitwear',min:150000,max:160000}),true);
+ for(const extra of [{size:'XL'},{brand:'DISCOAT'},{category:'Polo'},{min:160000},{max:150000}])assert.equal(matchesProduct(item,{q:'black beanpole',...extra}),false,JSON.stringify(extra));
+ assert.equal(matchesProduct(item,{q:'black',features:'half-button'}),true);
+ assert.equal(matchesProduct(item,{q:'black',features:'quarter-zip'}),false);
+});
 test('tag size stays distinct from store fit and unknown tags are not inferred',()=>{
  const group={...product.groups[0],tagSize:'XL',fits:['L']};
  const html=renderToStaticMarkup(React.createElement(SizeInfo,{group}));

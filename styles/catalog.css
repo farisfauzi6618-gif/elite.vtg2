@@ -379,3 +379,47 @@ h3{font-size:1rem;font-weight:600}
 }
 
 .pagination-controls{flex-wrap:wrap;justify-content:center;max-width:100%}
+
+/* Quiet storefront controls: details stay inside one compact filter drawer. */
+.catalog-title{padding:30px 0 22px}
+.catalog-title .muted{margin-top:10px}
+.filterbar{padding:14px 0;gap:10px}
+.catalog-filter-trigger{font-weight:400}
+.filterbar .results{font-size:.8125rem}
+.catalog-filter-sheet{width:min(400px,100vw);max-width:100vw;gap:0;background:var(--cream);overflow:hidden}
+.catalog-filter-sheet [data-slot=sheet-header]{padding:24px 24px 18px;border-bottom:1px solid var(--line)}
+.catalog-filter-sheet [data-slot=sheet-title]{font-size:1.625rem}
+.catalog-filter-sheet>button:last-child{width:44px;height:44px;display:grid;place-items:center;right:12px;top:14px}
+.catalog-filter-body{flex:1;min-height:0;overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:22px}
+.catalog-filter-label,.catalog-price-filter legend{display:block;font-size:.875rem;font-weight:500;color:var(--navy)}
+.catalog-filter-label select{margin-top:8px;font-size:.9375rem}
+.catalog-filter-body .filter-choice-buttons{gap:6px}
+.catalog-filter-body .filter-choice-buttons button{min-width:44px;padding:9px 12px;font-size:.875rem}
+.catalog-filter-body .filter-choices legend{font-size:.9375rem;font-weight:600}
+.brand-filter{min-width:0}
+.brand-search{position:relative;display:flex;align-items:center;gap:9px;margin-top:8px;padding:0 12px;background:#fff;border:1px solid var(--input);border-radius:7px;min-height:46px}
+.brand-search:focus-within{border-color:#456c94;box-shadow:0 0 0 3px #dce7f0}
+.brand-search>svg{flex-shrink:0;color:var(--muted-foreground)}
+.brand-search input{min-width:0;width:100%;height:46px;border:0;background:transparent;outline:none;font-size:16px}
+.brand-search input::placeholder{font-size:.875rem;color:#8a949e}
+.brand-suggestions{position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:2;max-height:188px;overflow-y:auto;border:1px solid var(--border);border-radius:7px;background:#fff;box-shadow:0 6px 20px #071f3a12;padding:4px}
+.brand-suggestions button{display:block;width:100%;min-height:44px;padding:10px 12px;text-align:left;border:0;background:#fff;color:var(--navy);font-size:.875rem;border-radius:4px;overflow-wrap:anywhere}
+.brand-suggestions button:hover,.brand-suggestions button[data-highlighted=true],.brand-suggestions button[aria-selected=true]{background:#edf1f5}
+.brand-suggestions p{font-size:.8125rem;color:var(--muted-foreground);padding:12px}
+.selected-brands{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.selected-brands button{display:flex;align-items:center;gap:8px;min-height:44px;max-width:100%;padding:7px 10px;border:0;background:#edf1f5;color:var(--navy);font-size:.8125rem;border-radius:5px;overflow-wrap:anywhere}
+.selected-brands svg{flex-shrink:0}
+.catalog-price-filter{border:0;padding:0;margin:0;min-width:0}
+.catalog-price-range{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:end;gap:8px;margin-top:8px}
+.catalog-price-range label{min-width:0}
+.catalog-price-range label>span{display:block;font-size:.75rem;color:var(--muted-foreground);margin-bottom:5px}
+.catalog-price-range>span{align-self:end;margin-bottom:12px;color:var(--muted-foreground)}
+.catalog-filter-actions{display:flex;align-items:center;gap:18px;padding:16px 24px calc(16px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--cream)}
+.catalog-filter-actions>.text-button{min-height:46px;padding:8px 4px;text-decoration:none;font-size:.875rem}
+.catalog-filter-actions>.button{flex:1;font-weight:500}
+@media(max-width:760px){
+ .catalog-title{padding:22px 0 18px}.catalog-title h1{font-size:1.875rem}.catalog-title .muted{font-size:.8125rem;margin-top:8px}
+ .filterbar{padding:12px 0;gap:8px}.filterbar .results{flex-basis:100%;margin-top:0;font-size:.75rem}
+ .catalog-products .product-grid{padding-top:16px}
+ .catalog-filter-body{padding:20px;gap:20px}.catalog-filter-sheet [data-slot=sheet-header]{padding:22px 20px 16px}.catalog-filter-actions{padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px))}
+}
