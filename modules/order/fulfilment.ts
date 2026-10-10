@@ -18,7 +18,7 @@ const phone=(s:string)=>s.replace(/^\+/,"").replace(/^0/,"62");
 const validAwb=(v:unknown)=>typeof v==="string"&&/^[A-Za-z0-9_-]{6,70}$/.test(v)&&!/[{}]/.test(v);
 export async function confirmPayment(id:string,telegramId:string,messageId:number){
  const o=await order(id),s=await settings();if(!s?.chat_id||telegramId!==s.chat_id||o.delivery_chat!==s.chat_id||String(messageId)!==o.invoice_message)throw new AppError(403,"Konfirmasi harus berasal dari invoice di chat Telegram pemilik.");if(!o.proof_key)throw new AppError(409,"Bukti pembayaran belum diterima.");
- await db().batch([db().prepare("UPDATE orders SET payment_state='payment_confirmed',confirmed_at=COALESCE(confirmed_at,?),confirmed_by=COALESCE(confirmed_by,?) WHERE id=? AND proof_key IS NOT NULL").bind(Date.now(),telegramId,id),db().prepare("INSERT INTO shipments(order_id,updated_at) VALUES(?,?) ON CONFLICT(order_id) DO UPDATE SET state='payment_confirmed',updated_at=excluded.updated_at WHERE shipments.state='awaiting_confirmation'").bind(id,Date.now())]);
+ await db().batch([db().prepare("UPDATE first_purchase_discounts SET redeemed_at=COALESCE(redeemed_at,?) WHERE order_id=?").bind(Date.now(),id),db().prepare("UPDATE orders SET payment_state='payment_confirmed',confirmed_at=COALESCE(confirmed_at,?),confirmed_by=COALESCE(confirmed_by,?) WHERE id=? AND proof_key IS NOT NULL").bind(Date.now(),telegramId,id),db().prepare("INSERT INTO shipments(order_id,updated_at) VALUES(?,?) ON CONFLICT(order_id) DO UPDATE SET state='payment_confirmed',updated_at=excluded.updated_at WHERE shipments.state='awaiting_confirmation'").bind(id,Date.now())]);
  await synchronizeCatalogStock(id);
 }
 async function refresh(s:Shipment){return (await shipment(s.order_id))!;}
