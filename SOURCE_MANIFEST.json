@@ -16,8 +16,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "app/catalog.tsx",
-      "sha256": "a8277db02c9841ce461e2db9e02041bc03ab24cbb3c69fbedb07b35fea158021",
-      "exportSha256": "a8277db02c9841ce461e2db9e02041bc03ab24cbb3c69fbedb07b35fea158021"
+      "sha256": "1a12d81d4ec4abdb16578167e2c792e8e395c60d14292058e881a52ca9514991",
+      "exportSha256": "1a12d81d4ec4abdb16578167e2c792e8e395c60d14292058e881a52ca9514991"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4044,6 +4044,18 @@
       "path": "tests/all-products-flow.mjs",
       "sha256": "4a4ae55bd72d2152f1f2eaf721ae862b668f3dc7dc28dcaa50fd20d4c58c0660",
       "exportSha256": "4a4ae55bd72d2152f1f2eaf721ae862b668f3dc7dc28dcaa50fd20d4c58c0660"
+    },
+    {
+      "source": "monolith-2026-10-10-network-recovery",
+      "path": "modules/catalog/catalog-request.ts",
+      "sha256": "dcccf20ecc0f33840e0139c84008d3b84da8d0b755a51db46294f36647ea9285",
+      "exportSha256": "dcccf20ecc0f33840e0139c84008d3b84da8d0b755a51db46294f36647ea9285"
+    },
+    {
+      "source": "monolith-2026-10-10-network-recovery",
+      "path": "tests/catalog-request.test.mjs",
+      "sha256": "29fc982306aece1012bbb952f528a7c1081f1ee34f7116f63a9b942787a73ec9",
+      "exportSha256": "29fc982306aece1012bbb952f528a7c1081f1ee34f7116f63a9b942787a73ec9"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -4093,6 +4105,15 @@
     "stockRegressionTestsPassed": 5,
     "isolatedProductsTested": 20,
     "isolatedCompleteFlowScenarios": 21,
+    "webpackAndTypeScriptPassed": true
+  },
+  "catalogNetworkRecovery": {
+    "date": "2026-10-10",
+    "timeoutMs": 15000,
+    "localizedRetryMessages": true,
+    "automaticCheckoutReplay": false,
+    "requestRegressionTestsPassed": 5,
+    "totalTestsPassed": 154,
     "webpackAndTypeScriptPassed": true
   }
 }

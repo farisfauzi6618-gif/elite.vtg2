@@ -9,6 +9,7 @@ import {catalogPage, catalogPageNumbers, parseCatalogPage} from '@/modules/catal
 import { ProductDetail } from '@/components/product-detail';
 import { reconcileReturnedCart } from '@/modules/catalog/cart-return';
 import { checkoutDestination } from '@/modules/catalog/checkout-navigation';
+import { catalogRequest } from '@/modules/catalog/catalog-request';
 import {cartAvailability,cartSummary} from '@/modules/catalog/cart-availability';
 import {CartItemStatus} from '@/components/cart-item-status';
 import { BrandLogo } from '@/components/brand-logo';
@@ -32,7 +33,7 @@ export default function Catalog({productId,initialProduct}:{productId?:string;in
  const restore=useRef<number|null>(null),pending=useRef(false),filtersRef=useRef(filters);filtersRef.current=filters;
  async function load(){
   if(pending.current)return;pending.current=true;
-  const read=async(path:string)=>{const res=await fetch(path,{cache:'no-store'}),data:any=await res.json();if(!res.ok)throw Object.assign(new Error(data.error||'Data belum dapat dimuat.'),{status:res.status});return data};
+  const read=(path:string)=>catalogRequest(path,{cache:'no-store'});
   try{
    const [catalogResult,detailResult]=await Promise.allSettled([read('/api/catalog'),productId?read('/api/products/'+encodeURIComponent(productId)):Promise.resolve(null)]);
    const errors:string[]=[];
@@ -54,7 +55,7 @@ export default function Catalog({productId,initialProduct}:{productId?:string;in
  function pick(p:Product,g:Product['groups'][number]){if(cart.reduce((n,x)=>n+x.quantity,0)>=20||(cart.find(x=>x.groupId===g.id)?.quantity??0)>=(g.qty??0))return;setCheckoutError('');setAddedNote(p.name+' · '+fitLabel(g)+' ditambahkan ke keranjang.');setCart(all=>{const old=all.find(x=>x.groupId===g.id);if(all.reduce((n,x)=>n+x.quantity,0)>=20||(old?.quantity||0)>=(g.qty||0))return all;return old?all.map(x=>x.groupId===g.id?{...x,quantity:x.quantity+1}:x):[...all,{productId:p.id,groupId:g.id,quantity:1,name:p.name,label:choiceLabel(g)}]})}
  function cartQuantity(groupId:string,delta:number){setCart(all=>all.map(x=>x.groupId===groupId?{...x,quantity:x.quantity+delta}:x).filter(x=>x.quantity>0));setCheckoutError('')}
  const cartRows=cartAvailability(cart,products,catalogLoaded),cartCount=cart.reduce((n,x)=>n+x.quantity,0),cartState=cartSummary(cartRows);
- async function checkout(){setCheckoutBusy(true);setCheckoutError('');try{const r=await fetch('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lines:cart.map(({productId,groupId,quantity})=>({productId,groupId,quantity}))})});const v:any=await r.json();if(!r.ok)throw new Error(v.error||'Pembayaran belum dapat dibuka.');const basket=crypto.randomUUID(),target=checkoutDestination(v.url,window.location.origin,basket);try{sessionStorage.setItem('elite.catalog.checkout',JSON.stringify({id:basket,lines:cart.map(({productId,groupId,quantity})=>({productId,groupId,quantity}))}))}catch{}remember();window.location.assign(target.href)}catch(e){setCheckoutError((e as Error).message);void load()}finally{setCheckoutBusy(false)}}
+ async function checkout(){setCheckoutBusy(true);setCheckoutError('');try{const v=await catalogRequest('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lines:cart.map(({productId,groupId,quantity})=>({productId,groupId,quantity}))})});const basket=crypto.randomUUID(),target=checkoutDestination(v.url,window.location.origin,basket);try{sessionStorage.setItem('elite.catalog.checkout',JSON.stringify({id:basket,lines:cart.map(({productId,groupId,quantity})=>({productId,groupId,quantity}))}))}catch{}remember();window.location.assign(target.href)}catch(e){setCheckoutError((e as Error).message);void load()}finally{setCheckoutBusy(false)}}
  function change(key:keyof typeof defaults,value:string){restore.current=null;setPage(1);setFilters(f=>({...f,[key]:value}))}
  function resetFilters(next=defaults){restore.current=null;setPage(1);setFilters(next)}
  function remember(){if(productId)return;try{sessionStorage.setItem('elite.catalog.navigation',JSON.stringify({url:window.location.pathname+window.location.search,y:window.scrollY}))}catch{}}
