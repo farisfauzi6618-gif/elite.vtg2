@@ -17,7 +17,7 @@ export function soldGridLimit(availableCount:number) {
 }
 export function catalogInventory(products:Product[],now=Date.now()) {
  const available=products.filter(p=>p.status==='published'&&availableGroups(p).length);
- const sold=products.filter(p=>soldAge(p,now)<=SOLD_ARCHIVE_DAYS*DAY).sort((a,b)=>(b.soldAt??'').localeCompare(a.soldAt??'')||a.id.localeCompare(b.id));
+ const sold=products.filter(p=>!p.soldHidden&&soldAge(p,now)<=SOLD_ARCHIVE_DAYS*DAY).sort((a,b)=>(b.soldAt??'').localeCompare(a.soldAt??'')||a.id.localeCompare(b.id));
  const young=sold.filter(p=>soldAge(p,now)<=SOLD_MAIN_DAYS*DAY);
  const mainSold=young.slice(0,soldGridLimit(available.length)),ids=new Set(mainSold.map(p=>p.id));
  return {available,main:[...available,...mainSold],recentlySold:sold.filter(p=>!ids.has(p.id))};

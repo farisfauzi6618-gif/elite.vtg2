@@ -2,6 +2,7 @@ import {readTaxonomy} from '@/modules/catalog/taxonomy-service';
 import { boundary, requireAdmin, requireOwner, readJson, response, readProducts, readProduct, readHistory, db, AppError, textValue } from '@/modules/catalog/server';
 import { instagramConfig } from '@/modules/catalog/instagram';
 import { createManualDraft, saveProduct, changeStock, undoStock } from '@/modules/catalog/catalog-service';
+import {setSoldVisibility} from '@/modules/catalog/sold-visibility';
 export const dynamic='force-dynamic';
 export async function GET(request:Request){return boundary(async()=>{await requireAdmin(request);const q=new URL(request.url).searchParams;
  if(q.has('id')){const p=await readProduct(q.get('id')!);return response({product:p,history:await readHistory(p.id)})}
@@ -10,6 +11,7 @@ export async function GET(request:Request){return boundary(async()=>{await requi
 })}
 export async function POST(request:Request){return boundary(async()=>{const user=await requireAdmin(request);const data=await readJson(request);if(!data||typeof data!=='object')throw new AppError(400,'Data formulir tidak valid.');switch(data.op){
  case 'create':return response(await createManualDraft(data));
+ case 'soldVisibility':return response({product:await setSoldVisibility(data)});
  case 'manualImport':
  case 'instagramImport':throw new AppError(410,'Impor caption dan Instagram sudah dihapus. Tambahkan barang melalui formulir manual.');
  case 'save':return response({product:await saveProduct(data,user.userId),history:await readHistory(textValue(data.id,100))});
