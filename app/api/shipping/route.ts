@@ -1,8 +1,9 @@
+import {watch} from '@/modules/analytics/errors';
 import { api,json,body,originCheck,rate,AppError } from "@/modules/order/order-server";
 import { searchDestinations,shippingQuote,shippingQuotes } from "@/modules/order/checkout-shipping";
 import { catalogQuote } from "@/modules/order/catalog-bridge";
 import { orderShippingGrams } from "@/modules/order/order-items";
-export const POST=(r:Request)=>api(async()=>{
+export const POST=(r:Request)=>watch(r,'shipping_api_error',()=>api(async()=>{
  originCheck(r);const v=await body(r);
  if(v.action==="search"){await rate(r,"shipping_search",80);return json({locations:await searchDestinations(v.query)});}
  if(v.action==="quote"||v.action==="rates"){
@@ -13,7 +14,7 @@ export const POST=(r:Request)=>api(async()=>{
   return json(v.action==="rates"?{quotes:await shippingQuotes(v.destinationId,grams)}:await shippingQuote(v.destinationId,grams));
  }
  throw new AppError(400,"Permintaan ongkir tidak valid.");
-});
+}));
 
 export const runtime="nodejs";
 export const dynamic="force-dynamic";

@@ -47,7 +47,7 @@ export const adminAccess=sqliteTable('admin_access',{
 },t=>[check('admin_access_single_owner',sql`${t.id} = 1`)]);
 
 export const teamAccess=sqliteTable('team_access',{
- id:text('id').primaryKey(),slot:integer('slot').notNull(),name:text('name').notNull(),tokenHash:text('token_hash').notNull(),tokenCipher:text('token_cipher').notNull(),active:integer('active').notNull().default(1),version:integer('version').notNull().default(0),createdAt:integer('created_at').notNull(),expiresAt:integer('expires_at').notNull(),
+ id:text('id').primaryKey(),slot:integer('slot').notNull(),name:text('name').notNull(),tokenHash:text('token_hash').notNull(),tokenCipher:text('token_cipher').notNull(),analyticsAllowed:integer('analytics_allowed').notNull().default(0),active:integer('active').notNull().default(1),version:integer('version').notNull().default(0),createdAt:integer('created_at').notNull(),expiresAt:integer('expires_at').notNull(),
 },t=>[uniqueIndex('idx_team_slot').on(t.slot),uniqueIndex('idx_team_token').on(t.tokenHash),check('team_slot_valid',sql`${t.slot} BETWEEN 1 AND 3`),check('team_active_valid',sql`${t.active} IN (0,1)`)]);
 export const teamSessions=sqliteTable('team_sessions',{
  hash:text('hash').primaryKey(),accessId:text('access_id').notNull().references(()=>teamAccess.id),version:integer('version').notNull(),createdAt:integer('created_at').notNull(),expiresAt:integer('expires_at').notNull(),

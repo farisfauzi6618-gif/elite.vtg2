@@ -1,4 +1,5 @@
 "use client";
+import {track} from "@/modules/analytics/client";
 /* eslint-disable @next/next/no-img-element -- Preserve QRIS and private proof previews. */
 import {usePurchaseBenefit,PurchaseBenefit} from "@/components/purchase-benefit";
 import {firstPurchaseDiscount} from "@/modules/order/first-purchase";
@@ -30,6 +31,7 @@ export default function OrderForm(){
  const [paymentAssetFailed,setPaymentAssetFailed]=useState(false);
  const method=storedPaymentMethod(order?.payment_method);
  const selectedAvailable=!!(config?.payment&&(method==="bca_transfer"?config.payment.bca:config.payment.qris&&!paymentAssetFailed));
+ useEffect(()=>{if(!config?.ready||catalogLoading)return;if(step===1&&!linked)track('checkout_started',{manual:true},'manual-checkout');if(step===2&&order)track('payment_reached',{},'payment:'+order.id)},[step,order?.id,config,catalogLoading,linked]);
  const proofSequence=useRef(0);
  const quoteSequence=useRef(0);
  const [itemNames,setItemNames]=useState<string[]>([""]),[quotes,setQuotes]=useState<ShippingQuote[]>([]);

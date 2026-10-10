@@ -1,4 +1,6 @@
 'use client';
+import {initAnalytics,track,trackError} from '@/modules/analytics/client';
+import {normalizeSearch} from '@/modules/analytics/common';
 import {useSaleClock} from '@/components/use-sale-clock';
 import {catalogInventory,catalogListing} from '@/modules/catalog/sold-lifecycle';
 import {orderingLocked} from '@/modules/catalog/product-schedule';
@@ -27,6 +29,8 @@ function Picker({label,value,onChange,options}:{label:string;value:string;onChan
 export default function Catalog({productId,initialProduct,archive=false}:{productId?:string;initialProduct?:Product;archive?:boolean}={}){
  const [filters,setFilters]=useState(defaults),[ready,setReady]=useState(false),[products,setProducts]=useState<Product[]>(initialProduct?[initialProduct]:[]),[catalogLoaded,setCatalogLoaded]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState(''),[updated,setUpdated]=useState(''),[refreshing,setRefreshing]=useState(false);
  const [page,setPage]=useState(1);
+ useEffect(()=>{void initAnalytics()},[]);
+ const analyticsCart=useRef<typeof cart|null>(null),lastSearch=useRef('');
  const saleNow=useSaleClock(updated,Math.max(0,...products.map(p=>p.orderableAt?Date.parse(p.orderableAt):0)));
  const grid=useRef<HTMLDivElement>(null);
  const [taxonomy,setTaxonomy]=useState<Taxonomy>({categories:CATEGORIES,features:DEFAULT_FEATURES,groups:FEATURE_GROUPS});
@@ -55,10 +59,12 @@ export default function Catalog({productId,initialProduct,archive=false}:{produc
  useEffect(()=>{if(!loading&&restore.current!=null){const y=restore.current;restore.current=null;requestAnimationFrame(()=>window.scrollTo({top:y,behavior:'instant'}))}},[loading,products]);
  useEffect(()=>{if(ready)try{sessionStorage.setItem('elite.catalog.cart',JSON.stringify(cart))}catch{}},[cart,ready]);
  useEffect(()=>{if(!cart.length)setCartOpen(false)},[cart.length]);
+ useEffect(()=>{if(!ready)return;const previous=analyticsCart.current;analyticsCart.current=cart;if(!previous)return;for(const row of cart){if(row.quantity>(previous.find(x=>x.groupId===row.groupId)?.quantity??0))track('add_to_cart',{productId:row.productId})}},[cart,ready]);
+ useEffect(()=>{if(detail)track('product_view',{productId:detail.id},'view:'+detail.id);else if(detailError)trackError('critical_404',productId)},[detail?.id,detailError]);
  function pick(p:Product,g:Product['groups'][number]){if(isSold(p)||orderingLocked(p,saleNow)||cart.reduce((n,x)=>n+x.quantity,0)>=20||(cart.find(x=>x.groupId===g.id)?.quantity??0)>=(g.qty??0))return;setCheckoutError('');setAddedNote(p.name+' · '+fitLabel(g)+' ditambahkan ke keranjang.');setCart(all=>{const old=all.find(x=>x.groupId===g.id);if(all.reduce((n,x)=>n+x.quantity,0)>=20||(old?.quantity||0)>=(g.qty||0))return all;return old?all.map(x=>x.groupId===g.id?{...x,quantity:x.quantity+1}:x):[...all,{productId:p.id,groupId:g.id,quantity:1,name:p.name,label:choiceLabel(g)}]})}
  function cartQuantity(groupId:string,delta:number){setCart(all=>all.map(x=>x.groupId===groupId?{...x,quantity:x.quantity+delta}:x).filter(x=>x.quantity>0));setCheckoutError('')}
  const cartRows=cartAvailability(cart,products,catalogLoaded,saleNow),cartCount=cart.reduce((n,x)=>n+x.quantity,0),cartState=cartSummary(cartRows);
- async function checkout(){setCheckoutBusy(true);setCheckoutError('');try{const v=await catalogRequest('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lines:cart.map(({productId,groupId,quantity})=>({productId,groupId,quantity}))})});const basket=crypto.randomUUID(),target=checkoutDestination(v.url,window.location.origin,basket);try{sessionStorage.setItem('elite.catalog.checkout',JSON.stringify({id:basket,lines:cart.map(({productId,groupId,quantity})=>({productId,groupId,quantity}))}))}catch{}remember();window.location.assign(target.href)}catch(e){setCheckoutError((e as Error).message);void load()}finally{setCheckoutBusy(false)}}
+ async function checkout(){setCheckoutBusy(true);setCheckoutError('');try{const v=await catalogRequest('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lines:cart.map(({productId,groupId,quantity})=>({productId,groupId,quantity}))})});const basket=crypto.randomUUID(),target=checkoutDestination(v.url,window.location.origin,basket);try{sessionStorage.setItem('elite.catalog.checkout',JSON.stringify({id:basket,lines:cart.map(({productId,groupId,quantity})=>({productId,groupId,quantity}))}))}catch{}remember();window.location.assign(target.href)}catch(e){setCheckoutError((e as Error).message);trackError('checkout_error');void load()}finally{setCheckoutBusy(false)}}
  function change(key:keyof typeof defaults,value:string){restore.current=null;setPage(1);setFilters(f=>({...f,[key]:value}))}
  function resetFilters(next=defaults){restore.current=null;setPage(1);setFilters(next)}
  function remember(){if(productId)return;try{sessionStorage.setItem('elite.catalog.navigation',JSON.stringify({url:window.location.pathname+window.location.search,y:window.scrollY}))}catch{}}
@@ -68,6 +74,7 @@ export default function Catalog({productId,initialProduct,archive=false}:{produc
  const shown=useMemo(()=>catalogListing(products,filters,taxonomy.features,saleNow||Date.parse(updated)||Date.now(),archive),[products,filters,taxonomy,saleNow,updated,archive]);
  const {page:currentPage,pageCount,start,items:pageItems}=catalogPage(shown,page);
  const pageNumbers=catalogPageNumbers(currentPage,pageCount);
+ useEffect(()=>{if(!ready||!catalogLoaded||productId||archive)return;const q=normalizeSearch(filters.q);if(!q){lastSearch.current='';return}if(lastSearch.current===q)return;const timer=setTimeout(()=>{lastSearch.current=q;track('search',{query:q,resultCount:shown.length})},800);return()=>clearTimeout(timer)},[filters.q,ready,catalogLoaded,shown.length,productId,archive]);
  useEffect(()=>{if(ready&&!loading&&page!==currentPage)setPage(currentPage)},[ready,loading,page,currentPage]);
  useEffect(()=>{if(!ready||loading||productId)return;const q=new URLSearchParams();Object.entries(filters).forEach(([k,v])=>{if(v&&(defaults as any)[k]!==v)q.set(k,v)});if(currentPage>1)q.set('page',String(currentPage));window.history.replaceState(null,'',window.location.pathname+(q.size?'?'+q:''));},[filters,ready,loading,productId,currentPage]);
  function changePage(next:number){restore.current=null;setPage(next);requestAnimationFrame(()=>grid.current?.scrollIntoView({block:'start',behavior:'instant'}))}

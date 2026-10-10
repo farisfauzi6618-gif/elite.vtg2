@@ -6,7 +6,7 @@ export type CheckoutLine={productId:string;groupId:string;quantity:number;name:s
 type Checkout={id:string;token_hash:string;lines_json:string;amount:number;expires_at:number;customer_id:string|null};
 export async function digest(value:string){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('')}
 export function checkoutConfigured(){return true}
-export async function createCheckout(input:any,customerId:string|null=null){
+export async function createCheckout(input:any,customerId:string|null=null,onCreated?:(id:string,products:string[])=>Promise<void>){
  if(!checkoutConfigured())throw new AppError(503,'Pembayaran katalog belum terhubung. Hubungi ELITE.VTG.');
  if(!Array.isArray(input?.lines)||!input.lines.length||input.lines.length>20)throw new AppError(400,'Pilih 1 sampai 20 barang.');
  const grouped=new Map<string,{productId:string;groupId:string;quantity:number}>();
@@ -16,6 +16,7 @@ export async function createCheckout(input:any,customerId:string|null=null){
  if(quantity>20||amount>10000000)throw new AppError(400,'Maksimal 20 unit dan harga barang Rp10.000.000 per pesanan.');
  const token=crypto.randomUUID().replaceAll('-','')+crypto.randomUUID().replaceAll('-',''),id=crypto.randomUUID(),expiresAt=Date.now()+86400000;
  await db().prepare('INSERT INTO catalog_checkouts(id,token_hash,lines_json,amount,expires_at,created_at,customer_id) VALUES(?,?,?,?,?,?,?)').bind(id,await digest(token),JSON.stringify(lines),amount,expiresAt,Date.now(),customerId).run();
+ if(onCreated)await onCreated(id,[...new Set(lines.map(l=>l.productId))]);
  return {url:'/order?catalog='+token,expiresAt};
 }
 export async function quoteCheckout(token:unknown){

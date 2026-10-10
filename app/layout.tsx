@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import {AnalyticsClient} from '@/components/analytics-client';
 export const metadata: Metadata = {
   title: { default: 'ELITE.VTG — Shop', template: '%s | ELITE.VTG' },
   description: 'Koleksi curated vintage ELITE.VTG. Pilih barang, ukuran, dan lanjutkan ke pembayaran.',
@@ -8,4 +9,4 @@ export const metadata: Metadata = {
   manifest: '/manifest.webmanifest',
 };
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, themeColor: '#071f3a' };
-export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="id"><body>{children}</body></html>; }
+export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="id"><body><AnalyticsClient/>{children}</body></html>; }
