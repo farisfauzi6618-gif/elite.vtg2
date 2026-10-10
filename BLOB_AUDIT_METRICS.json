@@ -1,0 +1,262 @@
+{
+  "date": "2026-10-11",
+  "environment": "production build with isolated local database/files; warm static JS/CSS browser cache",
+  "measurement": "actual HTTP responses reaching the local app; browser-memory/disk hits do not reach server; not Vercel billing counters",
+  "duplicates": "same method + full URL, regardless of POST body; polling and separate analytics events may be legitimate",
+  "productionOrdersCreated": 0,
+  "productionBlobWrites": 0,
+  "rows": [
+    {
+      "scenario": "Homepage/katalog: first view",
+      "before": {
+        "totalHttp": 23,
+        "imageHttp": 16,
+        "blobAssetHttp": 16,
+        "duplicateMethodUrls": 2,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 16,
+        "configRequests": 0
+      },
+      "after": {
+        "totalHttp": 21,
+        "imageHttp": 16,
+        "blobAssetHttp": 16,
+        "duplicateMethodUrls": 1,
+        "excludedOtherTabHttp": 1,
+        "localProductReads": 16,
+        "configRequests": 0
+      }
+    },
+    {
+      "scenario": "Homepage/katalog: refresh",
+      "before": {
+        "totalHttp": 22,
+        "imageHttp": 16,
+        "blobAssetHttp": 16,
+        "duplicateMethodUrls": 1,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 16,
+        "configRequests": 0
+      },
+      "after": {
+        "totalHttp": 6,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 1,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 0
+      }
+    },
+    {
+      "scenario": "Katalog: scroll",
+      "before": {
+        "totalHttp": 4,
+        "imageHttp": 4,
+        "blobAssetHttp": 4,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 4,
+        "configRequests": 0
+      },
+      "after": {
+        "totalHttp": 6,
+        "imageHttp": 4,
+        "blobAssetHttp": 4,
+        "duplicateMethodUrls": 1,
+        "excludedOtherTabHttp": 1,
+        "localProductReads": 4,
+        "configRequests": 0
+      }
+    },
+    {
+      "scenario": "Katalog: search + filter",
+      "before": {
+        "totalHttp": 2,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 0
+      },
+      "after": {
+        "totalHttp": 2,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 0
+      }
+    },
+    {
+      "scenario": "Detail: open",
+      "before": {
+        "totalHttp": 10,
+        "imageHttp": 1,
+        "blobAssetHttp": 1,
+        "duplicateMethodUrls": 3,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 1,
+        "configRequests": 0
+      },
+      "after": {
+        "totalHttp": 9,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 3,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 0
+      }
+    },
+    {
+      "scenario": "Detail: refresh",
+      "before": {
+        "totalHttp": 10,
+        "imageHttp": 1,
+        "blobAssetHttp": 1,
+        "duplicateMethodUrls": 2,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 1,
+        "configRequests": 0
+      },
+      "after": {
+        "totalHttp": 9,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 2,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 0
+      }
+    },
+    {
+      "scenario": "Cart: add + open",
+      "before": {
+        "totalHttp": 3,
+        "imageHttp": 1,
+        "blobAssetHttp": 1,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 1,
+        "configRequests": 0
+      },
+      "after": {
+        "totalHttp": 4,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 0
+      }
+    },
+    {
+      "scenario": "Checkout: open",
+      "before": {
+        "totalHttp": 12,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 1,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 1
+      },
+      "after": {
+        "totalHttp": 14,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 1,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 1
+      }
+    },
+    {
+      "scenario": "Checkout: refresh",
+      "before": {
+        "totalHttp": 12,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 1,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 1
+      },
+      "after": {
+        "totalHttp": 12,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 1,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 1
+      }
+    },
+    {
+      "scenario": "Admin katalog: open",
+      "before": {
+        "totalHttp": 22,
+        "imageHttp": 20,
+        "blobAssetHttp": 20,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 20,
+        "configRequests": 0
+      },
+      "after": {
+        "totalHttp": 3,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 0
+      }
+    },
+    {
+      "scenario": "Admin katalog: refresh",
+      "before": {
+        "totalHttp": 23,
+        "imageHttp": 20,
+        "blobAssetHttp": 20,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 20,
+        "configRequests": 0
+      },
+      "after": {
+        "totalHttp": 3,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 0
+      }
+    },
+    {
+      "scenario": "Admin: search + filter + scroll",
+      "before": {
+        "totalHttp": 1,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 0
+      },
+      "after": {
+        "totalHttp": 1,
+        "imageHttp": 0,
+        "blobAssetHttp": 0,
+        "duplicateMethodUrls": 0,
+        "excludedOtherTabHttp": 0,
+        "localProductReads": 0,
+        "configRequests": 0
+      }
+    }
+  ]
+}

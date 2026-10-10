@@ -1,4 +1,4 @@
-import { put, get, del } from '@vercel/blob';
+import { put, get, head, del, BlobNotFoundError } from '@vercel/blob';
 import { mkdir, readFile, writeFile, rename, rm, stat } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -26,10 +26,14 @@ export const storage = {
         throw error;
       }
     }
-    const result = await get('elite/' + key, { access: 'private', useCache: false, token: process.env.BLOB_READ_WRITE_TOKEN });
-    if (!result?.stream) return null;
-    await result.stream.cancel();
-    return { size: result.blob.size, httpMetadata: { contentType: result.blob.contentType || 'application/octet-stream' } };
+    // Metadata must not download the file body (especially the QRIS readiness probe).
+    try {
+      const result = await head('elite/' + key, { token: process.env.BLOB_READ_WRITE_TOKEN });
+      return { size: result.size, httpMetadata: { contentType: result.contentType || 'application/octet-stream' } };
+    } catch (error) {
+      if (error instanceof BlobNotFoundError) return null;
+      throw error;
+    }
   },
   async put(key: string, input: Uint8Array | ArrayBuffer, options?: { httpMetadata?: { contentType?: string } }) {
     safeKey(key);
@@ -48,7 +52,7 @@ export const storage = {
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
   },
-  async get(key: string) {
+  async get(key: string, options?: { useCache?: boolean }) {
     safeKey(key);
     if (local()) {
       const dest = path.join(localRoot(), key);
@@ -61,7 +65,9 @@ export const storage = {
         throw error;
       }
     }
-    const result = await get('elite/' + key, { access: 'private', useCache: false, token: process.env.BLOB_READ_WRITE_TOKEN });
+    // Only immutable, already-published product photos opt in. Sensitive assets and
+    // QRIS keep consistent reads; authentication never leaves the server.
+    const result = await get('elite/' + key, { access: 'private', useCache: options?.useCache === true, token: process.env.BLOB_READ_WRITE_TOKEN });
     if (!result?.stream) return null;
     const body = result.stream;
     return { size: result.blob.size, body, httpMetadata: { contentType: result.blob.contentType || 'application/octet-stream' }, arrayBuffer: () => new Response(body).arrayBuffer() };

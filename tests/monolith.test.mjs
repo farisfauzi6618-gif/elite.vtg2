@@ -53,6 +53,9 @@ const compiled = await build({
     export {POST as qrisAdminPost} from './app/api/admin/order/qris/route';
     export {paymentConfig} from './modules/order/payment-config';
     export {POST as proofPost} from './app/api/order/proof/route';
+    export {GET as proofDownload} from './app/api/admin/order/orders/[id]/route';
+    export {GET as labelDownload} from './app/api/admin/order/shipments/[id]/route';
+    export {storePhoto} from './modules/catalog/photos';
     export {POST as resumeInvoice} from './app/api/order/resume/route';
   `, resolveDir: process.cwd(), loader: 'ts' },
   bundle: true, platform: 'node', format: 'esm', write: false,
@@ -161,10 +164,28 @@ test('one shared storage serves published photos while private drafts stay prote
   await d.prepare("INSERT INTO size_groups(id,product_id,label,fits,qty) VALUES(?,?,'M','[\"M\"]',5)").bind(groupId,productId).run();
   const context = { params:Promise.resolve({key:photoKey}) };
   assert.equal((await m.photosGet(request('/api/photos/'+photoKey),context)).status,404);
+  const draft=await m.photosGet(request('/api/photos/'+photoKey,undefined,ownerCookie),context);
+  assert.equal(draft.status,200);assert.equal(draft.headers.get('cache-control'),'private, no-store');assert.equal(draft.headers.get('etag'),null);await draft.arrayBuffer();
   await d.prepare("UPDATE products SET status='published',published_at=? WHERE id=?").bind(now,productId).run();
   const visible = await m.photosGet(request('/api/photos/'+photoKey),context);
   assert.equal(visible.status,200); assert.equal(visible.headers.get('content-type'),'image/png');
   assert.deepEqual(new Uint8Array(await visible.arrayBuffer()),png);
+  assert.equal(visible.headers.get('cache-control'),'private, max-age=86400, immutable');
+  const etag=visible.headers.get('etag');assert.ok(etag);
+  const originalGet=m.storage.get;let reads=0;m.storage.get=async(...args)=>{reads++;return originalGet(...args);};
+  try{
+    const conditional=request('/api/photos/'+photoKey,undefined,'',{'If-None-Match':etag});
+    assert.equal((await m.photosGet(conditional,context)).status,304);assert.equal(reads,0);
+    await d.prepare("UPDATE products SET status='draft' WHERE id=?").bind(productId).run();
+    assert.equal((await m.photosGet(conditional,context)).status,404);assert.equal(reads,0);
+    await d.prepare("UPDATE products SET status='published' WHERE id=?").bind(productId).run();
+  }finally{m.storage.get=originalGet;}
+  const replacement=await m.storePhoto(png,'simulation-replacement');assert.notEqual(replacement,photoKey);
+  assert.equal((await d.prepare('SELECT size FROM photos WHERE key=?').bind(replacement).first()).size,png.length);
+  await d.prepare('UPDATE products SET photo_key=? WHERE id=?').bind(replacement,productId).run();
+  const changed=await m.photosGet(request('/api/photos/'+replacement,undefined,'',{'If-None-Match':etag}),{params:Promise.resolve({key:replacement})});
+  assert.equal(changed.status,200);assert.notEqual(changed.headers.get('etag'),etag);assert.deepEqual(new Uint8Array(await changed.arrayBuffer()),png);
+  await d.prepare('UPDATE products SET photo_key=? WHERE id=?').bind(photoKey,productId).run();
 });
 test('catalog checkout carries the customer and server prices directly to /order', async () => {
   const response = await m.checkoutPost(request('/api/checkout', { lines:[{productId,groupId,quantity:4}],amount:1 }, customerCookie));
@@ -227,6 +248,17 @@ test('proof upload submits the order without confirming funds or booking a shipm
   assert.equal(response.status,200); assert.equal((await response.json()).status,'submitted');
   assert.equal((await d.prepare('SELECT payment_state FROM orders WHERE id=?').bind(invoiceId).first()).payment_state,'proof_received');
   assert.equal(await d.prepare('SELECT COUNT(*) AS count FROM shipments').first('count'),0);
+  const context={params:Promise.resolve({id:invoiceId})};
+  const originalGet=m.storage.get;let reads=0;m.storage.get=async(...args)=>{reads++;return originalGet(...args);};
+  try{
+    for(const cookie of ['',teamCookie,customerCookie]){
+      assert.equal((await m.proofDownload(request('/api/admin/order/orders/'+invoiceId,undefined,cookie),context)).status,401);
+      assert.equal((await m.labelDownload(request('/api/admin/order/shipments/'+invoiceId+'?format=pdf',undefined,cookie),context)).status,401);
+    }
+    assert.equal(reads,0);
+    const proof=await m.proofDownload(request('/api/admin/order/orders/'+invoiceId,undefined,ownerCookie),context);
+    assert.equal(proof.status,200);assert.equal(proof.headers.get('cache-control'),'no-store');assert.deepEqual(new Uint8Array(await proof.arrayBuffer()),png);assert.equal(reads,1);
+  }finally{m.storage.get=originalGet;}
 });
 test('submitted payment methods are locked while owner confirmation remains required', async () => {
   const response=await m.paymentPatch(new Request('https://elite.test/api/order',{method:'PATCH',headers:{Origin:'https://elite.test',Cookie:orderCookie,'Content-Type':'application/json'},body:JSON.stringify({paymentMethod:'qris_dana'})}));assert.equal(response.status,409);

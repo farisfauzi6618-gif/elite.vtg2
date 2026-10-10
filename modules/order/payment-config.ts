@@ -1,5 +1,8 @@
 import { env } from '@/lib/env';
 import type { PaymentConfig, PaymentMethod } from "@/modules/order/payment-types";
+import { createQrisAvailabilityProbe } from './qris-availability';
+
+const qrisAvailable=createQrisAvailabilityProbe();
 
 const supportedMimes = ["image/png", "image/jpeg", "image/webp"];
 function validName(value?: string) {
@@ -22,13 +25,7 @@ export async function paymentConfig(): Promise<PaymentConfig> {
   const asset = trustedQris();
   let qris: PaymentConfig["qris"] = null;
   if (asset && env.BUCKET) {
-    try {
-      const object = await env.BUCKET.head(asset.key);
-      if (object && object.size >= 32 && object.size <= 4 * 1024 * 1024 &&
-          (!object.httpMetadata?.contentType || object.httpMetadata.contentType === asset.mime)) {
-        qris = { merchant: asset.merchant, imageUrl: "/api/qris" };
-      }
-    } catch { console.error("Payment QRIS asset unavailable"); }
+    if(await qrisAvailable(env.BUCKET,asset))qris = { merchant: asset.merchant, imageUrl: "/api/qris" };
   }
   return { bca, qris, defaultMethod: bca ? "bca_transfer" : qris ? "qris_dana" : null };
 }
