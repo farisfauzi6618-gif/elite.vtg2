@@ -16,8 +16,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "app/catalog.tsx",
-      "sha256": "0e8f1cc0af5f774dfb6192975e9de9325846f9abf70826995029d3a55febb7a6",
-      "exportSha256": "0e8f1cc0af5f774dfb6192975e9de9325846f9abf70826995029d3a55febb7a6"
+      "sha256": "a8277db02c9841ce461e2db9e02041bc03ab24cbb3c69fbedb07b35fea158021",
+      "exportSha256": "a8277db02c9841ce461e2db9e02041bc03ab24cbb3c69fbedb07b35fea158021"
     },
     {
       "source": "monolith-2026-10-09",
@@ -430,8 +430,8 @@
     {
       "source": "monolith-2026-10-09",
       "path": "components/product-detail.tsx",
-      "sha256": "7c6225c4419d115209b2d4bae2768c2f81743284d6f7075014d25e24c4a5ac81",
-      "exportSha256": "7c6225c4419d115209b2d4bae2768c2f81743284d6f7075014d25e24c4a5ac81"
+      "sha256": "8aca6e993f63b83c1e308b03837778f2505a30665b1afa3dbe23c4394f01814f",
+      "exportSha256": "8aca6e993f63b83c1e308b03837778f2505a30665b1afa3dbe23c4394f01814f"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4020,6 +4020,30 @@
       "path": "tests/checkout-navigation.test.mjs",
       "sha256": "ed55b7b1df2f18c41775ca20c1b6114e786535e1a037cc5b535f5183803ec1bc",
       "exportSha256": "ed55b7b1df2f18c41775ca20c1b6114e786535e1a037cc5b535f5183803ec1bc"
+    },
+    {
+      "source": "monolith-2026-10-10-stock-loading",
+      "path": "components/cart-item-status.tsx",
+      "sha256": "9bff6d99c5e5b47a1732196a0e0dba44bc450e6e16909159fba3847c573307cc",
+      "exportSha256": "9bff6d99c5e5b47a1732196a0e0dba44bc450e6e16909159fba3847c573307cc"
+    },
+    {
+      "source": "monolith-2026-10-10-stock-loading",
+      "path": "modules/catalog/cart-availability.ts",
+      "sha256": "53ee026f964c7fcbd3fa59dd46c5a8cb1ace896f5cc57fdf49e78d3c22a02363",
+      "exportSha256": "53ee026f964c7fcbd3fa59dd46c5a8cb1ace896f5cc57fdf49e78d3c22a02363"
+    },
+    {
+      "source": "monolith-2026-10-10-stock-loading",
+      "path": "tests/cart-availability.test.mjs",
+      "sha256": "27dbf1256decc76c211b017fe98e6326bbc6e09cda8b6206e7b707c867d75dd7",
+      "exportSha256": "27dbf1256decc76c211b017fe98e6326bbc6e09cda8b6206e7b707c867d75dd7"
+    },
+    {
+      "source": "monolith-2026-10-10-stock-loading",
+      "path": "tests/all-products-flow.mjs",
+      "sha256": "4a4ae55bd72d2152f1f2eaf721ae862b668f3dc7dc28dcaa50fd20d4c58c0660",
+      "exportSha256": "4a4ae55bd72d2152f1f2eaf721ae862b668f3dc7dc28dcaa50fd20d4c58c0660"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -4059,6 +4083,16 @@
     "relativeUrlResolved": true,
     "sameOriginRequired": true,
     "regressionTestsPassed": 24,
+    "webpackAndTypeScriptPassed": true
+  },
+  "stockLoadingFix": {
+    "date": "2026-10-10",
+    "unknownStockIsPending": true,
+    "serverRenderedStockUsedImmediately": true,
+    "parallelCatalogAndDetailRefresh": true,
+    "stockRegressionTestsPassed": 5,
+    "isolatedProductsTested": 20,
+    "isolatedCompleteFlowScenarios": 21,
     "webpackAndTypeScriptPassed": true
   }
 }
