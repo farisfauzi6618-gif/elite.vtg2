@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import './globals.css';
+import './globals.css'
+import './rewards.css';
 import {AnalyticsClient} from '@/components/analytics-client';
 export const metadata: Metadata = {
   title: { default: 'ELITE.VTG — Shop', template: '%s | ELITE.VTG' },

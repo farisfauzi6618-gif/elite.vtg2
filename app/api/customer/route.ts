@@ -1,11 +1,13 @@
 import {purchasePromotion} from '@/modules/order/first-purchase-server';
+import {availableRewardCount} from '@/modules/order/rewards-server';
 import { boundary, readJson, response, checkAdminOrigin, AppError } from '@/modules/catalog/server';
 import { publicRate } from '@/modules/catalog/request-rate';
 import { currentCustomer, customerProfile, customerIdentity, customerSessionCookie, registerCustomer, loginCustomer, logoutCustomer } from '@/modules/catalog/customers';
 
 export const GET = (request: Request) => boundary(async () => {
   const customer = await currentCustomer(request.headers.get('cookie'));
-  return response({ customer: customer ? customerProfile(customer) : null, promotion: await purchasePromotion(request.headers.get('cookie')) });
+  const promotion=await purchasePromotion(request.headers.get('cookie'));
+  return response({ customer: customer ? customerProfile(customer) : null, promotion, rewardCount: await availableRewardCount(request.headers.get('cookie'),promotion) });
 });
 export const POST = (request: Request) => boundary(async () => {
   checkAdminOrigin(request);

@@ -72,7 +72,7 @@ test('only owner confirmation consumes the benefit, and confirmation is idempote
  const {order,cookie}=await discounted();assert.equal((await m.purchasePromotion(buyerCookie)).state,'reserved');
  const form=new FormData(),png=new Uint8Array(80);png.set([137,80,78,71,13,10,26,10]);form.set('file',new File([png],'proof.png',{type:'image/png'}));form.set('paymentMethod','bca_transfer');
  const proof=await m.proofPost(new Request('https://elite.test/api/order/proof',{method:'POST',headers:{Origin:'https://elite.test',Cookie:cookie},body:form}));assert.equal(proof.status,200);assert.equal((await m.purchasePromotion(buyerCookie)).state,'reserved');
- assert.ok(messages.some(message=>message.text?.includes('Diskon pembelian pertama 5%')));
+ assert.ok(messages.some(message=>message.text?.includes('ELITE Reward · Pembelian pertama 5%')));
  await assert.rejects(m.confirmPayment(order.id,'other-owner',50));assert.equal((await client.execute('SELECT redeemed_at FROM first_purchase_discounts')).rows[0].redeemed_at,null);
  await m.confirmPayment(order.id,'123456',50);await m.confirmPayment(order.id,'123456',50);assert.equal((await m.purchasePromotion(buyerCookie)).state,'redeemed');
  const next=await create();assert.equal(next.status,201);assert.equal((await next.json()).discount_amount,0);

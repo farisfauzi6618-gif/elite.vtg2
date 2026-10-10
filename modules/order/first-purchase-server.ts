@@ -2,7 +2,9 @@ import type {Transaction,InValue} from '@libsql/client';
 import {db,AppError,random,hash,publicOrder,json} from './order-server';
 import type {Order} from './order-types';
 import {currentCustomer} from '@/modules/catalog/customers';
-import {firstPurchaseDiscount,type PurchasePromotion} from './first-purchase';
+import {type PurchasePromotion} from './first-purchase';
+import {FIRST_REWARD_ID,rewardChoice} from './rewards';
+import {rewardRules,rewardLines,priceRewards} from './rewards-server';
 import {orderingLocked,scheduleLabel} from '@/modules/catalog/product-schedule';
 import type {CheckoutLine} from '@/modules/catalog/checkout';
 
@@ -10,6 +12,8 @@ import type {CheckoutLine} from '@/modules/catalog/checkout';
 async function expireUnpaidClaim(tx:Transaction,customerId:string) {
  await tx.execute({sql:"UPDATE orders SET status='expired',payment_state='expired' WHERE customer_id=? AND status='awaiting_proof' AND proof_key IS NULL AND created_at<? AND id IN (SELECT order_id FROM first_purchase_discounts WHERE redeemed_at IS NULL)",args:[customerId,Date.now()-7*86400000]});
  await tx.execute({sql:"DELETE FROM first_purchase_discounts WHERE customer_id=? AND redeemed_at IS NULL AND order_id IN (SELECT id FROM orders WHERE status IN ('expired','cancelled') AND proof_key IS NULL)",args:[customerId]});
+ await tx.execute({sql:"UPDATE orders SET status='expired',payment_state='expired' WHERE customer_id=? AND status='awaiting_proof' AND proof_key IS NULL AND created_at<? AND id IN (SELECT order_id FROM purchase_voucher_claims WHERE redeemed_at IS NULL)",args:[customerId,Date.now()-7*86400000]});
+ await tx.execute({sql:"DELETE FROM purchase_voucher_claims WHERE customer_id=? AND redeemed_at IS NULL AND order_id IN (SELECT id FROM orders WHERE status IN ('expired','cancelled') AND proof_key IS NULL)",args:[customerId]});
 }
 async function promotion(tx:Transaction,customerId:string):Promise<PurchasePromotion> {
  const claim=(await tx.execute({sql:'SELECT order_id,redeemed_at FROM first_purchase_discounts WHERE customer_id=?',args:[customerId]})).rows[0];
@@ -22,9 +26,10 @@ export async function purchasePromotion(cookie:string|null):Promise<PurchaseProm
  const tx=await db().client.transaction('write');
  try{await expireUnpaidClaim(tx,customer.id);const result=await promotion(tx,customer.id);await tx.commit();return result;}finally{tx.close();}
 }
-export type DiscountPricing={customerId:string|null;subtotal:number;discount:number;net:number};
-export async function persistPurchase(request:Request,existing:Order|null,orderId:string,subtotal:number,lines:CheckoutLine[]|undefined,statement:(pricing:DiscountPricing)=>{sql:string;args:InValue[]}) {
+export type DiscountPricing={customerId:string|null;subtotal:number;discount:number;net:number;voucherId:string|null;voucherLabel:string|null};
+export async function persistPurchase(request:Request,existing:Order|null,orderId:string,subtotal:number,lines:CheckoutLine[]|undefined,statement:(pricing:DiscountPricing)=>{sql:string;args:InValue[]},selectedReward?:unknown) {
  const customer=await currentCustomer(request.headers.get('cookie'));
+ let choice:string;try{choice=rewardChoice(selectedReward)}catch{throw new AppError(400,'Pilihan reward tidak valid.')}
  if(existing?.discount_amount&&existing.customer_id!==customer?.id)throw new AppError(409,'Masuk kembali ke akun yang digunakan untuk invoice diskon ini sebelum mengubahnya.');
  const tx=await db().client.transaction('write');
  try{
@@ -34,17 +39,21 @@ export async function persistPurchase(request:Request,existing:Order|null,orderI
    if(!row||row.status!=='published'||Number(row.qty)<line.quantity||Number(row.group_price??row.price)!==line.unitPrice)throw new AppError(409,'Stok atau harga berubah. Pilih kembali di katalog.');
    if(orderingLocked({orderableAt:row.orderable_at as string|null}))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(String(row.orderable_at))+'.');
   }
-  let discount=0;
+  let state:PurchasePromotion={state:'guest',percent:5};
   if(customer){
    await expireUnpaidClaim(tx,customer.id);
-   const state=await promotion(tx,customer.id);
-   if(state.state==='reserved'&&state.orderId!==orderId)throw new AppError(409,'Diskon 5% sudah ada pada invoice yang belum selesai. Klik “Lanjutkan pesanan diskon”, atau batalkan invoice itu jika belum dibayar.');
-   if(state.state==='available'||(state.state==='reserved'&&state.orderId===orderId)||existing?.discount_amount)discount=firstPurchaseDiscount(subtotal);
+   state=await promotion(tx,customer.id);
+   if(state.state==='reserved'&&state.orderId!==orderId&&(choice==='auto'||choice===FIRST_REWARD_ID))throw new AppError(409,'Diskon 5% sudah ada pada invoice yang belum selesai. Klik “Lanjutkan pesanan diskon”, atau batalkan invoice itu jika belum dibayar.');
   }
-  const pricing={customerId:customer?.id??null,subtotal,discount,net:subtotal-discount};
+  const pricedLines=lines?await rewardLines(tx,lines):[{productId:null,category:null,amount:subtotal}],rules=customer?await rewardRules(tx,customer.id,state,orderId):[],quote=priceRewards(pricedLines,rules,choice,!!customer);
+  if(quote.subtotal!==subtotal)throw new AppError(409,'Harga barang berubah. Pilih kembali barang dari katalog.');
+  const pricing={customerId:customer?.id??null,subtotal,discount:quote.discount,net:subtotal-quote.discount,voucherId:quote.selected?.id??null,voucherLabel:quote.selected?.label??null};
   const saved=await tx.execute(statement(pricing));
   if(saved.rowsAffected!==1)throw new AppError(409,'Pesanan berubah dari tab lain. Muat ulang halaman sebelum melanjutkan.');
-  if(discount)await tx.execute({sql:'INSERT INTO first_purchase_discounts(customer_id,order_id) VALUES(?,?) ON CONFLICT(customer_id) DO NOTHING',args:[customer!.id,orderId]});
+  await tx.execute({sql:'DELETE FROM first_purchase_discounts WHERE order_id=? AND redeemed_at IS NULL',args:[orderId]});
+  await tx.execute({sql:'DELETE FROM purchase_voucher_claims WHERE order_id=? AND redeemed_at IS NULL',args:[orderId]});
+  if(pricing.discount&&pricing.voucherId===FIRST_REWARD_ID)await tx.execute({sql:'INSERT INTO first_purchase_discounts(customer_id,order_id) VALUES(?,?)',args:[customer!.id,orderId]});
+  else if(pricing.discount)await tx.execute({sql:'INSERT INTO purchase_voucher_claims(voucher_id,order_id,customer_id,reserved_at) VALUES(?,?,?,?)',args:[pricing.voucherId!,orderId,customer!.id,Date.now()]});
   await tx.commit();return pricing;
  }catch(error){await tx.rollback();throw error;}finally{tx.close();}
 }
@@ -52,6 +61,7 @@ export async function abandonPurchase(order:Order) {
  await db().batch([
   db().prepare("UPDATE orders SET status='cancelled',payment_state='cancelled' WHERE id=? AND session_hash=? AND status='awaiting_proof' AND proof_key IS NULL").bind(order.id,order.session_hash),
   db().prepare("DELETE FROM first_purchase_discounts WHERE order_id=? AND redeemed_at IS NULL AND EXISTS (SELECT 1 FROM orders WHERE id=? AND status='cancelled' AND proof_key IS NULL)").bind(order.id,order.id),
+  db().prepare("DELETE FROM purchase_voucher_claims WHERE order_id=? AND redeemed_at IS NULL AND EXISTS (SELECT 1 FROM orders WHERE id=? AND status='cancelled' AND proof_key IS NULL)").bind(order.id,order.id),
  ]);
 }
 export async function resumeFirstPurchase(request:Request) {
