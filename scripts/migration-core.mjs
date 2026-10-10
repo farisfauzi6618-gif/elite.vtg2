@@ -16,7 +16,7 @@ export async function migrate(client, directory, { check = false } = {}) {
     }
     pending.push(name);
     if (check) continue;
-    const statements = text.split('--> statement-breakpoint').flatMap(part => part.split(';')).map(sql => sql.trim()).filter(Boolean);
+    const statements = text.split('--> statement-breakpoint').flatMap(part => /^CREATE\s+TRIGGER\b/i.test(part.trim()) ? [part] : part.split(';')).map(sql => sql.trim()).filter(Boolean);
     await client.batch([...statements.map(sql => ({ sql, args: [] })), { sql: 'INSERT INTO elite_migrations(name,checksum,applied_at) VALUES(?,?,?)', args: [name, checksum, Date.now()] }], 'write');
   }
   return { pending, total: files.length };

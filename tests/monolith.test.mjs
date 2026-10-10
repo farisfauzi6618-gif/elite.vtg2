@@ -104,7 +104,7 @@ after(async () => {
 
 test('the unified migration sequence is repeatable and prepares all three domains', async () => {
   const result = await migrate(client, new URL('../migrations/', import.meta.url));
-  assert.equal(result.pending.length, 0); assert.equal(result.total, 24);
+  assert.equal(result.pending.length, 0); assert.equal(result.total, 25);
   const tables = (await client.execute("SELECT name FROM sqlite_master WHERE type='table'")).rows.map(row => row.name);
   for (const name of ['products','orders','shipping_config','customers','owner_sessions']) assert.ok(tables.includes(name));
 });

@@ -6,8 +6,8 @@ export const products = sqliteTable('products', {
  legacyCategory:text('legacy_category').notNull().default(''),featureIds:text('feature_ids').notNull().default('[]'),
  price:integer('price'), condition:text('condition'), defects:text('defects'), photoKey:text('photo_key'), caption:text('caption').notNull().default(''), description:text('description').notNull().default(''), photoKeys:text('photo_keys').notNull().default('[]'),
  warnings:text('warnings').notNull().default('[]'), reviewed:integer('reviewed').notNull().default(0), status:text('status').notNull().default('draft'),
- createdAt:text('created_at').notNull(), updatedAt:text('updated_at').notNull(), publishedAt:text('published_at'),orderableAt:text('orderable_at'), version:integer('version').notNull().default(0), lastMutation:text('last_mutation'),
-},t=>[uniqueIndex('idx_products_shortcode').on(t.shortcode),index('idx_products_status_published').on(t.status,t.publishedAt),check('product_price_valid',sql`${t.price} IS NULL OR (${t.price} >= 0 AND ${t.price} <= 1000000000)`),check('product_status_valid',sql`${t.status} IN ('draft','published')`)]);
+ createdAt:text('created_at').notNull(), updatedAt:text('updated_at').notNull(), publishedAt:text('published_at'),orderableAt:text('orderable_at'),soldAt:text('sold_at'), version:integer('version').notNull().default(0), lastMutation:text('last_mutation'),
+},t=>[uniqueIndex('idx_products_shortcode').on(t.shortcode),index('idx_products_status_published').on(t.status,t.publishedAt),index('idx_products_status_sold').on(t.status,t.soldAt),check('product_price_valid',sql`${t.price} IS NULL OR (${t.price} >= 0 AND ${t.price} <= 1000000000)`),check('product_status_valid',sql`${t.status} IN ('draft','published')`)]);
 export const sizeGroups=sqliteTable('size_groups',{
  id:text('id').primaryKey(),productId:text('product_id').notNull().references(()=>products.id),label:text('label').notNull().default(''),tagSize:text('tag_size').notNull().default(''),
  fits:text('fits').notNull().default('[]'),lengthCm:real('length_cm'),widthCm:real('width_cm'),qty:integer('qty'),price:integer('price'),condition:text('condition'),defects:text('defects'),
