@@ -392,10 +392,10 @@
       "exportSha256": "a72a90505002e2248576622924a4383ffae52fc867047aae9b5665caf9358677"
     },
     {
-      "source": "monolith-2026-10-10-promotions-and-scheduled-sales",
+      "source": "monolith-2026-10-10-promo-copy",
       "path": "components/customer-account.tsx",
-      "sha256": "d504f1d0d5bc25dce932fefeaec35c988364e119f6d3454f7a5979c98d01c43a",
-      "exportSha256": "d504f1d0d5bc25dce932fefeaec35c988364e119f6d3454f7a5979c98d01c43a"
+      "sha256": "2c50f13d5b009d536541154508031ce535e9d768f7fde57a667d5aa8f075a862",
+      "exportSha256": "2c50f13d5b009d536541154508031ce535e9d768f7fde57a667d5aa8f075a862"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4088,10 +4088,10 @@
       "exportSha256": "59319db2ff4371054078dc7bf41432ac554b9d7ff73a816699e6df754cdd5978"
     },
     {
-      "source": "monolith-2026-10-10-promotions-and-scheduled-sales",
+      "source": "monolith-2026-10-10-promo-copy",
       "path": "components/purchase-benefit.tsx",
-      "sha256": "e19cce44c2b272f1eeb00b869713da9e2575f8bd42b4c431e3f18b622ac19e72",
-      "exportSha256": "e19cce44c2b272f1eeb00b869713da9e2575f8bd42b4c431e3f18b622ac19e72"
+      "sha256": "b985e79d22790d889b878657bc39159c4a9d8f16e8d9798ede5efc516d18b870",
+      "exportSha256": "b985e79d22790d889b878657bc39159c4a9d8f16e8d9798ede5efc516d18b870"
     },
     {
       "source": "monolith-2026-10-10-promotions-and-scheduled-sales",
