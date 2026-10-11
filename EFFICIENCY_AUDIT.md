@@ -23,7 +23,7 @@ Menurut [dokumentasi Private Blob](https://vercel.com/docs/vercel-blob/private-s
 
 ## Perubahan yang diterapkan
 
-1. GET katalog, detail produk, dan admin katalog memakai validator ETag yang dihitung dari pembacaan database terbaru. Data tidak berubah: 304 tanpa body; data berubah: 200 lengkap. Auth admin diperiksa sebelum validator. Respons private/no-store, Vary Cookie; snapshot hanya dalam komponen, dibatasi delapan URL, dihapus saat error. Jam server tetap dikirim supaya produk terjadwal terbuka tepat waktu.
+1. GET katalog, detail produk, dan admin katalog memakai validator ETag yang dihitung dari pembacaan database terbaru. Data tidak berubah: 304 tanpa body; data berubah: 200 lengkap. Auth admin diperiksa sebelum validator. Respons private/no-store, Vary Cookie; snapshot hanya dalam komponen, dibatasi delapan URL, dihapus saat error. Jam server memakai header aplikasi atau fallback HTTP Date (presisi satu detik) karena Vercel membuang header tambahan pada 304. Snapshot jam tidak mundur, dan validasi checkout tetap memakai waktu server penuh.
 2. Akun dan pemberitahuan reward berbagi request GET yang masih berjalan. Tidak menyimpan respons akun selesai. Login/logout membatalkan generasi lama agar respons sebelum pergantian sesi tidak menang.
 3. Refresh otomatis hanya saat tab visible. Focus/pageshow/visibility digabung dalam 100 ms. Stok tetap diperiksa setiap 15 detik saat aktif, voucher setiap 60 detik; refresh manual tetap langsung.
 4. Admin tidak lagi menjalankan INSERT identitas pemilik yang tidak mengubah data pada setiap baca. Binding tetap diperiksa setiap request, inisialisasi memakai konflik aman dan membaca ulang identitas yang tersimpan. Tidak ada cache otorisasi.
@@ -40,7 +40,7 @@ Menurut [dokumentasi Private Blob](https://vercel.com/docs/vercel-blob/private-s
 
 Perbandingan body bukan klaim penghematan seluruh tagihan/transfer: respons 304 masih memanggil Function dan database, header tetap memakai jaringan. Penghematan request akun pada pembukaan katalog terukur 50%; tidak diasumsikan sebagai 50% seluruh invocations. Ukuran file trace bukan meter Functions Storage Vercel.
 
-245 tes lulus, build produksi dan pemeriksaan TypeScript lulus. Cakupan: perubahan stok/harga/publication, SOLD aging/hide/direct URL, cart/checkout, harga server dan voucher, login/logout race, sesi admin invalid, konflik binding pemilik, origin protection, QRIS/BCA, upload bukti, Telegram idempotency, ongkir, tracking, dan render PDF/PNG resmi. Ketiga entry point render diverifikasi memiliki WASM dalam trace.
+246 tes lulus, build produksi dan pemeriksaan TypeScript lulus. Cakupan: perubahan stok/harga/publication, SOLD aging/hide/direct URL, cart/checkout, harga server dan voucher, login/logout race, sesi admin invalid, konflik binding pemilik, origin protection, QRIS/BCA, upload bukti, Telegram idempotency, ongkir, tracking, dan render PDF/PNG resmi. Ketiga entry point render diverifikasi memiliki WASM dalam trace.
 
 Browser: produk → keranjang → form checkout dengan barang/harga/voucher terisi; admin stok dikurangi/restock pada database simulasi menunjukkan 19 → 18 → 19 tersedia. Desktop 1265 × 720 diverifikasi. Permintaan emulasi HP 390 × 844 tidak diterapkan oleh browser aplikasi, sehingga verifikasi mobile tidak diklaim; override sudah di-reset. Layout/CSS tidak diubah. Tidak membuat transaksi, mengubah stok, mengirim Telegram, atau mengganti aset di produksi. Pengujian layanan eksternal memakai fixture/mocks lokal.
 

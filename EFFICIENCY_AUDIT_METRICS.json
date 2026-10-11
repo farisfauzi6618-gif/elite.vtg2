@@ -48,7 +48,7 @@
     "limitation": "Local NFT trace references, including possible Windows path aliases; not the compressed deployed Functions Storage meter."
   },
   "tests": {
-    "passed": 245,
+    "passed": 246,
     "failed": 0,
     "productionBuild": true,
     "typecheck": true

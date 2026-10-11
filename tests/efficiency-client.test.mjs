@@ -26,6 +26,10 @@ test('conditional reader coalesces parallel reads and forgets snapshots after er
  const gate=deferred();let calls=0,fail=false;const read=m.createCatalogReader({fetcher:async(url,init)=>{calls++;if(calls===1)return gate.promise;if(fail)return Response.json({error:'Expired'},{status:401});assert.equal(new Headers(init.headers).has('If-None-Match'),false);return Response.json({products:[]});}});
  const a=read('/api/admin/katalog'),b=read('/api/admin/katalog');assert.equal(calls,1);gate.resolve(Response.json({products:[]},{headers:{etag:'W/"test"'}}));await Promise.all([a,b]);fail=true;await assert.rejects(read('/api/admin/katalog'),e=>e.status===401);fail=false;await read('/api/admin/katalog');assert.equal(calls,3);
 });
+test('Vercel 304 clock fallback uses HTTP Date and never rewinds a saved timestamp',async()=>{
+ let calls=0;const read=m.createCatalogReader({fetcher:async()=>{calls++;if(calls===1)return Response.json({products:[],asOf:'2026-10-11T00:00:00.750Z'},{headers:{etag:'W/"clock"'}});return new Response(null,{status:304,headers:{Date:calls===2?'Sun, 11 Oct 2026 00:00:15 GMT':'Sun, 11 Oct 2026 00:00:14 GMT'}})}});
+ const initial=await read('/api/catalog'),fresh=await read('/api/catalog'),later=await read('/api/catalog');assert.ok(Date.parse(fresh.asOf)>Date.parse(initial.asOf));assert.equal(fresh.asOf,'2026-10-11T00:00:15.000Z');assert.equal(later.asOf,fresh.asOf);
+});
 test('conditional snapshots are bounded and never shared across readers',async()=>{
  const headers=[];const fetcher=async(url,init)=>{headers.push(new Headers(init.headers).get('If-None-Match'));return Response.json({id:url},{headers:{etag:'W/"test"'}})};const read=m.createCatalogReader({fetcher});for(let i=0;i<9;i++)await read('/api/products/'+i);await read('/api/products/0');await m.createCatalogReader({fetcher})('/api/products/8');assert.ok(headers.every(h=>h===null));
 });

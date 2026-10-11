@@ -7,7 +7,13 @@ export async function catalogRequest(path:string,init:RequestInit={},options:Req
  const retry=checkout?'Coba lagi. Pilihan barang tetap ada di keranjang.':'Coba perbarui stok kembali.';
  try{
   const response=await (options.fetcher??fetch)(path,{...init,signal:controller.signal});
-  if(response.status===304&&options.previous){const asOf=response.headers.get('X-ELITE-Server-Time');return asOf?{...options.previous.data,asOf}:options.previous.data;}
+  if(response.status===304&&options.previous){
+   const previous=options.previous;
+   // Vercel strips custom headers on 304; HTTP Date remains available (seconds).
+   const clock=Date.parse(response.headers.get('X-ELITE-Server-Time')??response.headers.get('Date')??'');
+   const data=typeof previous.data?.asOf==='string'&&Number.isFinite(clock)?{...previous.data,asOf:new Date(Math.max(clock,Date.parse(previous.data.asOf)||0)).toISOString()}:previous.data;
+   options.remember?.({...previous,data});return data;
+  }
   const data:any=await response.json();
   if(!response.ok)throw Object.assign(new Error(typeof data?.error==='string'?data.error:'Data belum dapat dimuat. '+retry),{status:response.status});
   const etag=response.headers.get('etag');if(etag)options.remember?.({etag,data});

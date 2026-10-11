@@ -4048,8 +4048,8 @@
     {
       "source": "monolith-2026-10-11-resource-efficiency",
       "path": "modules/catalog/catalog-request.ts",
-      "sha256": "5773b1549cb59b54e5ff6343be4f6845da991bcae7c69ca85bccefe8f14802e7",
-      "exportSha256": "5773b1549cb59b54e5ff6343be4f6845da991bcae7c69ca85bccefe8f14802e7"
+      "sha256": "bd573367cf553195d07d9b5673df1bf248a00bb4e10160c7bfd3c351e214e7d7",
+      "exportSha256": "bd573367cf553195d07d9b5673df1bf248a00bb4e10160c7bfd3c351e214e7d7"
     },
     {
       "source": "monolith-2026-10-10-network-recovery",
@@ -4348,8 +4348,8 @@
     {
       "source": "monolith-2026-10-11-resource-efficiency",
       "path": "tests/efficiency-client.test.mjs",
-      "sha256": "39d76c1fb0eecf33ebed0fdc2d8afe41f2ad03df1696c1c5476d2b41cea96ad2",
-      "exportSha256": "39d76c1fb0eecf33ebed0fdc2d8afe41f2ad03df1696c1c5476d2b41cea96ad2"
+      "sha256": "023fdb34790d6b3544f04f50c5805390024d3fda33f3a818fd27f5b6d538c546",
+      "exportSha256": "023fdb34790d6b3544f04f50c5805390024d3fda33f3a818fd27f5b6d538c546"
     },
     {
       "source": "monolith-2026-10-11-resource-efficiency",
@@ -4360,14 +4360,14 @@
     {
       "source": "monolith-2026-10-11-resource-efficiency",
       "path": "EFFICIENCY_AUDIT.md",
-      "sha256": "7052ec34c3a90a006bc414874d2038a7b257cda626acbace720b9059df5c077b",
-      "exportSha256": "7052ec34c3a90a006bc414874d2038a7b257cda626acbace720b9059df5c077b"
+      "sha256": "5fc431dc1d087d66f128809b6007d3a78a4b7a17dbc9bbbbb36f23147726f503",
+      "exportSha256": "5fc431dc1d087d66f128809b6007d3a78a4b7a17dbc9bbbbb36f23147726f503"
     },
     {
       "source": "monolith-2026-10-11-resource-efficiency",
       "path": "EFFICIENCY_AUDIT_METRICS.json",
-      "sha256": "0a7c3fe52c21e7bf495491ac1c53cfe06fb87a62da80fe309dc2544dd9907323",
-      "exportSha256": "0a7c3fe52c21e7bf495491ac1c53cfe06fb87a62da80fe309dc2544dd9907323"
+      "sha256": "ace0740c3aa6a01df8b74064574c35f6b432a8bb4f957f494ad1b7ee35e92be4",
+      "exportSha256": "ace0740c3aa6a01df8b74064574c35f6b432a8bb4f957f494ad1b7ee35e92be4"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
