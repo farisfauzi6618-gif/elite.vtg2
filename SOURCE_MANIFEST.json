@@ -116,10 +116,10 @@
       "exportSha256": "0af0c3740fb9866dc5c543d0f893a770b3eef2b402c382e4412570809c5c91c9"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-11-customer-directory",
       "path": "app/admin/page.tsx",
-      "sha256": "2daf74844d2548da622182fd686bdba62ab124486c72e7992914488923b129ca",
-      "exportSha256": "2daf74844d2548da622182fd686bdba62ab124486c72e7992914488923b129ca"
+      "sha256": "e19330f0c81d84ed9483cf23789dbd3e379fce1820647ec219df6aba4a39391c",
+      "exportSha256": "e19330f0c81d84ed9483cf23789dbd3e379fce1820647ec219df6aba4a39391c"
     },
     {
       "source": "monolith-2026-10-11-resource-efficiency",
@@ -380,10 +380,10 @@
       "exportSha256": "b588c3e4294074370f88dbe1291cfce5bfebc9ffde8aade1ee5f2d9d50da8f1c"
     },
     {
-      "source": "monolith-2026-10-10-website-analytics-v1",
+      "source": "monolith-2026-10-11-customer-directory",
       "path": "components/admin-navigation.tsx",
-      "sha256": "08c1d128e75f16ce28cf5dd9233894a2464876c8432b00a23f51f2674357c413",
-      "exportSha256": "08c1d128e75f16ce28cf5dd9233894a2464876c8432b00a23f51f2674357c413"
+      "sha256": "b4ddc3004aa06edcaf11e2e8621a84c222552bbbb47d0919dbc5e1f1e6f005bc",
+      "exportSha256": "b4ddc3004aa06edcaf11e2e8621a84c222552bbbb47d0919dbc5e1f1e6f005bc"
     },
     {
       "source": "monolith-2026-10-09",
@@ -818,10 +818,10 @@
       "exportSha256": "4dc3ec549f69fd2ad516ffb06e55c4bb0a7e8c01f026c90ef8679183eb5fde6a"
     },
     {
-      "source": "monolith-2026-10-10-website-analytics-v1",
+      "source": "monolith-2026-10-11-customer-directory",
       "path": "db/schema/catalog.ts",
-      "sha256": "633a1e7dcbd3436e0cdab923ecfcc265a867dc60b681fa209a7bc3d6cfd4146b",
-      "exportSha256": "633a1e7dcbd3436e0cdab923ecfcc265a867dc60b681fa209a7bc3d6cfd4146b"
+      "sha256": "6a8fe8d3998d7da38017f6a222142bf56b20e963f8d75dce8f9c06b3e1bdc5a0",
+      "exportSha256": "6a8fe8d3998d7da38017f6a222142bf56b20e963f8d75dce8f9c06b3e1bdc5a0"
     },
     {
       "source": "monolith-2026-10-10-personal-rewards",
@@ -1472,10 +1472,10 @@
       "exportSha256": "533087000b7e52c493ea23db71b3325daaa1ece8fa3f03db01a818f8947f6e7b"
     },
     {
-      "source": "monolith-2026-10-11-blob-optimization",
+      "source": "monolith-2026-10-11-customer-directory",
       "path": "tests/monolith.test.mjs",
-      "sha256": "b2300261f09ecc2059dbe5e51b6b6d69492263bec5e235e4733bc0c00f067610",
-      "exportSha256": "b2300261f09ecc2059dbe5e51b6b6d69492263bec5e235e4733bc0c00f067610"
+      "sha256": "a30006f9c3e9dbf1b3bb78e2b0d052d4a6bfea5d4bdfd21feee3d56e6c0a1594",
+      "exportSha256": "a30006f9c3e9dbf1b3bb78e2b0d052d4a6bfea5d4bdfd21feee3d56e6c0a1594"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4368,6 +4368,66 @@
       "path": "EFFICIENCY_AUDIT_METRICS.json",
       "sha256": "ace0740c3aa6a01df8b74064574c35f6b432a8bb4f957f494ad1b7ee35e92be4",
       "exportSha256": "ace0740c3aa6a01df8b74064574c35f6b432a8bb4f957f494ad1b7ee35e92be4"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-directory",
+      "path": "modules/catalog/customer-directory.ts",
+      "sha256": "85e2a48dfeaafd5c111a04ce61d97067aae651fa309814ec318b5ab6836bec66",
+      "exportSha256": "85e2a48dfeaafd5c111a04ce61d97067aae651fa309814ec318b5ab6836bec66"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-directory",
+      "path": "app/api/admin/customers/route.ts",
+      "sha256": "1245aae9b8636d6078028d50e29e1c85b49643a7407cd4805ec7fc1f3c5d6aac",
+      "exportSha256": "1245aae9b8636d6078028d50e29e1c85b49643a7407cd4805ec7fc1f3c5d6aac"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-directory",
+      "path": "app/api/admin/customers/export/route.ts",
+      "sha256": "48a19aa6fa240e095c914da9ee01a2dd472cee64db59dc9699e6442374b47a3a",
+      "exportSha256": "48a19aa6fa240e095c914da9ee01a2dd472cee64db59dc9699e6442374b47a3a"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-directory",
+      "path": "app/api/admin/customers/giveaway/route.ts",
+      "sha256": "f1e48f9e201ba53062c7686c445b1a5741bd0258b233af3cc8e04c19a4cf150c",
+      "exportSha256": "f1e48f9e201ba53062c7686c445b1a5741bd0258b233af3cc8e04c19a4cf150c"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-directory",
+      "path": "app/admin/customers/page.tsx",
+      "sha256": "94efa36deea9dcfa33ca2271106c9436df1b8acadf0706a4fab3ffe10b4e073a",
+      "exportSha256": "94efa36deea9dcfa33ca2271106c9436df1b8acadf0706a4fab3ffe10b4e073a"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-directory",
+      "path": "app/admin/customers/ui.tsx",
+      "sha256": "25b9c21eecf210ffb538333c819dbb69b1c2bec0a354b4eb6feaa29dbd5789aa",
+      "exportSha256": "25b9c21eecf210ffb538333c819dbb69b1c2bec0a354b4eb6feaa29dbd5789aa"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-directory",
+      "path": "app/admin/customers/customers.css",
+      "sha256": "80c4b5275154d63a99d6b8e17995e820b12bc612124e9192c5170384dda088e1",
+      "exportSha256": "80c4b5275154d63a99d6b8e17995e820b12bc612124e9192c5170384dda088e1"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-directory",
+      "path": "migrations/release_0006_customer_directory.sql",
+      "sha256": "4ea5a4182fff543a1a6f030a102f5ceb0649e91e231ef7609d64604738fabd61",
+      "exportSha256": "4ea5a4182fff543a1a6f030a102f5ceb0649e91e231ef7609d64604738fabd61"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-directory",
+      "path": "tests/customer-directory.test.mjs",
+      "sha256": "19d41fb6ed833e3af090556c7ae753c09e398a5720b9a4c7cf843d4deebef077",
+      "exportSha256": "19d41fb6ed833e3af090556c7ae753c09e398a5720b9a4c7cf843d4deebef077"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-directory",
+      "path": "CUSTOMER_DATA.md",
+      "sha256": "7c39955ced4c1528a269707862be294022634095f901ab13626d63cfcd640d31",
+      "exportSha256": "7c39955ced4c1528a269707862be294022634095f901ab13626d63cfcd640d31"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -4523,5 +4583,21 @@
     "migrationsRequired": false,
     "audit": "EFFICIENCY_AUDIT.md",
     "metrics": "EFFICIENCY_AUDIT_METRICS.json"
+  },
+  "customerDirectory": {
+    "route": "/admin/customers",
+    "ownerOnly": true,
+    "pageSize": 50,
+    "exportBatchSize": 500,
+    "exports": [
+      "csv",
+      "json"
+    ],
+    "giveawayVerification": "manual per campaign; unique Instagram username per campaign; optimistic version",
+    "migration": "release_0006_customer_directory.sql",
+    "existingData": "preserved",
+    "blobUsage": false,
+    "automaticPolling": false,
+    "guide": "CUSTOMER_DATA.md"
   }
 }

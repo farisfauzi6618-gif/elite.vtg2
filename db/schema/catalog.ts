@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, real, index, uniqueIndex, check } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, real, index, uniqueIndex, check, primaryKey } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 export const products = sqliteTable('products', {
  id:text('id').primaryKey(), shortcode:text('shortcode').notNull(), instagramUrl:text('instagram_url').notNull(),
@@ -27,10 +27,13 @@ export const importAttempts=sqliteTable('import_attempts',{
 },t=>[index('idx_imports_time').on(t.createdAt)]);
 export const customers=sqliteTable('customers',{
  id:text('id').primaryKey(),name:text('name').notNull(),identity:text('identity').notNull(),email:text('email'),phone:text('phone'),birthday:text('birthday'),passwordHash:text('password_hash').notNull(),createdAt:integer('created_at').notNull(),
-},t=>[uniqueIndex('idx_customer_identity').on(t.identity)]);
+},t=>[uniqueIndex('idx_customer_identity').on(t.identity),index('idx_customer_created_id').on(sql`${t.createdAt} DESC`,sql`${t.id} DESC`)]);
 export const customerSessions=sqliteTable('customer_sessions',{
  hash:text('hash').primaryKey(),customerId:text('customer_id').notNull().references(()=>customers.id),createdAt:integer('created_at').notNull(),expiresAt:integer('expires_at').notNull(),
 },t=>[index('idx_customer_session_expiry').on(t.expiresAt)]);
+export const customerGiveawayEntries=sqliteTable('customer_giveaway_entries',{
+ customerId:text('customer_id').notNull().references(()=>customers.id),campaign:text('campaign').notNull(),instagramUsername:text('instagram_username').notNull(),commentVerifiedAt:integer('comment_verified_at'),updatedAt:integer('updated_at').notNull(),updatedBy:text('updated_by').notNull(),version:integer('version').notNull().default(1),
+},t=>[primaryKey({columns:[t.customerId,t.campaign]}),index('idx_customer_giveaway_campaign').on(t.campaign,t.commentVerifiedAt),uniqueIndex('idx_customer_giveaway_instagram').on(t.campaign,t.instagramUsername)]);
 export const catalogCheckouts=sqliteTable('catalog_checkouts',{
  id:text('id').primaryKey(),tokenHash:text('token_hash').notNull(),linesJson:text('lines_json').notNull(),amount:integer('amount').notNull(),expiresAt:integer('expires_at').notNull(),createdAt:integer('created_at').notNull(),customerId:text('customer_id').references(()=>customers.id),
 },t=>[uniqueIndex('idx_catalog_checkout_token').on(t.tokenHash)]);
