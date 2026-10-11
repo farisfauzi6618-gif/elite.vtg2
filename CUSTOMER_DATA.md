@@ -1,33 +1,37 @@
-# Data pelanggan dan pencatatan giveaway ELITE.VTG
+# Data pelanggan ELITE.VTG
 
-Halaman pemilik: `/admin/customers`, melalui **Admin → Data pelanggan**. Akun pelanggan tetap berada di database Turso saat pengguna logout atau sesi login 30 harinya berakhir. Pembaruan aplikasi tidak menghapus akun yang sudah ada.
+Halaman pemilik: `/admin/customers`, melalui **Admin → Data pelanggan**. Halaman ini hanya mengelola data pelanggan. Pencatatan giveaway dilakukan di luar aplikasi.
 
-## Data dan cara penggunaan
+## Data dan ekspor
 
-- Data akun: ID, nama, email atau nomor HP sesuai pilihan saat mendaftar, ulang tahun opsional, dan waktu pendaftaran.
-- Data giveaway: kode giveaway, username Instagram, waktu verifikasi komentar, waktu pembaruan, dan versi catatan. Aktor pembaruan disimpan di database untuk pertanggungjawaban admin.
-- Pilih kode unik untuk setiap promo, misalnya `giveaway-oktober-2026`; klik **Terapkan**. Catatan giveaway lain tetap tersimpan.
-- Klik **Catat Instagram** pada pelanggan, isi username, dan tandai komentar terverifikasi setelah memeriksanya di Instagram. Website tidak mengambil komentar Instagram secara otomatis.
-- Satu username tidak dapat dicatat untuk dua akun dalam giveaway yang sama. Pemilik tetap perlu memeriksa keaslian akun dan syarat promonya sendiri. Pencatatan tidak memilih pemenang secara otomatis.
-- Filter rentang pendaftaran memakai hari kalender WIB, termasuk tanggal akhir. Pencarian mendukung nama, kontak, dan username Instagram dengan atau tanpa `@`.
-- Filter **Terverifikasi** menghasilkan daftar akun yang komentarnya sudah diperiksa untuk giveaway terpilih.
+Data yang terlihat: ID, nama, email atau nomor HP sesuai pilihan saat mendaftar, ulang tahun opsional, dan waktu pendaftaran. Cari melalui nama, email, atau nomor HP. Filter tanggal menggunakan hari kalender WIB, termasuk tanggal akhir.
 
-## Arsip dan ekspor
+Daftar mengambil 50 akun per halaman. **Unduh CSV** atau **Unduh arsip JSON** mencakup semua pelanggan sesuai filter dan tab yang dipilih, bukan hanya halaman yang terlihat. Reset filter pada tab **Pelanggan** sebelum mengarsipkan semua akun aktif. Untuk mengarsipkan akun yang dihapus, unduh juga dari tab **Sampah**; nama file diberi penanda sampah.
 
-**Unduh CSV** mengekspor seluruh pelanggan sesuai filter beserta catatan giveaway yang dipilih, bukan hanya 50 akun yang terlihat. Dibuka di Excel/Google Sheets. Sel yang berpotensi dianggap formula diberi awalan tab agar dibaca sebagai teks; nomor HP tetap berbentuk teks. CSV ditujukan untuk pemeriksaan manusia. [Rujukan OWASP](https://community.owasp.org/attacks/CSV_Injection).
+CSV memakai UTF-8 dan perlindungan sel yang berpotensi menjadi formula. JSON menyimpan nilai asli, versi format 2, jumlah akun dan penanda `complete`. Keduanya hanya memuat data pelanggan, tanpa kolom/catatan giveaway, kata sandi, hash kata sandi, token sesi, atau kredensial integrasi. Arsip ini bukan backup lengkap autentikasi/database toko. Simpan unduhan di tempat pribadi.
 
-**Unduh arsip JSON** menyimpan nilai asli data akun dan seluruh catatan giveaway milik pelanggan dalam hasil filter. Arsip menyertakan jumlah akun dan penanda `complete`. Reset filter sebelum mengunduh arsip semua pelanggan. Simpan file di tempat pribadi, misalnya folder arsip pemilik. Arsip ini tidak memuat kata sandi, hash kata sandi, token login, atau kredensial integrasi; bukan backup lengkap untuk mengembalikan autentikasi/database toko.
+Database adalah penyimpanan utama. Logout dan kedaluwarsa sesi tidak menghapus akun. Ekspor menjadi salinan terpisah yang dapat diakses nanti. Tidak ada penggunaan Blob atau pengiriman otomatis ke layanan pemasaran.
 
-Database adalah penyimpanan utama; ekspor menjadi salinan terpisah yang dapat diakses nanti. Lakukan ekspor sebelum dan setelah periode promo untuk menyimpan catatan periode tersebut. Tidak ada pengiriman otomatis ke GitHub atau layanan pemasaran, dan tidak ada penggunaan Blob untuk data pelanggan ini.
+## Hapus dan pulihkan
 
-[Turso mendokumentasikan PITR](https://docs.turso.tech/features/point-in-time-recovery) dengan jendela pemulihan 24 jam pada paket Free. Jendela pemulihan tersebut berbeda dari masa penyimpanan akun: akun normal tidak otomatis dihapus setelah 24 jam. Ekspor memberi salinan data pelanggan di luar jendela pemulihan layanan.
+Klik **Hapus** pada pelanggan, periksa nama dan kontak pada panel konfirmasi, lalu pilih **Hapus ke Sampah**. Penghapusan dilakukan per akun dan dapat dibatalkan melalui **Sampah → Pulihkan → Pulihkan akun**.
 
-## Keamanan dan kapasitas
+Akun yang dihapus:
+- tidak muncul pada daftar dan ekspor pelanggan aktif;
+- tidak dapat login selama berada di Sampah;
+- kehilangan seluruh sesi login aktif;
+- tetap memiliki data asli dan referensi transaksi di database.
 
-Halaman, daftar, unduhan, dan perubahan catatan hanya menerima sesi pemilik yang sah. Akun pelanggan dan tim, termasuk tim yang mendapat izin Analytics, tidak mendapat akses data pelanggan. Perubahan memerlukan origin aplikasi yang sama. Daftar/unduhan menggunakan `private, no-store`; tidak menyimpan data pelanggan di localStorage atau cache publik. Parameter query dibatasi dan SQL memakai binding.
+Pemulihan mengembalikan akun dengan ID, kontak, kata sandi, pesanan, serta riwayat diskon yang sama. Pelanggan harus login ulang; token lama tidak aktif kembali. Identitas tetap unik selama berada di Sampah, sehingga pendaftaran ulang tidak membuat akun duplikat atau mengulang hak diskon pertama.
 
-Daftar mengambil 50 akun dengan cursor dan index waktu/ID. Unduhan membaca 500 akun per batch melalui stream, dengan pengecekan jumlah hasil dan kegagalan jika stream terputus. Halaman tidak melakukan polling otomatis. Login/pendaftaran, batas percobaan autentikasi, stok, checkout, pembayaran, analytics, dan paket hosting tetap memakai aturan sebelumnya. Kapasitas akhir tetap mengikuti kuota Turso dan Vercel; fitur ini tidak menjamin trafik tak terbatas.
+Tidak tersedia penghapusan permanen, penghapusan massal, atau pembersihan Sampah otomatis. Ini adalah penghapusan yang dapat dipulihkan, bukan penghapusan seluruh data pribadi dari penyimpanan. Pesanan, pembayaran, stok, voucher, dan catatan giveaway lama tidak dihapus oleh tindakan ini. Catatan giveaway lama tetap disimpan di database untuk mencegah hilangnya data, tetapi tidak memiliki UI/API pencatatan dan tidak diekspor oleh fitur pelanggan.
 
-Migrasi `release_0006_customer_directory.sql` hanya menambah index dan tabel catatan giveaway. Tidak menghapus atau mengubah baris pelanggan, produk, pesanan, atau konfigurasi pembayaran yang sudah ada. Riwayat giveaway dipisahkan berdasarkan kode; edit pada kode yang sama memperbarui catatan terkini dengan kontrol versi agar dua tab tidak saling menimpa.
+## Keamanan dan efisiensi
 
-Pengujian meliputi akses pemilik/pelanggan/tim, CSRF, logout/sesi kedaluwarsa, migrasi data lama, pencarian literal, tanggal WIB, pagination dengan waktu sama dan pendaftaran baru, username duplikat, edit bersamaan, ekspor 1.505 akun, seluruh riwayat giveaway di JSON, formula CSV, dan unduhan terputus.
+Halaman, daftar, ekspor, Hapus, dan Pulihkan hanya menerima sesi pemilik yang sah. Akun pelanggan dan tim, termasuk tim berizin Analytics, tidak mendapat akses data pelanggan. Perubahan wajib berasal dari origin aplikasi yang sama dan memeriksa status yang dilihat admin untuk menolak perubahan basi dari tab lain.
+
+Hapus/Pulihkan beserta pencabutan sesi berjalan dalam satu transaksi. Tidak ada penghapusan baris pelanggan atau transaksi bisnis. Migrasi `release_0007_customer_trash.sql` hanya menambah tabel Sampah dan index, tanpa mengubah data lama. Migrasi giveaway sebelumnya tidak diubah agar checksum tetap sah.
+
+Daftar/ekspor menggunakan cache privat `no-store`. Data tidak disimpan di localStorage. SQL memakai binding; pagination menggunakan cursor; ekspor membaca 500 akun per batch. Tidak ada polling otomatis atau perubahan paket hosting.
+
+Pengujian mencakup akses pemilik/pelanggan/tim, CSRF, pemisahan daftar/Sampah, Hapus/Pulihkan, sesi dan login, ID/riwayat transaksi tetap utuh, rollback, perubahan bersamaan, pencarian literal, tanggal WIB, pagination, ekspor 1.505 akun tanpa giveaway/kredensial, formula CSV, dan unduhan terputus.

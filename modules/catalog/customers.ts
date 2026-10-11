@@ -53,14 +53,15 @@ function cookieToken(cookie: string | null) {
 export async function currentCustomer(cookie: string | null): Promise<Customer | null> {
   const token = cookieToken(cookie);
   if (!token) return null;
-  return db().prepare('SELECT c.* FROM customer_sessions s JOIN customers c ON c.id=s.customer_id WHERE s.hash=? AND s.expires_at>?').bind(await digest(token), Date.now()).first<Customer>();
+  return db().prepare('SELECT c.* FROM customer_sessions s JOIN customers c ON c.id=s.customer_id WHERE s.hash=? AND s.expires_at>? AND NOT EXISTS (SELECT 1 FROM customer_trash t WHERE t.customer_id=c.id)').bind(await digest(token), Date.now()).first<Customer>();
 }
 async function startSession(customer: Customer, previousCookie: string | null) {
   const token = randomToken(), now = Date.now(), previous = cookieToken(previousCookie);
-  const statements = [db().prepare('INSERT INTO customer_sessions(hash,customer_id,created_at,expires_at) VALUES(?,?,?,?)').bind(await digest(token), customer.id, now, now + SESSION_MS)];
+  const statements = [db().prepare('INSERT INTO customer_sessions(hash,customer_id,created_at,expires_at) SELECT ?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM customer_trash WHERE customer_id=?)').bind(await digest(token), customer.id, now, now + SESSION_MS,customer.id)];
   if (previous) statements.push(db().prepare('DELETE FROM customer_sessions WHERE hash=?').bind(await digest(previous)));
   statements.push(db().prepare('DELETE FROM customer_sessions WHERE expires_at<?').bind(now));
-  await db().batch(statements);
+  const saved=await db().batch(statements);
+  if(saved[0].meta.changes!==1)throw new AppError(401,'Email/nomor HP atau kata sandi tidak cocok.');
   return { customer: customerProfile(customer), token };
 }
 export async function registerCustomer(input: Record<string, unknown>, cookie: string | null) {
@@ -75,7 +76,7 @@ export async function registerCustomer(input: Record<string, unknown>, cookie: s
 }
 export async function loginCustomer(input: Record<string, unknown>, cookie: string | null) {
   const { identity } = customerIdentity(input.identity), password = passwordValue(input.password);
-  const customer = await db().prepare('SELECT * FROM customers WHERE identity=?').bind(identity).first<Customer>();
+  const customer = await db().prepare('SELECT c.* FROM customers c WHERE identity=? AND NOT EXISTS (SELECT 1 FROM customer_trash t WHERE t.customer_id=c.id)').bind(identity).first<Customer>();
   const dummy = 'scrypt$16384$8$5$' + '0'.repeat(32) + '$' + '0'.repeat(64);
   const valid = await passwordMatches(password, customer?.password_hash ?? dummy);
   if (!customer || !valid) throw new AppError(401, 'Email/nomor HP atau kata sandi tidak cocok.');

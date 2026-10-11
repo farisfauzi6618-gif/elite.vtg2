@@ -107,9 +107,9 @@ after(async () => {
 
 test('the unified migration sequence is repeatable and prepares all three domains', async () => {
   const result = await migrate(client, new URL('../migrations/', import.meta.url));
-  assert.equal(result.pending.length, 0); assert.equal(result.total, 30);
+  assert.equal(result.pending.length, 0); assert.equal(result.total, 31);
   const tables = (await client.execute("SELECT name FROM sqlite_master WHERE type='table'")).rows.map(row => row.name);
-  for (const name of ['products','orders','shipping_config','customers','customer_giveaway_entries','owner_sessions']) assert.ok(tables.includes(name));
+  for (const name of ['products','orders','shipping_config','customers','customer_giveaway_entries','customer_trash','owner_sessions']) assert.ok(tables.includes(name));
 });
 test('the libSQL adapter rolls back every statement when one batch statement fails', async () => {
   await client.execute('CREATE TABLE adapter_probe(id INTEGER PRIMARY KEY,value TEXT)');

@@ -818,10 +818,10 @@
       "exportSha256": "4dc3ec549f69fd2ad516ffb06e55c4bb0a7e8c01f026c90ef8679183eb5fde6a"
     },
     {
-      "source": "monolith-2026-10-11-customer-directory",
+      "source": "monolith-2026-10-11-customer-simplification",
       "path": "db/schema/catalog.ts",
-      "sha256": "6a8fe8d3998d7da38017f6a222142bf56b20e963f8d75dce8f9c06b3e1bdc5a0",
-      "exportSha256": "6a8fe8d3998d7da38017f6a222142bf56b20e963f8d75dce8f9c06b3e1bdc5a0"
+      "sha256": "0d8e49aeb53e38046d86aa12782ffa6c900375225dd47775f9e22b3047cb9d5c",
+      "exportSha256": "0d8e49aeb53e38046d86aa12782ffa6c900375225dd47775f9e22b3047cb9d5c"
     },
     {
       "source": "monolith-2026-10-10-personal-rewards",
@@ -1088,10 +1088,10 @@
       "exportSha256": "15a998d8c295588c79691e0fdaecf4eb310352dc8448980a33d9606003841a7a"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-11-customer-simplification",
       "path": "modules/catalog/customers.ts",
-      "sha256": "e076dce5125537b7971269c558043cb7bfe43a0ab55a438bef00140dce9a07f9",
-      "exportSha256": "e076dce5125537b7971269c558043cb7bfe43a0ab55a438bef00140dce9a07f9"
+      "sha256": "21b42be470aa8599f55551f5d6a3416a686f16daaa91b08f3e3bd07e6c791fc7",
+      "exportSha256": "21b42be470aa8599f55551f5d6a3416a686f16daaa91b08f3e3bd07e6c791fc7"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1472,10 +1472,10 @@
       "exportSha256": "533087000b7e52c493ea23db71b3325daaa1ece8fa3f03db01a818f8947f6e7b"
     },
     {
-      "source": "monolith-2026-10-11-customer-directory",
+      "source": "monolith-2026-10-11-customer-simplification",
       "path": "tests/monolith.test.mjs",
-      "sha256": "a30006f9c3e9dbf1b3bb78e2b0d052d4a6bfea5d4bdfd21feee3d56e6c0a1594",
-      "exportSha256": "a30006f9c3e9dbf1b3bb78e2b0d052d4a6bfea5d4bdfd21feee3d56e6c0a1594"
+      "sha256": "1273ce477066dfa6374ff4e44253b92efb3c0c81c792f4aefb072072f0efd927",
+      "exportSha256": "1273ce477066dfa6374ff4e44253b92efb3c0c81c792f4aefb072072f0efd927"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4370,10 +4370,10 @@
       "exportSha256": "ace0740c3aa6a01df8b74064574c35f6b432a8bb4f957f494ad1b7ee35e92be4"
     },
     {
-      "source": "monolith-2026-10-11-customer-directory",
+      "source": "monolith-2026-10-11-customer-simplification",
       "path": "modules/catalog/customer-directory.ts",
-      "sha256": "85e2a48dfeaafd5c111a04ce61d97067aae651fa309814ec318b5ab6836bec66",
-      "exportSha256": "85e2a48dfeaafd5c111a04ce61d97067aae651fa309814ec318b5ab6836bec66"
+      "sha256": "de82a0778c0de55d712d6cd9471cade9fb96ea9b2f51c4cfb8fee1619b0d12fc",
+      "exportSha256": "de82a0778c0de55d712d6cd9471cade9fb96ea9b2f51c4cfb8fee1619b0d12fc"
     },
     {
       "source": "monolith-2026-10-11-customer-directory",
@@ -4389,27 +4389,21 @@
     },
     {
       "source": "monolith-2026-10-11-customer-directory",
-      "path": "app/api/admin/customers/giveaway/route.ts",
-      "sha256": "f1e48f9e201ba53062c7686c445b1a5741bd0258b233af3cc8e04c19a4cf150c",
-      "exportSha256": "f1e48f9e201ba53062c7686c445b1a5741bd0258b233af3cc8e04c19a4cf150c"
-    },
-    {
-      "source": "monolith-2026-10-11-customer-directory",
       "path": "app/admin/customers/page.tsx",
       "sha256": "94efa36deea9dcfa33ca2271106c9436df1b8acadf0706a4fab3ffe10b4e073a",
       "exportSha256": "94efa36deea9dcfa33ca2271106c9436df1b8acadf0706a4fab3ffe10b4e073a"
     },
     {
-      "source": "monolith-2026-10-11-customer-directory",
+      "source": "monolith-2026-10-11-customer-simplification",
       "path": "app/admin/customers/ui.tsx",
-      "sha256": "25b9c21eecf210ffb538333c819dbb69b1c2bec0a354b4eb6feaa29dbd5789aa",
-      "exportSha256": "25b9c21eecf210ffb538333c819dbb69b1c2bec0a354b4eb6feaa29dbd5789aa"
+      "sha256": "8911ba102035365d541b89c7cb3cd21e180ed3d22a89e5eb90a682b001b80272",
+      "exportSha256": "8911ba102035365d541b89c7cb3cd21e180ed3d22a89e5eb90a682b001b80272"
     },
     {
-      "source": "monolith-2026-10-11-customer-directory",
+      "source": "monolith-2026-10-11-customer-simplification",
       "path": "app/admin/customers/customers.css",
-      "sha256": "80c4b5275154d63a99d6b8e17995e820b12bc612124e9192c5170384dda088e1",
-      "exportSha256": "80c4b5275154d63a99d6b8e17995e820b12bc612124e9192c5170384dda088e1"
+      "sha256": "54e07c6230bad29acf14e6d63fed49e663c25fc1459daf80aaf44416f2dadcba",
+      "exportSha256": "54e07c6230bad29acf14e6d63fed49e663c25fc1459daf80aaf44416f2dadcba"
     },
     {
       "source": "monolith-2026-10-11-customer-directory",
@@ -4418,16 +4412,28 @@
       "exportSha256": "4ea5a4182fff543a1a6f030a102f5ceb0649e91e231ef7609d64604738fabd61"
     },
     {
-      "source": "monolith-2026-10-11-customer-directory",
+      "source": "monolith-2026-10-11-customer-simplification",
       "path": "tests/customer-directory.test.mjs",
-      "sha256": "19d41fb6ed833e3af090556c7ae753c09e398a5720b9a4c7cf843d4deebef077",
-      "exportSha256": "19d41fb6ed833e3af090556c7ae753c09e398a5720b9a4c7cf843d4deebef077"
+      "sha256": "d0e2a8fc2f66abd4a5d4c64b619d8ff72e389b704e70049976b2da9edeb35edd",
+      "exportSha256": "d0e2a8fc2f66abd4a5d4c64b619d8ff72e389b704e70049976b2da9edeb35edd"
     },
     {
-      "source": "monolith-2026-10-11-customer-directory",
+      "source": "monolith-2026-10-11-customer-simplification",
       "path": "CUSTOMER_DATA.md",
-      "sha256": "7c39955ced4c1528a269707862be294022634095f901ab13626d63cfcd640d31",
-      "exportSha256": "7c39955ced4c1528a269707862be294022634095f901ab13626d63cfcd640d31"
+      "sha256": "e7233026db49a817a733d7f30ad868974e9b67135033194031d289bce16c77e4",
+      "exportSha256": "e7233026db49a817a733d7f30ad868974e9b67135033194031d289bce16c77e4"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-simplification",
+      "path": "app/api/admin/customers/manage/route.ts",
+      "sha256": "1fad0a94d9409bbf7e1037cf73f8744ebd4228a28d524920882c34238aa92d1f",
+      "exportSha256": "1fad0a94d9409bbf7e1037cf73f8744ebd4228a28d524920882c34238aa92d1f"
+    },
+    {
+      "source": "monolith-2026-10-11-customer-simplification",
+      "path": "migrations/release_0007_customer_trash.sql",
+      "sha256": "1836cfc338c1c8cb94029a7ff59fce2c7ae1faa4907a230033377e1f2deb3481",
+      "exportSha256": "1836cfc338c1c8cb94029a7ff59fce2c7ae1faa4907a230033377e1f2deb3481"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -4593,8 +4599,12 @@
       "csv",
       "json"
     ],
-    "giveawayVerification": "manual per campaign; unique Instagram username per campaign; optimistic version",
-    "migration": "release_0006_customer_directory.sql",
+    "giveawayRecording": false,
+    "removal": "owner-confirmed reversible trash; sessions revoked; customer and transaction rows retained",
+    "migrations": [
+      "release_0006_customer_directory.sql",
+      "release_0007_customer_trash.sql"
+    ],
     "existingData": "preserved",
     "blobUsage": false,
     "automaticPolling": false,
