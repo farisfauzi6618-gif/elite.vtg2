@@ -11,7 +11,12 @@ const pdfiumWasmPath = relative(
 
 const config: NextConfig = {
   serverExternalPackages: ['@libsql/client', '@hyzyla/pdfium'],
-  outputFileTracingIncludes: { '/api/**/*': [pdfiumWasmPath] },
+  // Only shipment processing renders official PDFs. Other APIs need no WASM.
+  outputFileTracingIncludes: {
+    '/api/admin/order/shipments/*': [pdfiumWasmPath],
+    '/api/telegram/webhook': [pdfiumWasmPath],
+    '/api/kiriminaja/webhook/*': [pdfiumWasmPath],
+  },
   poweredByHeader: false,
   async headers() {
     return [{ source: '/:path*', headers: [

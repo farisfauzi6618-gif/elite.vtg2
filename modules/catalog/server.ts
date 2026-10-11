@@ -13,8 +13,12 @@ export async function requireOwner(request?:Request){
  const user=await getOwnerUser(request);if(!user)throw new AppError(401,'Masuk dengan akun pemilik terlebih dahulu.');
  const allow=env.ADMIN_EMAIL?.trim().toLowerCase();if(!allow||user.email.trim().toLowerCase()!==allow)throw new AppError(403,'Akun ini tidak mempunyai akses admin ELITE.VTG.');
  // The signed-in owner identity is created only by the password-verified session service.
- await db().prepare('INSERT INTO admin_access(id,user_id,created_at) VALUES(1,?,?) ON CONFLICT(id) DO NOTHING').bind(user.userId,new Date().toISOString()).run();
- const access=await db().prepare('SELECT user_id FROM admin_access WHERE id=1').first<{user_id:string}>();
+ let access=await db().prepare('SELECT user_id FROM admin_access WHERE id=1').first<{user_id:string}>();
+ if(!access){
+  await db().prepare('INSERT INTO admin_access(id,user_id,created_at) VALUES(1,?,?) ON CONFLICT(id) DO NOTHING').bind(user.userId,new Date().toISOString()).run();
+  // Re-read after conflict resolution; never trust the attempted first binding.
+  access=await db().prepare('SELECT user_id FROM admin_access WHERE id=1').first<{user_id:string}>();
+ }
  if(!access||access.user_id!==user.userId)throw new AppError(403,'Halaman ini hanya untuk akun pemilik ELITE.VTG yang terdaftar.');
 
  if(request&&request.method!=='GET'){
@@ -37,7 +41,15 @@ export async function boundary(action:()=>Promise<Response>){try{return await ac
 export function groupFromRow(r:any):SizeGroup{return {id:r.id,productId:r.product_id,label:r.label,tagSize:r.tag_size,fits:JSON.parse(r.fits),lengthCm:r.length_cm,widthCm:r.width_cm,qty:r.qty,price:r.price,condition:r.condition,defects:r.defects,revision:r.revision,sortOrder:r.sort_order}}
 export function productFromRow(r:any,groups:SizeGroup[]):Product{return {id:r.id,shortcode:r.shortcode,instagramUrl:r.instagram_url,name:r.name,brand:r.brand,category:r.category,legacyCategory:r.legacy_category??'',features:JSON.parse(r.feature_ids??'[]'),categoryNeedsReview:!CATEGORIES.includes(r.category),color:r.color,price:r.price,condition:r.condition,defects:r.defects,photoKey:r.photo_key,photoKeys:JSON.parse(r.photo_keys??'[]'),description:r.description??'',caption:r.caption,warnings:JSON.parse(r.warnings),reviewed:r.reviewed===1,status:r.status,createdAt:r.created_at,updatedAt:r.updated_at,publishedAt:r.published_at,orderableAt:r.orderable_at??null,soldAt:r.sold_at??null,soldHidden:r.sold_hidden===1,version:r.version,groups}}
 export async function readProduct(id:string){const d=db();const r=await d.prepare('SELECT * FROM products WHERE id=?').bind(id).first();if(!r)throw new AppError(404,'Barang tidak ditemukan.');const g=await d.prepare('SELECT * FROM size_groups WHERE product_id=? ORDER BY sort_order,id').bind(id).all();return productFromRow(r,g.results.map(groupFromRow))}
-export async function readProducts(admin=false){const d=db();const cutoff=new Date(Date.now()-30*86400000).toISOString();const query=admin?d.prepare('SELECT * FROM products ORDER BY created_at DESC'):d.prepare("SELECT * FROM products WHERE status='published' AND (EXISTS (SELECT 1 FROM size_groups g WHERE g.product_id=products.id AND g.qty>0) OR (sold_hidden=0 AND sold_at IS NOT NULL AND julianday(sold_at)>=julianday(?))) ORDER BY published_at DESC").bind(cutoff);const p=await query.all();if(!p.results.length)return [];const g=await d.prepare(admin?'SELECT * FROM size_groups ORDER BY sort_order,id':"SELECT g.* FROM size_groups g JOIN products p ON p.id=g.product_id WHERE p.status='published' AND (g.qty>0 OR (p.sold_at IS NOT NULL AND NOT EXISTS(SELECT 1 FROM size_groups stocked WHERE stocked.product_id=p.id AND stocked.qty>0))) ORDER BY g.sort_order,g.id").all();return p.results.map((r:any)=>productFromRow(r,g.results.filter((gr:any)=>gr.product_id===r.id).map(groupFromRow)))}
+export async function readProducts(admin=false){
+ const d=db(),cutoff=new Date(Date.now()-30*86400000).toISOString();
+ const query=admin?d.prepare('SELECT * FROM products ORDER BY created_at DESC'):d.prepare("SELECT * FROM products WHERE status='published' AND (EXISTS (SELECT 1 FROM size_groups g WHERE g.product_id=products.id AND g.qty>0) OR (sold_hidden=0 AND sold_at IS NOT NULL AND julianday(sold_at)>=julianday(?))) ORDER BY published_at DESC").bind(cutoff);
+ const p=await query.all();if(!p.results.length)return [];
+ const groups=admin?d.prepare('SELECT * FROM size_groups ORDER BY sort_order,id'):d.prepare("SELECT g.* FROM size_groups g JOIN products p ON p.id=g.product_id WHERE p.status='published' AND (g.qty>0 OR (p.sold_hidden=0 AND p.sold_at IS NOT NULL AND julianday(p.sold_at)>=julianday(?) AND NOT EXISTS(SELECT 1 FROM size_groups stocked WHERE stocked.product_id=p.id AND stocked.qty>0))) ORDER BY g.sort_order,g.id").bind(cutoff);
+ const g=await groups.all(),byProduct=new Map<string,SizeGroup[]>();
+ for(const row of g.results as any[]){const list=byProduct.get(row.product_id)??[];list.push(groupFromRow(row));byProduct.set(row.product_id,list);}
+ return p.results.map((r:any)=>productFromRow(r,byProduct.get(r.id)??[]));
+}
 export async function readHistory(id:string){const h=await db().prepare("SELECT h.*,g.label,CASE WHEN t.name IS NOT NULL THEN t.name WHEN h.actor=(SELECT user_id FROM admin_access WHERE id=1) THEN 'Pemilik' ELSE 'Sistem / pembayaran' END AS actor_name FROM stock_history h JOIN size_groups g ON g.id=h.group_id LEFT JOIN team_access t ON h.actor=('team:'||t.id) WHERE h.product_id=? ORDER BY h.rowid DESC LIMIT 50").bind(id).all();return h.results.map((r:any)=>({id:r.id,groupId:r.group_id,label:r.label,beforeQty:r.before_qty,afterQty:r.after_qty,reason:r.reason,createdAt:r.created_at,undoOf:r.undo_of,afterRevision:r.after_revision,actorName:r.actor_name}))}
 export async function readJson(request:Request){if(request.headers.get('content-type')?.split(';')[0].trim().toLowerCase()!=='application/json')throw new AppError(415,'Gunakan formulir aplikasi untuk mengirim data.');const raw=await readLimitedText(request,150000);try{return JSON.parse(raw)}catch{throw new AppError(400,'Data formulir tidak valid.')}}
 export function textValue(v:unknown,max=500){if(typeof v!=='string')return '';return v.trim().slice(0,max)}

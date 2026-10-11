@@ -1,14 +1,16 @@
 'use client';
 import {useEffect,useState} from 'react';
+import {readCustomer} from '@/modules/catalog/customer-request';
+import {visibleRefresh} from '@/modules/catalog/visible-refresh';
 import type {PurchasePromotion} from '@/modules/order/first-purchase';
 import type {CustomerProfile} from '@/modules/catalog/customer-types';
 export function usePurchaseBenefit() {
  const [promotion,setPromotion]=useState<PurchasePromotion|null>(null),[customer,setCustomer]=useState<CustomerProfile|null>(null),[loading,setLoading]=useState(true),[rewardCount,setRewardCount]=useState(0);
  useEffect(()=>{
   let active=true;
-  async function load(){try{const reply=await fetch('/api/customer',{cache:'no-store'});if(!reply.ok)throw Error();const data=await reply.json();if(active){setPromotion(data.promotion);setCustomer(data.customer);setRewardCount(data.rewardCount??0);}}catch{if(active){setPromotion(null);setRewardCount(0);}}finally{if(active)setLoading(false);}}
-  void load();window.addEventListener('elite:customer-change',load);window.addEventListener('focus',load);
-  return()=>{active=false;window.removeEventListener('elite:customer-change',load);window.removeEventListener('focus',load)};
+  async function load(){try{const data=await readCustomer();if(active){setPromotion(data.promotion);setCustomer(data.customer);setRewardCount(data.rewardCount??0);}}catch{if(active){setPromotion(null);setRewardCount(0);}}finally{if(active)setLoading(false);}}
+  void load();window.addEventListener('elite:customer-change',load);const stop=visibleRefresh(()=>{void load()});
+  return()=>{active=false;window.removeEventListener('elite:customer-change',load);stop()};
  },[]);
  return {promotion,customer,loading,rewardCount};
 }

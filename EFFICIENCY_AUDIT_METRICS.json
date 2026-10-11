@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-11",
+  "timezone": "Asia/Jakarta",
+  "accountUsage": {
+    "fastOriginGB": 6.44,
+    "fastDataGB": 3.26,
+    "cpuSeconds": 1559,
+    "invocations": 21969,
+    "cdnRequests": 38112,
+    "blobSimple": 10447,
+    "blobAdvanced": 172,
+    "blobStorageMB": 83.92,
+    "blobDataGB": 3.26
+  },
+  "usagePeriod": "Last 30 Days; dashboard data up to one hour old",
+  "productionRouteSample": {
+    "period": "Last 12 hours, Production",
+    "photoTransferOutMB": 428.05,
+    "catalogTransferOutMB": 2.44,
+    "customerRequests": 486,
+    "catalogRequests": 427,
+    "limitation": "Dashboard tables and charts may update at different times; these are observed route values, not an exact percentage breakdown of Fast Origin Transfer."
+  },
+  "localBrowser": {
+    "customerHomeGetBefore": 2,
+    "customerHomeGetAfter": 1,
+    "unchangedCatalogResponseSample": {
+      "checks": 4,
+      "beforeBodyBytes": 66320,
+      "afterBodyBytes": 0,
+      "statusAfter": 304
+    },
+    "stockChangeAndRestock": "200 fresh response; visible count 19 → 18 → 19",
+    "cartAndCheckout": "product → cart → catalog-prefilled order form; automatic personal reward price verified",
+    "viewport": "Desktop verified at 1265 × 720. Requested 390 × 844 override did not apply in IAB; reset afterward. Layout/CSS unchanged."
+  },
+  "bundles": {
+    "apiRoutes": 35,
+    "pdfiumRoutesBefore": 35,
+    "pdfiumRoutesAfter": 6,
+    "pdfiumTraceReferenceBytesBefore": 163541989,
+    "pdfiumTraceReferenceBytesAfter": 35899461,
+    "renderAssetsVerifiedFor": [
+      "admin shipment retry",
+      "Telegram confirmation/retry",
+      "KiriminAja callback"
+    ],
+    "limitation": "Local NFT trace references, including possible Windows path aliases; not the compressed deployed Functions Storage meter."
+  },
+  "tests": {
+    "passed": 245,
+    "failed": 0,
+    "productionBuild": true,
+    "typecheck": true
+  },
+  "invariants": {
+    "stockPollSeconds": 15,
+    "rewardVisiblePollSeconds": 60,
+    "freshDatabaseValidation": true,
+    "serverOrCdnAccountCache": false,
+    "productionOrderOrStockMutations": 0,
+    "productionAssetWrites": 0,
+    "paymentQrisAndBankChanges": false,
+    "planChanges": false,
+    "migrations": false
+  },
+  "limitations": [
+    "Conditional responses reduce payload bytes, not the number of Vercel invocations.",
+    "Fresh stock/auth reads still use the database; no TTL cache of stock or authorization.",
+    "Existing resource consumption does not reset after optimization.",
+    "First-time photo visitors still require photo downloads. Blob/Origin Transfer remains the main capacity constraint.",
+    "Local checkout was tested through the prefilled form; external shipping/payment/Telegram and official PDF rendering were covered by isolated integration tests, not live production transactions.",
+    "Mobile viewport emulation could not be verified in IAB; desktop browser and timer receiver tests passed."
+  ]
+}

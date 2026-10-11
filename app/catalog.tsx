@@ -15,7 +15,8 @@ import {catalogPage, catalogPageNumbers, parseCatalogPage} from '@/modules/catal
 import { ProductDetail } from '@/components/product-detail';
 import { reconcileReturnedCart } from '@/modules/catalog/cart-return';
 import { checkoutDestination } from '@/modules/catalog/checkout-navigation';
-import { catalogRequest } from '@/modules/catalog/catalog-request';
+import {visibleRefresh} from '@/modules/catalog/visible-refresh';
+import { catalogRequest,createCatalogReader } from '@/modules/catalog/catalog-request';
 import {cartAvailability,cartSummary} from '@/modules/catalog/cart-availability';
 import {CartItemStatus} from '@/components/cart-item-status';
 import { BrandLogo } from '@/components/brand-logo';
@@ -42,9 +43,9 @@ export default function Catalog({productId,initialProduct,archive=false}:{produc
  const [cartOpen,setCartOpen]=useState(false),[addedNote,setAddedNote]=useState('');
  const [detail,setDetail]=useState<Product|null>(initialProduct??null),[detailError,setDetailError]=useState(''),[backHref,setBackHref]=useState('/');
  const restore=useRef<number|null>(null),pending=useRef(false),filtersRef=useRef(filters);filtersRef.current=filters;
+ const read=useRef(createCatalogReader()).current;
  async function load(){
   if(pending.current)return;pending.current=true;
-  const read=(path:string)=>catalogRequest(path,{cache:'no-store'});
   try{
    const [catalogResult,detailResult]=await Promise.allSettled([read('/api/catalog'),productId?read('/api/products/'+encodeURIComponent(productId)):Promise.resolve(null)]);
    const errors:string[]=[];
@@ -59,7 +60,7 @@ export default function Catalog({productId,initialProduct,archive=false}:{produc
    setError(errors.join(' '));
   }finally{setLoading(false);setRefreshing(false);pending.current=false}
  }
- useEffect(()=>{const params=new URLSearchParams(window.location.search);const next={...defaults};Object.keys(next).forEach(k=>{const v=params.get(k);if(v!=null)(next as any)[k]=v});if(!['newest','low','high'].includes(next.sort))next.sort='newest';setFilters(next);setPage(parseCatalogPage(params.get('page')));setReady(true);try{const s=JSON.parse(sessionStorage.getItem('elite.catalog.navigation')??'null');if(productId&&typeof s?.url==='string'&&(s.url==='/'||s.url.startsWith('/?')||s.url==='/recently-sold'||s.url.startsWith('/recently-sold?')))setBackHref(s.url);if(s?.url===window.location.pathname+window.location.search&&typeof s.y==='number')restore.current=s.y}catch{}try{const saved=JSON.parse(sessionStorage.getItem('elite.catalog.cart')||'[]');if(Array.isArray(saved)){const valid=saved.filter(x=>typeof x?.productId==='string'&&typeof x?.groupId==='string'&&Number.isSafeInteger(x?.quantity)&&x.quantity>0).slice(0,20);const returned=reconcileReturnedCart(valid,JSON.parse(sessionStorage.getItem('elite.catalog.checkout')??'null'),window.location.hash);setCart(returned.cart);if(returned.completed){sessionStorage.removeItem('elite.catalog.checkout');window.history.replaceState(null,'',window.location.pathname+window.location.search);setAddedNote('Pesanan sudah dikirim. Silakan pilih barang lainnya.')}}}catch{}void load();const timer=setInterval(()=>{if(document.visibilityState==='visible')void load()},15000);const focus=()=>{void load()};window.addEventListener('focus',focus);window.addEventListener('pageshow',focus);document.addEventListener('visibilitychange',focus);return()=>{clearInterval(timer);window.removeEventListener('focus',focus);window.removeEventListener('pageshow',focus);document.removeEventListener('visibilitychange',focus)}},[]);
+ useEffect(()=>{const params=new URLSearchParams(window.location.search);const next={...defaults};Object.keys(next).forEach(k=>{const v=params.get(k);if(v!=null)(next as any)[k]=v});if(!['newest','low','high'].includes(next.sort))next.sort='newest';setFilters(next);setPage(parseCatalogPage(params.get('page')));setReady(true);try{const s=JSON.parse(sessionStorage.getItem('elite.catalog.navigation')??'null');if(productId&&typeof s?.url==='string'&&(s.url==='/'||s.url.startsWith('/?')||s.url==='/recently-sold'||s.url.startsWith('/recently-sold?')))setBackHref(s.url);if(s?.url===window.location.pathname+window.location.search&&typeof s.y==='number')restore.current=s.y}catch{}try{const saved=JSON.parse(sessionStorage.getItem('elite.catalog.cart')||'[]');if(Array.isArray(saved)){const valid=saved.filter(x=>typeof x?.productId==='string'&&typeof x?.groupId==='string'&&Number.isSafeInteger(x?.quantity)&&x.quantity>0).slice(0,20);const returned=reconcileReturnedCart(valid,JSON.parse(sessionStorage.getItem('elite.catalog.checkout')??'null'),window.location.hash);setCart(returned.cart);if(returned.completed){sessionStorage.removeItem('elite.catalog.checkout');window.history.replaceState(null,'',window.location.pathname+window.location.search);setAddedNote('Pesanan sudah dikirim. Silakan pilih barang lainnya.')}}}catch{}void load();return visibleRefresh(()=>{void load()},15000)},[]);
  useEffect(()=>{if(!loading&&restore.current!=null){const y=restore.current;restore.current=null;requestAnimationFrame(()=>window.scrollTo({top:y,behavior:'instant'}))}},[loading,products]);
  useEffect(()=>{if(ready)try{sessionStorage.setItem('elite.catalog.cart',JSON.stringify(cart))}catch{}},[cart,ready]);
  useEffect(()=>{if(!cart.length)setCartOpen(false)},[cart.length]);

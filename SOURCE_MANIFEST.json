@@ -14,10 +14,10 @@
   "excluded": "Runtime secrets, local environment, databases, customer data, uploaded photos, private proofs, production payment assets, generated builds and old Git histories.",
   "files": [
     {
-      "source": "monolith-2026-10-10-personal-rewards",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "app/catalog.tsx",
-      "sha256": "76f94ddad844fc8d337493db965e38a1338a53669d569776f368354ca2f9b5e2",
-      "exportSha256": "76f94ddad844fc8d337493db965e38a1338a53669d569776f368354ca2f9b5e2"
+      "sha256": "c31f61772f8221af8ab6874d80392b72117220d5526691d80821237162ee7938",
+      "exportSha256": "c31f61772f8221af8ab6874d80392b72117220d5526691d80821237162ee7938"
     },
     {
       "source": "monolith-2026-10-10-admin-sold-visibility",
@@ -122,10 +122,10 @@
       "exportSha256": "2daf74844d2548da622182fd686bdba62ab124486c72e7992914488923b129ca"
     },
     {
-      "source": "monolith-2026-10-11-blob-optimization",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "app/admin/katalog/admin.tsx",
-      "sha256": "217e8698b82a6b4997ae369c2a61588dc88ab328ea414069ef7296018de8162a",
-      "exportSha256": "217e8698b82a6b4997ae369c2a61588dc88ab328ea414069ef7296018de8162a"
+      "sha256": "ec6eb4bc3626a109e2584881359504e50085495c0614ef29468abbd20485a71c",
+      "exportSha256": "ec6eb4bc3626a109e2584881359504e50085495c0614ef29468abbd20485a71c"
     },
     {
       "source": "monolith-2026-10-09",
@@ -182,10 +182,10 @@
       "exportSha256": "b078e92dafa88055d6b8634fb00287250b4d9efb99150b048629026bf8062750"
     },
     {
-      "source": "monolith-2026-10-10-admin-sold-visibility",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "app/api/admin/katalog/route.ts",
-      "sha256": "fae8824bb5926d279827ac3528294d2bf196e29d250c49512364573413a833a1",
-      "exportSha256": "fae8824bb5926d279827ac3528294d2bf196e29d250c49512364573413a833a1"
+      "sha256": "15d5ec61de37386273fe3e27c76d0f25bf912367b5082071d4f49da87e89b6ac",
+      "exportSha256": "15d5ec61de37386273fe3e27c76d0f25bf912367b5082071d4f49da87e89b6ac"
     },
     {
       "source": "monolith-2026-10-09",
@@ -254,10 +254,10 @@
       "exportSha256": "12a63ab683818b96871bdb467893a9ac658f4083d4cb29993d902fc8f508a5a9"
     },
     {
-      "source": "monolith-2026-10-10-sold-lifecycle",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "app/api/catalog/route.ts",
-      "sha256": "cd762bd857a6030802ffcaae2b39266bcd88b0ea14ffbb19ac96e27cf19b8a10",
-      "exportSha256": "cd762bd857a6030802ffcaae2b39266bcd88b0ea14ffbb19ac96e27cf19b8a10"
+      "sha256": "67b7062b29f26a2f0360c6b6ae6d1743e8a3dde46a11d3daf7b0caa2b98407cb",
+      "exportSha256": "67b7062b29f26a2f0360c6b6ae6d1743e8a3dde46a11d3daf7b0caa2b98407cb"
     },
     {
       "source": "monolith-2026-10-10-website-analytics-v1",
@@ -332,10 +332,10 @@
       "exportSha256": "d50eb5e1c3439172f1a9da70a238b4bb6bf29cce1cf30482b9d346142eec13a4"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "app/api/products/[id]/route.ts",
-      "sha256": "9925fd758e06a8367209cef4751c2aff9d0f2f0e5fc487930afab15403d7afad",
-      "exportSha256": "9925fd758e06a8367209cef4751c2aff9d0f2f0e5fc487930afab15403d7afad"
+      "sha256": "c58fea4673dacb81ce9d9b5a1af5edacd7dd7824767ab42798d081e989f924ac",
+      "exportSha256": "c58fea4673dacb81ce9d9b5a1af5edacd7dd7824767ab42798d081e989f924ac"
     },
     {
       "source": "monolith-2026-10-09",
@@ -392,10 +392,10 @@
       "exportSha256": "a72a90505002e2248576622924a4383ffae52fc867047aae9b5665caf9358677"
     },
     {
-      "source": "monolith-2026-10-10-promo-copy",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "components/customer-account.tsx",
-      "sha256": "2c50f13d5b009d536541154508031ce535e9d768f7fde57a667d5aa8f075a862",
-      "exportSha256": "2c50f13d5b009d536541154508031ce535e9d768f7fde57a667d5aa8f075a862"
+      "sha256": "ceb6d92f26972adeac0d382b306e8fd197222e5518025d8896d799c8303966e9",
+      "exportSha256": "ceb6d92f26972adeac0d382b306e8fd197222e5518025d8896d799c8303966e9"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1118,10 +1118,10 @@
       "exportSha256": "89b440330df02684f2514133fbfc5b6778a6e11a01500c707ff20bff2e5683e8"
     },
     {
-      "source": "monolith-2026-10-10-admin-sold-visibility",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "modules/catalog/server.ts",
-      "sha256": "e7e4973b751ca53b1dd4b7e1c15154782e7a8ab91457cb0eae57f7ed687be819",
-      "exportSha256": "e7e4973b751ca53b1dd4b7e1c15154782e7a8ab91457cb0eae57f7ed687be819"
+      "sha256": "fa52c9fa649cc3c14210c20767bbf396cf75a14c0d4c01920bb89daf03c66c96",
+      "exportSha256": "fa52c9fa649cc3c14210c20767bbf396cf75a14c0d4c01920bb89daf03c66c96"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1556,10 +1556,10 @@
       "exportSha256": "f22a254df7d934bbf9be499d3c969a13abb7f7f64c03f5967d0095cad81dfe06"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "next.config.ts",
-      "sha256": "f7f31ab315b2bce6278d9c5ec64eb03cb648be5e9b3162cc17792f0ab44b6e40",
-      "exportSha256": "f7f31ab315b2bce6278d9c5ec64eb03cb648be5e9b3162cc17792f0ab44b6e40"
+      "sha256": "3324016d644da3f11bbd0a0a3ca976d14e785cf58654c8a352e3b0c38d756cc2",
+      "exportSha256": "3324016d644da3f11bbd0a0a3ca976d14e785cf58654c8a352e3b0c38d756cc2"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4046,10 +4046,10 @@
       "exportSha256": "4a4ae55bd72d2152f1f2eaf721ae862b668f3dc7dc28dcaa50fd20d4c58c0660"
     },
     {
-      "source": "monolith-2026-10-10-network-recovery",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "modules/catalog/catalog-request.ts",
-      "sha256": "dcccf20ecc0f33840e0139c84008d3b84da8d0b755a51db46294f36647ea9285",
-      "exportSha256": "dcccf20ecc0f33840e0139c84008d3b84da8d0b755a51db46294f36647ea9285"
+      "sha256": "5773b1549cb59b54e5ff6343be4f6845da991bcae7c69ca85bccefe8f14802e7",
+      "exportSha256": "5773b1549cb59b54e5ff6343be4f6845da991bcae7c69ca85bccefe8f14802e7"
     },
     {
       "source": "monolith-2026-10-10-network-recovery",
@@ -4088,10 +4088,10 @@
       "exportSha256": "688c49ff3bd24172ba301d9ac948dcb9050adab8705deaa4db039dfe944be2ff"
     },
     {
-      "source": "monolith-2026-10-10-personal-rewards",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "components/purchase-benefit.tsx",
-      "sha256": "e4e03d4853d75442282a10bf746497010cc00810a531ce146ee270cb7588def8",
-      "exportSha256": "e4e03d4853d75442282a10bf746497010cc00810a531ce146ee270cb7588def8"
+      "sha256": "19130f080bd0db44e238d08beac2fdbdbc2b5cdb9041ba706575ef07d2b813ef",
+      "exportSha256": "19130f080bd0db44e238d08beac2fdbdbc2b5cdb9041ba706575ef07d2b813ef"
     },
     {
       "source": "monolith-2026-10-10-promotions-and-scheduled-sales",
@@ -4262,10 +4262,10 @@
       "exportSha256": "8a376b3dc0c2887b2887f510fd18cbe19090935b43a06e09a6cf43524d8eac52"
     },
     {
-      "source": "monolith-2026-10-10-personal-rewards",
+      "source": "monolith-2026-10-11-resource-efficiency",
       "path": "components/elite-rewards.tsx",
-      "sha256": "46fd6a4386d936e64534def543fa4e7281362edf312a401d24736865a588a6f9",
-      "exportSha256": "46fd6a4386d936e64534def543fa4e7281362edf312a401d24736865a588a6f9"
+      "sha256": "1496278cda84118ff6ca7a3e2622d9950178be2d7f9fda4364585d6fa8cd7b8b",
+      "exportSha256": "1496278cda84118ff6ca7a3e2622d9950178be2d7f9fda4364585d6fa8cd7b8b"
     },
     {
       "source": "monolith-2026-10-10-personal-rewards",
@@ -4326,6 +4326,48 @@
       "path": "BLOB_AUDIT_METRICS.json",
       "sha256": "96e0ac745629f78d3ab3993e449462941bb8bd5af24a53482df082500ed4c772",
       "exportSha256": "96e0ac745629f78d3ab3993e449462941bb8bd5af24a53482df082500ed4c772"
+    },
+    {
+      "source": "monolith-2026-10-11-resource-efficiency",
+      "path": "modules/catalog/conditional-response.ts",
+      "sha256": "2a46c80f5efe45170785139cfc28f08b12dfb4eec07486a125def9b53f922c88",
+      "exportSha256": "2a46c80f5efe45170785139cfc28f08b12dfb4eec07486a125def9b53f922c88"
+    },
+    {
+      "source": "monolith-2026-10-11-resource-efficiency",
+      "path": "modules/catalog/customer-request.ts",
+      "sha256": "852a3e253ee9648decd7bee02989f852c125a7aa4b438824eea85d93c64bb3eb",
+      "exportSha256": "852a3e253ee9648decd7bee02989f852c125a7aa4b438824eea85d93c64bb3eb"
+    },
+    {
+      "source": "monolith-2026-10-11-resource-efficiency",
+      "path": "modules/catalog/visible-refresh.ts",
+      "sha256": "d38a4af192fbe6e171f0d9f057aeb1ca510d2bb5dcb6103e07b19b81cff24a93",
+      "exportSha256": "d38a4af192fbe6e171f0d9f057aeb1ca510d2bb5dcb6103e07b19b81cff24a93"
+    },
+    {
+      "source": "monolith-2026-10-11-resource-efficiency",
+      "path": "tests/efficiency-client.test.mjs",
+      "sha256": "39d76c1fb0eecf33ebed0fdc2d8afe41f2ad03df1696c1c5476d2b41cea96ad2",
+      "exportSha256": "39d76c1fb0eecf33ebed0fdc2d8afe41f2ad03df1696c1c5476d2b41cea96ad2"
+    },
+    {
+      "source": "monolith-2026-10-11-resource-efficiency",
+      "path": "tests/efficiency-server.test.mjs",
+      "sha256": "5c01aae69416e97319ed2cc15dcc1675fbee1ed995cd09cdc422a24fee8da379",
+      "exportSha256": "5c01aae69416e97319ed2cc15dcc1675fbee1ed995cd09cdc422a24fee8da379"
+    },
+    {
+      "source": "monolith-2026-10-11-resource-efficiency",
+      "path": "EFFICIENCY_AUDIT.md",
+      "sha256": "7052ec34c3a90a006bc414874d2038a7b257cda626acbace720b9059df5c077b",
+      "exportSha256": "7052ec34c3a90a006bc414874d2038a7b257cda626acbace720b9059df5c077b"
+    },
+    {
+      "source": "monolith-2026-10-11-resource-efficiency",
+      "path": "EFFICIENCY_AUDIT_METRICS.json",
+      "sha256": "0a7c3fe52c21e7bf495491ac1c53cfe06fb87a62da80fe309dc2544dd9907323",
+      "exportSha256": "0a7c3fe52c21e7bf495491ac1c53cfe06fb87a62da80fe309dc2544dd9907323"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -4464,5 +4506,22 @@
     "migrationsRequired": false,
     "audit": "BLOB_AUDIT.md",
     "metrics": "BLOB_AUDIT_METRICS.json"
+  },
+  "resourceEfficiency": {
+    "conditionalReads": "fresh DB validation; component-owned bounded snapshots; no shared cache",
+    "visibleStockPollSeconds": 15,
+    "visibleRewardPollSeconds": 60,
+    "customerReads": "in-flight only; invalidate on login/logout",
+    "publicSoldGroupReads": "eligible public inventory only",
+    "ownerIdentity": "verify established binding each request; initialize only when missing",
+    "pdfiumExplicitRoutes": [
+      "/api/admin/order/shipments/*",
+      "/api/telegram/webhook",
+      "/api/kiriminaja/webhook/*"
+    ],
+    "productionMutationsDuringTesting": 0,
+    "migrationsRequired": false,
+    "audit": "EFFICIENCY_AUDIT.md",
+    "metrics": "EFFICIENCY_AUDIT_METRICS.json"
   }
 }

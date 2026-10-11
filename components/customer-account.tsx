@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState, type FormEvent } from 'react';
+import {readCustomer,invalidateCustomer} from '@/modules/catalog/customer-request';
+import {visibleRefresh} from '@/modules/catalog/visible-refresh';
 import type {PurchasePromotion} from '@/modules/order/first-purchase';
 import { UserRound, LockKeyhole, Eye, EyeOff, LogOut } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -15,14 +17,14 @@ export function CustomerAccount() {
   useEffect(() => {
     let active = true;
     async function load() {
-      try { const reply = await fetch('/api/customer', { cache: 'no-store' }); if (!reply.ok) throw new Error(); const value = await reply.json() as {customer:CustomerProfile|null;promotion:PurchasePromotion}; if (active) { setCustomer(value.customer);setPromotion(value.promotion); setError(''); } }
+      try { const value = await readCustomer(); if (active) { setCustomer(value.customer);setPromotion(value.promotion); setError(''); } }
       catch { if (active) setError('Akun belum dapat dimuat. Tutup dan buka lagi untuk mencoba.'); }
       finally { if (active) setLoading(false); }
     }
     void load();
     const focus = () => { void load(); };
-    window.addEventListener('focus', focus);
-    return () => { active = false; window.removeEventListener('focus', focus); };
+    const stop=visibleRefresh(focus);window.addEventListener('elite:customer-change',focus);
+    return () => { active = false; stop();window.removeEventListener('elite:customer-change',focus); };
   }, [open]);
   function changeMode(value: 'login' | 'register') { setMode(value); setError(''); setPassword(''); setShowPassword(false); }
   async function submit(event: FormEvent) {
@@ -34,7 +36,7 @@ export function CustomerAccount() {
       const reply = await fetch('/api/customer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: mode, identity, password, ...(mode === 'register' ? { name, birthday: hasBirthday ? `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}` : null, consent } : {}) }) });
       const value = await reply.json() as {customer:CustomerProfile;error?:string};
       if (!reply.ok) throw new Error(value.error || 'Akun belum dapat dibuka. Coba lagi.');
-      setCustomer(value.customer); setPassword(''); setShowPassword(false); setOpen(false);window.dispatchEvent(new Event('elite:customer-change'));
+      setCustomer(value.customer); setPassword(''); setShowPassword(false); setOpen(false);invalidateCustomer();window.dispatchEvent(new Event('elite:customer-change'));
     } catch (error) { setError((error as Error).message); } finally { setBusy(false); }
   }
   async function logout() {
@@ -42,7 +44,7 @@ export function CustomerAccount() {
     try {
       const reply = await fetch('/api/customer', { method: 'DELETE' });
       if (!reply.ok) throw new Error((await reply.json() as {error?:string}).error || 'Belum berhasil keluar. Coba lagi.');
-      setCustomer(null); setPassword(''); setOpen(false);window.dispatchEvent(new Event('elite:customer-change'));
+      setCustomer(null); setPassword(''); setOpen(false);invalidateCustomer();window.dispatchEvent(new Event('elite:customer-change'));
     } catch (error) { setError((error as Error).message); } finally { setBusy(false); }
   }
   return <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) { setPassword(''); setShowPassword(false); } }}>

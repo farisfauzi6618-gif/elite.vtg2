@@ -1,10 +1,11 @@
 'use client';
 import {useEffect,useState} from 'react';
+import {visibleRefresh} from '@/modules/catalog/visible-refresh';
 import type {RewardQuote} from '@/modules/order/rewards';
 import {money} from '@/modules/catalog/catalog-types';
 export function useRewardQuote(input:Record<string,unknown>|null,version=''){
  const key=input?JSON.stringify(input):'', [quote,setQuote]=useState<RewardQuote|null>(null),[loading,setLoading]=useState(false),[error,setError]=useState(''),[revision,setRevision]=useState(0);
- useEffect(()=>{const reload=()=>setRevision(v=>v+1);window.addEventListener('elite:customer-change',reload);window.addEventListener('focus',reload);const timer=setInterval(reload,60000);return()=>{clearInterval(timer);window.removeEventListener('elite:customer-change',reload);window.removeEventListener('focus',reload)}},[]);
+ useEffect(()=>{const reload=()=>setRevision(v=>v+1);window.addEventListener('elite:customer-change',reload);const stop=visibleRefresh(reload,60000);return()=>{stop();window.removeEventListener('elite:customer-change',reload)}},[]);
  useEffect(()=>{if(!key){setQuote(null);setLoading(false);setError('');return;}const controller=new AbortController();setQuote(null);setLoading(true);setError('');const timer=setTimeout(async()=>{try{const r=await fetch('/api/rewards/quote',{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json'},body:key,signal:controller.signal});const value=await r.json();if(!r.ok)throw Error(value.error||'Reward belum dapat diperiksa.');if(!controller.signal.aborted)setQuote(value);}catch(e){if(!controller.signal.aborted)setError((e as Error).message);}finally{if(!controller.signal.aborted)setLoading(false);}},150);return()=>{clearTimeout(timer);controller.abort();}},[key,revision,version]);
  return {quote,loading,error,refresh:()=>setRevision(v=>v+1)};
 }
