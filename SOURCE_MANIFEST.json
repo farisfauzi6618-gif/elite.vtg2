@@ -122,10 +122,10 @@
       "exportSha256": "e19330f0c81d84ed9483cf23789dbd3e379fce1820647ec219df6aba4a39391c"
     },
     {
-      "source": "monolith-2026-10-11-resource-efficiency",
+      "source": "monolith-2026-10-12-product-photo-upload",
       "path": "app/admin/katalog/admin.tsx",
-      "sha256": "ec6eb4bc3626a109e2584881359504e50085495c0614ef29468abbd20485a71c",
-      "exportSha256": "ec6eb4bc3626a109e2584881359504e50085495c0614ef29468abbd20485a71c"
+      "sha256": "72e654e7a4ca81fd2cc318375fc651366a2050dacbd95022d568b8ed3e0fc748",
+      "exportSha256": "72e654e7a4ca81fd2cc318375fc651366a2050dacbd95022d568b8ed3e0fc748"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4494,6 +4494,36 @@
       "path": "LOYALTY_CARD.md",
       "sha256": "8b4158ce481769c265a2db5ba7ce600477d03068af3f87c7ec5f7d37925c547a",
       "exportSha256": "8b4158ce481769c265a2db5ba7ce600477d03068af3f87c7ec5f7d37925c547a"
+    },
+    {
+      "source": "monolith-2026-10-12-product-photo-upload",
+      "path": "modules/catalog/product-photo.ts",
+      "sha256": "0b6a8df64e804a7f47dadb68a0318757fea4838bbad099b710505f4a6408ae4f",
+      "exportSha256": "0b6a8df64e804a7f47dadb68a0318757fea4838bbad099b710505f4a6408ae4f"
+    },
+    {
+      "source": "monolith-2026-10-12-product-photo-upload",
+      "path": "modules/catalog/photo-upload.ts",
+      "sha256": "8880adfc15ff54c38216771afbef11e6aa721c12c799c06ea728bb0447461c4f",
+      "exportSha256": "8880adfc15ff54c38216771afbef11e6aa721c12c799c06ea728bb0447461c4f"
+    },
+    {
+      "source": "monolith-2026-10-12-product-photo-upload",
+      "path": "tests/product-photo-client.test.mjs",
+      "sha256": "3d33ba96d54d5319503f47c752ffebf2a3f23519a33d1711e6cedee8401914f6",
+      "exportSha256": "3d33ba96d54d5319503f47c752ffebf2a3f23519a33d1711e6cedee8401914f6"
+    },
+    {
+      "source": "monolith-2026-10-12-product-photo-upload",
+      "path": "tests/photo-upload-server.test.mjs",
+      "sha256": "8b06aa872e74b4b91c937c20c021197b58020a3cabb1218041a96c126d953bcf",
+      "exportSha256": "8b06aa872e74b4b91c937c20c021197b58020a3cabb1218041a96c126d953bcf"
+    },
+    {
+      "source": "monolith-2026-10-12-product-photo-upload",
+      "path": "PRODUCT_PHOTO_UPLOAD.md",
+      "sha256": "57eb945e5f72db8278ef53042ed2bf6e2796b52f53c040b3b3d08bdfe8d561da",
+      "exportSha256": "57eb945e5f72db8278ef53042ed2bf6e2796b52f53c040b3b3d08bdfe8d561da"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -4703,5 +4733,23 @@
     "blobUsage": false,
     "automaticPolling": false,
     "guide": "LOYALTY_CARD.md"
+  },
+  "productPhotoUpload": {
+    "originalMaxMiB": 30,
+    "preparedMaxMiB": 3.5,
+    "serverMaxMiB": 4,
+    "maxPhotosPerProduct": 12,
+    "longEdge": 3072,
+    "minimumJpegQuality": 0.86,
+    "preserveFullFrame": true,
+    "upscale": false,
+    "clientPreparation": true,
+    "sequentialBatch": true,
+    "nativeHeicConversion": true,
+    "failedFilesListed": true,
+    "successfulPhotosRetained": true,
+    "privateFiles": 0,
+    "migrations": [],
+    "guide": "PRODUCT_PHOTO_UPLOAD.md"
   }
 }
