@@ -1,0 +1,3 @@
+export type LoyaltyReward={id:string;cycleNumber:number;milestone:number;value:number;minimumPurchase:number;status:'LOCKED'|'UNLOCKED'|'REDEEMED';unlockedAt:number|null;redeemedAt:number|null;redeemedOrderId:string|null;reservedOrderId:string|null};
+export type LoyaltyHistory={id:number;orderId:string;cycleNumber:number;stamps:number;kind:'EARNED'|'REVERSED';timestamp:number};
+export type LoyaltyCard={cycleNumber:number;stamps:number;completedCycles:number;availableCount:number;redeemedCount:number;rewards:LoyaltyReward[];rewardsNext:number|null;cycles:{cycleNumber:number;stamps:number;status:string;completedAt:number|null}[];history:LoyaltyHistory[];historyNext:number|null};

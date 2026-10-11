@@ -31,7 +31,7 @@ const request=(route,body,cookie='')=>new Request('https://elite.test'+route,{me
 const payload={name:'Simulated Buyer',phone:'081234567890',address:'Jalan Pengujian Nomor 12 RT 01',postcode:'78243',item:'Simulated vintage',quantity:1,itemAmount:185000,quoteId:'f'.repeat(64),consent:true};
 let buyer,buyerCookie,product,selection;
 beforeEach(async()=>{
- for(const table of ['first_purchase_discounts','shipments','orders','catalog_sales','catalog_checkouts','stock_history','size_groups','products','customer_sessions','customers','photos','limits','request_limits','shipping_quotes','settings'])await client.execute('DELETE FROM '+table);
+ for(const table of ['loyalty_stamp_history','loyalty_rewards','loyalty_cycles','loyalty_order_credits','purchase_voucher_claims','purchase_vouchers','first_purchase_discounts','shipments','orders','catalog_sales','catalog_checkouts','stock_history','size_groups','products','customer_sessions','customers','photos','limits','request_limits','shipping_quotes','settings'])await client.execute('DELETE FROM '+table);
  messages=[];
  await client.execute({sql:'INSERT INTO settings(id,bot_cipher,chat_id,webhook_cipher,webhook_active) VALUES(1,?,?,?,1)',args:[await m.encrypt('SIMULATED_BOT'),'123456',await m.encrypt('SIMULATED_HOOK')]});
  const q={id:'f'.repeat(64),amount:38000,grams:1000,service:'EZ',destination:{id:90,label:'Simulated destination',postalCode:'78243'},checkedAt:Date.now(),expiresAt:Date.now()+3600000};

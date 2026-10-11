@@ -1,0 +1,3 @@
+import {boundary,response,requireOwner,AppError} from '@/modules/catalog/server';import {loyaltyCard} from '@/modules/loyalty/server';
+export const dynamic='force-dynamic';export const runtime='nodejs';
+export const GET=(request:Request)=>boundary(async()=>{await requireOwner(request);const params=new URL(request.url).searchParams,id=params.get('customerId');if(!id||id.length>128||/[\x00-\x1f]/.test(id)||[...params.keys()].some(k=>!['customerId','before','rewardsBefore'].includes(k)))throw new AppError(400,'Pelanggan tidak valid.');const reply=response(await loyaltyCard(id,params,true));reply.headers.set('Cache-Control','private, no-store');reply.headers.set('Vary','Cookie');return reply});

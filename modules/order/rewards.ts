@@ -3,7 +3,7 @@ export const FIRST_REWARD_ID='first-purchase-5';
 export type RewardRule={id:string;label:string;ownerUserId:string|null;type:'percentage'|'fixed';percentage:number|null;fixedAmount:number|null;minimumOrder:number;maximumDiscount:number|null;validFrom:number;validUntil:number|null;usageLimit:number|null;usageCount:number;reservedCount:number;categories:string[];products:string[];firstOrderOnly:boolean;active:boolean};
 export type RewardLine={productId:string|null;category:string|null;amount:number};
 export type RewardOption={id:string;label:string;discount:number;applicable:boolean;requirement:string|null};
-export type RewardQuote={subtotal:number;discount:number;net:number;selected:RewardOption|null;options:RewardOption[];loggedIn:boolean;personalPrice:number|null};
+export type RewardQuote={subtotal:number;discount:number;net:number;selected:RewardOption|null;options:RewardOption[];loggedIn:boolean;personalPrice:number|null;loyaltyLocked?:{milestone:number;value:number;minimumPurchase:number}[]};
 export function rewardChoice(value:unknown){if(value===undefined)return 'auto';if(typeof value!=='string'||!(/^[a-zA-Z0-9_-]{1,100}$/.test(value)))throw Error('Pilihan reward tidak valid.');return value;}
 export function ruleAvailable(rule:RewardRule,customerId:string,hasConfirmed:boolean,now:number){return rule.active&&(!rule.ownerUserId||rule.ownerUserId===customerId)&&rule.validFrom<=now&&(rule.validUntil==null||now<rule.validUntil)&&(!rule.firstOrderOnly||!hasConfirmed)&&(rule.usageLimit==null||rule.usageCount+rule.reservedCount<rule.usageLimit);}
 export function evaluateReward(rule:RewardRule,lines:RewardLine[]):RewardOption {

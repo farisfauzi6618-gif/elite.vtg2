@@ -1,0 +1,18 @@
+import {db,AppError} from '@/modules/catalog/server';
+import type {LoyaltyCard,LoyaltyReward,LoyaltyHistory} from './types';
+const PAGE=30;
+function cursor(params:URLSearchParams,key:string){const value=params.get(key);if(value===null)return null;if(!/^\d{1,16}$/.test(value)||!Number.isSafeInteger(Number(value))||Number(value)<1)throw new AppError(400,'Halaman loyalty tidak valid.');return Number(value)}
+export async function loyaltyCard(customerId:string,params=new URLSearchParams(),owner=false):Promise<LoyaltyCard>{
+ const before=cursor(params,'before'),rewardsBefore=cursor(params,'rewardsBefore');
+ if(!await db().prepare('SELECT id FROM customers WHERE id=?').bind(customerId).first())throw new AppError(404,'Pelanggan tidak ditemukan.');
+ const [cycle,counts,rewards,cycles,history]=await Promise.all([
+ db().prepare("SELECT * FROM loyalty_cycles WHERE customer_id=? AND status='ACTIVE' ORDER BY cycle_number LIMIT 1").bind(customerId).first<{cycle_number:number;stamp_count:number}>(),
+ db().prepare("SELECT (SELECT COUNT(*) FROM loyalty_cycles WHERE customer_id=? AND status='COMPLETED') completed,(SELECT COUNT(*) FROM loyalty_rewards WHERE customer_id=? AND status='UNLOCKED') available,(SELECT COUNT(*) FROM loyalty_rewards WHERE customer_id=? AND status='REDEEMED') redeemed").bind(customerId,customerId,customerId).first<{completed:number;available:number;redeemed:number}>(),
+ db().prepare(`SELECT r.rowid AS cursor,r.id,c.cycle_number AS cycleNumber,r.milestone,r.reward_value AS value,r.minimum_purchase AS minimumPurchase,r.status,r.unlocked_at AS unlockedAt,r.redeemed_at AS redeemedAt,r.redeemed_order_id AS redeemedOrderId,(SELECT cl.order_id FROM purchase_voucher_claims cl JOIN orders o ON o.id=cl.order_id WHERE cl.voucher_id=r.voucher_id AND cl.redeemed_at IS NULL AND o.status NOT IN ('cancelled','expired') AND (o.proof_key IS NOT NULL OR o.created_at>=?) LIMIT 1) reservedOrderId FROM loyalty_rewards r JOIN loyalty_cycles c ON c.id=r.cycle_id WHERE r.customer_id=? AND (r.status!='LOCKED' OR c.status='ACTIVE') ${rewardsBefore===null?'':'AND r.rowid<?'} ORDER BY r.rowid DESC LIMIT ?`).bind(Date.now()-7*86400000,customerId,...(rewardsBefore===null?[]:[rewardsBefore]),PAGE+1).all<LoyaltyReward&{cursor:number}>(),
+ db().prepare("SELECT cycle_number cycleNumber,stamp_count stamps,status,completed_at completedAt FROM loyalty_cycles WHERE customer_id=? AND status='COMPLETED' ORDER BY cycle_number DESC LIMIT 10").bind(customerId).all<LoyaltyCard['cycles'][number]>(),
+ owner?db().prepare(`SELECT h.id,h.order_id orderId,c.cycle_number cycleNumber,h.stamps,h.kind,h.timestamp FROM loyalty_stamp_history h JOIN loyalty_cycles c ON c.id=h.cycle_id WHERE h.customer_id=? ${before===null?'':'AND h.id<?'} ORDER BY h.id DESC LIMIT ?`).bind(customerId,...(before===null?[]:[before]),PAGE+1).all<LoyaltyHistory>():Promise.resolve({results:[] as LoyaltyHistory[]}),
+ ]);
+ const list=rewards.results.slice(0,PAGE),events=history.results.slice(0,PAGE),cycleNumber=Number(cycle?.cycle_number||1);
+ const defaults:LoyaltyReward[]=[3,5,10].map(m=>({id:'locked-'+m,cycleNumber,milestone:m,value:m===3?50000:m===5?100000:250000,minimumPurchase:m===3?0:500000,status:'LOCKED',unlockedAt:null,redeemedAt:null,redeemedOrderId:null,reservedOrderId:null}));
+ return {cycleNumber,stamps:Number(cycle?.stamp_count||0),completedCycles:Number(counts?.completed||0),availableCount:Number(counts?.available||0),redeemedCount:Number(counts?.redeemed||0),rewards:!cycle&&rewardsBefore===null?defaults:list.map(({cursor,...reward})=>reward),rewardsNext:rewards.results.length>PAGE?Number(list.at(-1)!.cursor):null,cycles:cycles.results,history:events,historyNext:history.results.length>PAGE?Number(events.at(-1)!.id):null};
+}
