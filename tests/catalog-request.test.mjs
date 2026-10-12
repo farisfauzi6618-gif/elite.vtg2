@@ -7,7 +7,7 @@ import path from 'node:path';
 await mkdir('.test-runtime',{recursive:true});
 const output=path.resolve('.test-runtime/catalog-request.mjs');
 await build({entryPoints:['modules/catalog/catalog-request.ts'],bundle:true,platform:'node',format:'esm',outfile:output});
-const {catalogRequest}=await import(pathToFileURL(output));
+const {catalogRequest,createCatalogReader}=await import(pathToFileURL(output));
 after(()=>rm(output,{force:true}));
 
 test('checkout submits the selected lines once and keeps the server destination',async()=>{
@@ -38,4 +38,10 @@ test('a stalled request aborts and a later explicit checkout can succeed',async(
 });
 test('unreadable stock responses show a refresh action',async()=>{
  await assert.rejects(catalogRequest('/api/catalog',{}, {fetcher:async()=>new Response('<html>temporarily unavailable</html>',{status:503})}),/Respons belum dapat dibaca.*perbarui stok/);
+});
+
+test('Safari-style parsing exceptions are readable and malformed success responses cannot crash the catalog',async()=>{
+ await assert.rejects(catalogRequest('/api/catalog',{}, {fetcher:async()=>({status:503,json:async()=>{throw new DOMException('The string did not match the expected pattern.','SyntaxError')}})}),/Respons belum dapat dibaca.*perbarui stok/);
+ for(const value of [null,'bad',{products:null},{products:[],recentlySold:{}}]){const read=createCatalogReader({fetcher:async()=>Response.json(value)});await assert.rejects(read('/api/catalog'),/Respons stok belum lengkap/)}
+ const read=createCatalogReader({fetcher:async()=>Response.json({product:null})});await assert.rejects(read('/api/products/product'),/Respons stok belum lengkap/);
 });

@@ -14,7 +14,7 @@ export async function catalogRequest(path:string,init:RequestInit={},options:Req
    const data=typeof previous.data?.asOf==='string'&&Number.isFinite(clock)?{...previous.data,asOf:new Date(Math.max(clock,Date.parse(previous.data.asOf)||0)).toISOString()}:previous.data;
    options.remember?.({...previous,data});return data;
   }
-  const data:any=await response.json();
+  let data:any;try{data=await response.json()}catch(error){if(error instanceof TypeError||controller.signal.aborted)throw error;throw new SyntaxError('Unreadable server response')}
   if(!response.ok)throw Object.assign(new Error(typeof data?.error==='string'?data.error:'Data belum dapat dimuat. '+retry),{status:response.status});
   const etag=response.headers.get('etag');if(etag)options.remember?.({etag,data});
   return data;
@@ -33,6 +33,7 @@ export function createCatalogReader(options:RequestOptions={}){
   const active=pending.get(path);if(active)return active;
   const previous=snapshots.get(path);
   const request=catalogRequest(path,{cache:'no-store',headers:previous?{'If-None-Match':previous.etag}:{}},{...options,previous,remember:snapshot=>{snapshots.delete(path);snapshots.set(path,snapshot);if(snapshots.size>8)snapshots.delete(snapshots.keys().next().value!);}})
+   .then(data=>{const valid=path==='/api/catalog'?data&&Array.isArray(data.products)&&(data.recentlySold===undefined||Array.isArray(data.recentlySold)):path.startsWith('/api/products/')?data?.product&&typeof data.product.id==='string'&&Array.isArray(data.product.groups):true;if(!valid)throw new Error('Respons stok belum lengkap. Coba perbarui stok kembali.');return data})
    .catch(error=>{snapshots.delete(path);throw error}).finally(()=>{pending.delete(path)});
   pending.set(path,request);return request;
  };

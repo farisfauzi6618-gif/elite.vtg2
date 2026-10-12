@@ -31,7 +31,7 @@ test('Vercel 304 clock fallback uses HTTP Date and never rewinds a saved timesta
  const initial=await read('/api/catalog'),fresh=await read('/api/catalog'),later=await read('/api/catalog');assert.ok(Date.parse(fresh.asOf)>Date.parse(initial.asOf));assert.equal(fresh.asOf,'2026-10-11T00:00:15.000Z');assert.equal(later.asOf,fresh.asOf);
 });
 test('conditional snapshots are bounded and never shared across readers',async()=>{
- const headers=[];const fetcher=async(url,init)=>{headers.push(new Headers(init.headers).get('If-None-Match'));return Response.json({id:url},{headers:{etag:'W/"test"'}})};const read=m.createCatalogReader({fetcher});for(let i=0;i<9;i++)await read('/api/products/'+i);await read('/api/products/0');await m.createCatalogReader({fetcher})('/api/products/8');assert.ok(headers.every(h=>h===null));
+ const headers=[];const fetcher=async(url,init)=>{headers.push(new Headers(init.headers).get('If-None-Match'));return Response.json({product:{id:url,groups:[]}},{headers:{etag:'W/"test"'}})};const read=m.createCatalogReader({fetcher});for(let i=0;i<9;i++)await read('/api/products/'+i);await read('/api/products/0');await m.createCatalogReader({fetcher})('/api/products/8');assert.ok(headers.every(h=>h===null));
 });
 test('visibility pauses polls, coalesces return events, resumes immediately and cleans up',()=>{
  const win=new EventTarget(),doc=new EventTarget();doc.visibilityState='visible';let tick,wake,calls=0,clearedInterval=0;const timers=new Map();let id=0;

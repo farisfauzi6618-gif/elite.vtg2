@@ -10,7 +10,7 @@ const pdfiumWasmPath = relative(
 ).replaceAll('\\', '/');
 
 const config: NextConfig = {
-  serverExternalPackages: ['@libsql/client', '@hyzyla/pdfium'],
+  serverExternalPackages: ['@libsql/client', '@hyzyla/pdfium', 'sharp'],
   // Only shipment processing renders official PDFs. Other APIs need no WASM.
   outputFileTracingIncludes: {
     '/api/admin/order/shipments/*': [pdfiumWasmPath],

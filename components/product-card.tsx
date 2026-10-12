@@ -1,4 +1,5 @@
 'use client';
+import {photoUrl,fallbackPhoto} from '@/modules/catalog/photo-url';
 import {orderingLocked,scheduleLabel} from '@/modules/catalog/product-schedule';
 import {type Product, availableGroups, displayPrice, FITS,isSold} from '@/modules/catalog/catalog-types';
 export function ProductCard({product, onNavigate,now=Date.now()}: {now?:number;product: Product; onNavigate: () => void}) {
@@ -14,7 +15,7 @@ export function ProductCard({product, onNavigate,now=Date.now()}: {now?:number;p
   return <article className={'product-card'+(sold?' product-sold':'')}>
     <a className="product-card-link" href={'/produk/' + encodeURIComponent(product.id)} onClick={onNavigate}>
       <div className="product-photo">{sold?<span className="sold-badge">SOLD</span>:orderingLocked(product,now)&&<span className="scheduled-badge">Segera hadir</span>}
-        {product.photoKey ? <img src={'/api/photos/' + product.photoKey} alt="" width="600" height="750" loading="lazy"/> : <span className="product-photo-empty">ELITE.VTG</span>}
+        {product.photoKey ? <img src={photoUrl(product.photoKey,'card')} onError={event=>fallbackPhoto(event.currentTarget,product.photoKey!)} alt="" width="600" height="750" loading="lazy" decoding="async"/> : <span className="product-photo-empty">ELITE.VTG</span>}
       </div>
       <div className="product-info">
         <div className="product-card-meta">

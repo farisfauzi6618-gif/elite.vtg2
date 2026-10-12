@@ -59,7 +59,7 @@ const compiled = await build({
     export {POST as resumeInvoice} from './app/api/order/resume/route';
   `, resolveDir: process.cwd(), loader: 'ts' },
   bundle: true, platform: 'node', format: 'esm', write: false,
-  external: ['@libsql/client', '@vercel/blob', '@hyzyla/pdfium'],
+  external: ['@libsql/client', '@vercel/blob', '@hyzyla/pdfium', 'sharp'],
   banner: { js: "import {createRequire as createBundleRequire} from 'node:module';const require=createBundleRequire(import.meta.url);" },
   plugins: [{ name: 'node-next-imports', setup(builder) {
     builder.onResolve({ filter: /^next\/(headers|navigation)$/ }, args => ({ path: args.path + '.js', external: true }));
