@@ -4,7 +4,7 @@ import {validateFeatures} from '@/modules/catalog/taxonomy-service';
 import { fitLabel } from '@/modules/catalog/catalog-types';
 import { db, AppError, readProduct, integerValue, measureValue, optionalText, textValue } from '@/modules/catalog/server';
 import { MAX_PRODUCT_PHOTOS,FITS, type Product, type SizeGroup } from '@/modules/catalog/catalog-types';
-// Every new item starts blank. Caption data never supplies price, fit or stock.
+// New drafts use editable brand/minus defaults; price, fit and stock stay unset.
 export async function createManualDraft(input:any){
  if(input.caption||input.url||input.instagramUrl)throw new AppError(400,'Isi barang melalui formulir manual, tanpa caption atau link Instagram.');
  const supplied=textValue(input.draftId,100);
@@ -15,17 +15,18 @@ export async function createManualDraft(input:any){
  const photoKey=optionalText(input.photoKey,100),photoKeys=await validatePhotos(photoKey,input.photoKeys??[]);
  const id=crypto.randomUUID(),gid=crypto.randomUUID(),now=new Date().toISOString();
  const group:SizeGroup={id:gid,label:'',tagSize:'',fits:[],lengthCm:null,widthCm:null,qty:null,price:null,condition:null,defects:null,revision:0,sortOrder:0};
- const warnings=publicationIssues({name:'',brand:'',category:'',color:'',price:null,condition:null,defects:null,photoKey,groups:[group]});
+ const brand='Polo Ralph Lauren',defects='tidak ada';
+ const warnings=publicationIssues({name:'',brand,category:'',color:'',price:null,condition:null,defects,photoKey,groups:[group]});
  const result=await d.batch([
-  d.prepare("INSERT OR IGNORE INTO products (id,shortcode,instagram_url,name,brand,category,feature_ids,color,price,condition,defects,photo_key,photo_keys,caption,warnings,reviewed,status,created_at,updated_at,version) VALUES (?,?,'','','','','[]','',NULL,NULL,NULL,?,?,'',?,0,'draft',?,?,0)").bind(id,shortcode,photoKey,JSON.stringify(photoKeys),JSON.stringify(warnings),now,now),
+  d.prepare("INSERT OR IGNORE INTO products (id,shortcode,instagram_url,name,brand,category,feature_ids,color,price,condition,defects,photo_key,photo_keys,caption,warnings,reviewed,status,created_at,updated_at,version) VALUES (?,?,'','',?,'','[]','',NULL,NULL,?,?,?,'',?,0,'draft',?,?,0)").bind(id,shortcode,brand,defects,photoKey,JSON.stringify(photoKeys),JSON.stringify(warnings),now,now),
   d.prepare("INSERT INTO size_groups (id,product_id,label,tag_size,fits,length_cm,width_cm,qty,price,condition,defects,revision,sort_order) SELECT ?,?,'','','[]',NULL,NULL,NULL,NULL,NULL,NULL,0,0 WHERE EXISTS (SELECT 1 FROM products WHERE id=?)").bind(gid,id,id),
  ]);
  if(result[0].meta.changes===0){const duplicate=await d.prepare('SELECT id FROM products WHERE shortcode=?').bind(shortcode).first<{id:string}>();if(duplicate)return {product:await readProduct(duplicate.id),duplicate:true};throw new AppError(409,'Draf berubah saat disimpan. Coba lagi.')}
  return {product:await readProduct(id),duplicate:false};
 }
 async function validatePhotos(photoKey:string|null,input:unknown){
- if(!Array.isArray(input)||input.length>MAX_PRODUCT_PHOTOS||input.some(x=>typeof x!=='string'||!/^[a-f0-9-]{36}$/.test(x)))throw new AppError(400,'Maksimal 12 foto yang sudah diunggah.');
- const keys=[...new Set([photoKey,...input].filter((x):x is string=>!!x))];if(keys.length>MAX_PRODUCT_PHOTOS)throw new AppError(400,'Maksimal 12 foto per barang.');
+ if(!Array.isArray(input)||input.length>MAX_PRODUCT_PHOTOS||input.some(x=>typeof x!=='string'||!/^[a-f0-9-]{36}$/.test(x)))throw new AppError(400,`Maksimal ${MAX_PRODUCT_PHOTOS} foto yang sudah diunggah.`);
+ const keys=[...new Set([photoKey,...input].filter((x):x is string=>!!x))];if(keys.length>MAX_PRODUCT_PHOTOS)throw new AppError(400,`Maksimal ${MAX_PRODUCT_PHOTOS} foto per barang.`);
  for(const key of keys)if(!await db().prepare('SELECT key FROM photos WHERE key=?').bind(key).first())throw new AppError(400,'Foto belum tersimpan. Unggah kembali.');return keys;
 }
 function validateGroup(input:any,index:number):SizeGroup{

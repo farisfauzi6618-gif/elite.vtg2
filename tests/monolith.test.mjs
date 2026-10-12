@@ -40,8 +40,10 @@ const compiled = await build({
     export {status as legacyShippingStatus} from './modules/shipping/legacy-shipping-server';
     export {GET as publicConfig} from './app/api/config/route';
     export {createManualDraft} from './modules/catalog/catalog-service';
+    export {MAX_PRODUCT_PHOTOS,productPhotos,publicProduct} from './modules/catalog/catalog-types';
     export {POST as ownerLogin} from './app/api/auth/owner/route';
     export {GET as catalogAdmin} from './app/api/admin/katalog/route';
+    export {POST as catalogAdminPost} from './app/api/admin/katalog/route';
     export {GET as orderAdmin} from './app/api/admin/order/route';
     export {GET as ongkirAdmin,POST as ongkirPost} from './app/api/ongkir/route';
     export {GET as photosGet} from './app/api/photos/[key]/route';
@@ -141,6 +143,22 @@ test('one owner session opens catalog, order settings, and the shipping calculat
   const connected = await m.ongkirPost(request('/api/ongkir', { action:'connect', key:'SIMULATED_RATE_KEY' }, ownerCookie));
   assert.equal(connected.status, 200); assert.equal((await connected.json()).connected, true);
   assert.equal((await m.ongkirAdmin(request('/api/ongkir', undefined, ownerCookie))).status, 200);
+});
+
+test('new admin drafts use editable defaults and persist up to 17 gallery photos', async () => {
+  assert.equal(m.MAX_PRODUCT_PHOTOS,17);
+  const keys=[];for(let i=0;i<18;i++)keys.push(await m.storePhoto(png,'simulation-gallery'));
+  const draftId=crypto.randomUUID(),payload={op:'create',draftId,photoKey:keys[0],photoKeys:keys.slice(0,17)};
+  const response=await m.catalogAdminPost(request('/api/admin/katalog',payload,ownerCookie));assert.equal(response.status,200);
+  const {product:p}=await response.json();assert.equal(p.brand,'Polo Ralph Lauren');assert.equal(p.defects,'tidak ada');assert.equal(p.status,'draft');assert.equal(p.reviewed,false);
+  assert.equal(p.price,null);assert.equal(p.groups[0].qty,null);assert.deepEqual(p.groups[0].fits,[]);assert.equal(p.groups[0].defects,null);
+  assert.deepEqual(m.productPhotos(p),keys.slice(0,17));assert.deepEqual(m.publicProduct(p).photoKeys,keys.slice(0,17));
+  const saved=await m.catalogAdminPost(request('/api/admin/katalog',{...p,op:'save',brand:'Beanpole',defects:'Noda kecil',status:'draft'},ownerCookie));assert.equal(saved.status,200);
+  const changed=(await saved.json()).product;assert.equal(changed.brand,'Beanpole');assert.equal(changed.defects,'Noda kecil');assert.equal(changed.photoKeys.length,17);
+  const retry=await m.catalogAdminPost(request('/api/admin/katalog',payload,ownerCookie));assert.equal(retry.status,200);const duplicate=await retry.json();assert.equal(duplicate.duplicate,true);assert.equal(duplicate.product.id,p.id);assert.equal(duplicate.product.brand,'Beanpole');assert.equal(duplicate.product.defects,'Noda kecil');
+  const tooMany=await m.catalogAdminPost(request('/api/admin/katalog',{...changed,op:'save',photoKeys:keys,status:'draft'},ownerCookie));assert.equal(tooMany.status,400);assert.match((await tooMany.json()).error,/17 foto/);
+  const distinctMain=await m.catalogAdminPost(request('/api/admin/katalog',{...changed,op:'save',photoKey:keys[17],photoKeys:keys.slice(0,17),status:'draft'},ownerCookie));assert.equal(distinctMain.status,400);
+  const fresh=await(await m.catalogAdmin(request('/api/admin/katalog?id='+p.id,undefined,ownerCookie))).json();assert.equal(fresh.product.version,changed.version);assert.equal(fresh.product.photoKeys.length,17);assert.equal(fresh.product.brand,'Beanpole');assert.equal(fresh.product.defects,'Noda kecil');
 });
 test('catalog team sessions have no access to payment, private proofs, or calculator settings', async () => {
   const links = await m.listTeam('https://elite.test'), token = links[0].link.split('#')[1];

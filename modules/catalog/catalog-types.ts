@@ -1,6 +1,6 @@
 import {CATEGORIES,DEFAULT_FEATURES,normalizeSearch,selectedValues,matchesFeatures,type Feature} from '@/modules/catalog/taxonomy';
 export {CATEGORIES} from '@/modules/catalog/taxonomy';
-export const MAX_PRODUCT_PHOTOS=12;
+export const MAX_PRODUCT_PHOTOS=17;
 export const FITS=['XXS','XS','S','M','L','XL','XXL','3XL','4XL','One size'];
 export type SizeGroup={id:string;productId?:string;label:string;tagSize:string;fits:string[];lengthCm:number|null;widthCm:number|null;qty:number|null;price:number|null;condition:string|null;defects:string|null;revision:number;sortOrder:number};
 export type Product={id:string;shortcode:string;instagramUrl:string;name:string;brand:string;category:string;legacyCategory?:string;features?:string[];categoryNeedsReview?:boolean;color:string;price:number|null;condition:string|null;defects:string|null;photoKey:string|null;photoKeys?:string[];description?:string;caption:string;warnings:string[];reviewed:boolean;status:'draft'|'published';createdAt:string;updatedAt:string;orderableAt?:string|null;publishedAt:string|null;soldAt?:string|null;soldHidden?:boolean;version:number;groups:SizeGroup[]};

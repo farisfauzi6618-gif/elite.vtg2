@@ -1,6 +1,6 @@
 # Product photo upload
 
-The editor accepts up to 12 photos per product, with original files up to 30 MiB each. JPG, PNG and WebP are supported; HEIC/HEIF originals are converted when the device's native image decoder supports them, such as supported iPhone Safari versions. Other browsers receive instructions to export HEIC as JPG.
+The editor accepts up to 17 photos per product, with original files up to 30 MiB each. JPG, PNG and WebP are supported; HEIC/HEIF originals are converted when the device's native image decoder supports them, such as supported iPhone Safari versions. Other browsers receive instructions to export HEIC as JPG.
 
 Before sending, large photos are prepared sequentially in the browser. The whole frame and aspect ratio are retained, without cropping or upscaling. Encoding starts at JPEG quality 0.94 and a maximum long edge of 3072 px, then tries 0.90/0.86 and at most 2560/2048 px when necessary. Small decoded photos are preserved; conversion is avoided when it would increase an already valid, unscaled file. JPEG conversion uses a white matte for transparency. Source images are capped at 64 million pixels, covering common 48 MP phone originals, and temporary canvas buffers and object URLs are released after every file.
 

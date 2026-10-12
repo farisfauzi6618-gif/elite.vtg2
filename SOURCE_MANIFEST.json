@@ -122,10 +122,10 @@
       "exportSha256": "e19330f0c81d84ed9483cf23789dbd3e379fce1820647ec219df6aba4a39391c"
     },
     {
-      "source": "monolith-2026-10-12-photo-efficiency",
+      "source": "monolith-2026-10-12-admin-defaults-gallery",
       "path": "app/admin/katalog/admin.tsx",
-      "sha256": "577cfcfd32b2f7a50c1185261267e9f6fbe88b6d71ed119c17b5f1a034d74477",
-      "exportSha256": "577cfcfd32b2f7a50c1185261267e9f6fbe88b6d71ed119c17b5f1a034d74477"
+      "sha256": "4570a98b6685d46fc2179abc0c74d309a8d8d610a86f0c2471b1fe12f01f2269",
+      "exportSha256": "4570a98b6685d46fc2179abc0c74d309a8d8d610a86f0c2471b1fe12f01f2269"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1064,16 +1064,16 @@
       "exportSha256": "3acb3609b40a512c116b911ffe7bbf22e8af4dd285ade2a8cb8da71b6878a087"
     },
     {
-      "source": "monolith-2026-10-10-promotions-and-scheduled-sales",
+      "source": "monolith-2026-10-12-admin-defaults-gallery",
       "path": "modules/catalog/catalog-service.ts",
-      "sha256": "10ed7ce8798adab7f08fa4f611f7c99cf9d0668d592c4626030646eef6841871",
-      "exportSha256": "10ed7ce8798adab7f08fa4f611f7c99cf9d0668d592c4626030646eef6841871"
+      "sha256": "999c8fe7f03075a9f3670417d5fe31111ec89bdc2f67225514ca0f5719036b33",
+      "exportSha256": "999c8fe7f03075a9f3670417d5fe31111ec89bdc2f67225514ca0f5719036b33"
     },
     {
-      "source": "monolith-2026-10-10-admin-sold-visibility",
+      "source": "monolith-2026-10-12-admin-defaults-gallery",
       "path": "modules/catalog/catalog-types.ts",
-      "sha256": "a10f627ae4ded12827f3e26814c5cd9095c2c511440e18ce832821a155c49fc4",
-      "exportSha256": "a10f627ae4ded12827f3e26814c5cd9095c2c511440e18ce832821a155c49fc4"
+      "sha256": "22f8edc136e61d383334fad6a4f39c53a6672814ada71df280283064a481e456",
+      "exportSha256": "22f8edc136e61d383334fad6a4f39c53a6672814ada71df280283064a481e456"
     },
     {
       "source": "monolith-2026-10-10-website-analytics-v1",
@@ -1472,10 +1472,10 @@
       "exportSha256": "533087000b7e52c493ea23db71b3325daaa1ece8fa3f03db01a818f8947f6e7b"
     },
     {
-      "source": "monolith-2026-10-12-photo-efficiency",
+      "source": "monolith-2026-10-12-admin-defaults-gallery",
       "path": "tests/monolith.test.mjs",
-      "sha256": "79bc6b667e89e7ea88784bc55bde76467a3acc0a48717e074a59fb07cbbc3208",
-      "exportSha256": "79bc6b667e89e7ea88784bc55bde76467a3acc0a48717e074a59fb07cbbc3208"
+      "sha256": "5167c34eb92fbefafc5fee390ed731b519d1cef53074f43146e571f744f5ac06",
+      "exportSha256": "5167c34eb92fbefafc5fee390ed731b519d1cef53074f43146e571f744f5ac06"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4520,10 +4520,10 @@
       "exportSha256": "8b06aa872e74b4b91c937c20c021197b58020a3cabb1218041a96c126d953bcf"
     },
     {
-      "source": "monolith-2026-10-12-product-photo-upload",
+      "source": "monolith-2026-10-12-admin-defaults-gallery",
       "path": "PRODUCT_PHOTO_UPLOAD.md",
-      "sha256": "57eb945e5f72db8278ef53042ed2bf6e2796b52f53c040b3b3d08bdfe8d561da",
-      "exportSha256": "57eb945e5f72db8278ef53042ed2bf6e2796b52f53c040b3b3d08bdfe8d561da"
+      "sha256": "f8b3fd2f77686492c0e2c269e5c8207200359a4bf59e95fcb184c38a393ce5b0",
+      "exportSha256": "f8b3fd2f77686492c0e2c269e5c8207200359a4bf59e95fcb184c38a393ce5b0"
     },
     {
       "source": "monolith-2026-10-12-photo-efficiency",
@@ -4762,7 +4762,7 @@
     "originalMaxMiB": 30,
     "preparedMaxMiB": 3.5,
     "serverMaxMiB": 4,
-    "maxPhotosPerProduct": 12,
+    "maxPhotosPerProduct": 17,
     "longEdge": 3072,
     "minimumJpegQuality": 0.86,
     "preserveFullFrame": true,
@@ -4800,5 +4800,14 @@
     "privateFiles": 0,
     "migrations": [],
     "guide": "EFFICIENCY_AUDIT_2026-10-12.md"
+  },
+  "adminProductDefaults": {
+    "brand": "Polo Ralph Lauren",
+    "defects": "tidak ada",
+    "newDraftsOnly": true,
+    "editable": true,
+    "existingProductsUntouched": true,
+    "migrations": [],
+    "privateFiles": 0
   }
 }
