@@ -7,9 +7,10 @@ import { UserRound, LockKeyhole, Eye, EyeOff, LogOut } from 'lucide-react';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import type { CustomerProfile } from '@/modules/catalog/customer-types';
 import {LoyaltyCard} from '@/components/loyalty-card';
+import {MemberInvite} from '@/components/member-invite';
 
 const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-export function CustomerAccount() {
+export function CustomerAccount({inviteMembers=false}:{inviteMembers?:boolean}={}) {
   const [promotion,setPromotion]=useState<PurchasePromotion|null>(null);
   const [customer, setCustomer] = useState<CustomerProfile | null>(null), [open, setOpen] = useState(false), [mode, setMode] = useState<'login' | 'register'>('login');
   const [name, setName] = useState(''), [identity, setIdentity] = useState(''), [password, setPassword] = useState(''), [showPassword, setShowPassword] = useState(false);
@@ -48,7 +49,7 @@ export function CustomerAccount() {
       setCustomer(null); setPassword(''); setOpen(false);invalidateCustomer();window.dispatchEvent(new Event('elite:customer-change'));
     } catch (error) { setError((error as Error).message); } finally { setBusy(false); }
   }
-  return <Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) { setPassword(''); setShowPassword(false); } }}>
+  return <><Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) { setPassword(''); setShowPassword(false); } }}>
     <DialogTrigger asChild><button type="button" className="quiet-link account-trigger" aria-label={customer ? 'Buka akun pelanggan' : 'Masuk atau daftar pelanggan'}><UserRound size={19} aria-hidden="true"/><span>{customer ? 'Akun saya' : 'Masuk'}</span></button></DialogTrigger>
     <DialogContent className="customer-account-dialog">
       <DialogHeader><DialogTitle>{customer ? 'Akun saya' : mode === 'register' ? 'Daftar' : 'Masuk'}</DialogTitle><DialogDescription>{customer ? 'Gunakan akun ini untuk mengisi data penerima lebih cepat.' : mode === 'register' ? 'Daftar untuk diskon 5% harga barang pada pembelian pertama. Diskon otomatis saat Anda login.' : 'Masuk dengan email atau nomor HP yang Anda gunakan saat mendaftar.'}</DialogDescription></DialogHeader>
@@ -63,5 +64,5 @@ export function CustomerAccount() {
         <p className="account-guest-note">Anda tetap bisa belanja tanpa membuat akun.</p>
       </form>}
     </DialogContent>
-  </Dialog>;
+  </Dialog>{inviteMembers&&<MemberInvite eligible={!loading&&!error&&customer===null} blocked={open} onJoin={()=>{changeMode('register');setOpen(true)}}/>}</>;
 }

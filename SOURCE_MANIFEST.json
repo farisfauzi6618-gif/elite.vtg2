@@ -14,10 +14,10 @@
   "excluded": "Runtime secrets, local environment, databases, customer data, uploaded photos, private proofs, production payment assets, generated builds and old Git histories.",
   "files": [
     {
-      "source": "monolith-2026-10-12-photo-efficiency",
+      "source": "monolith-2026-10-12-member-invite",
       "path": "app/catalog.tsx",
-      "sha256": "81e72ccc93498b6b4112c9425346addf4fa7d7bbedf816c6059b740c848ff4df",
-      "exportSha256": "81e72ccc93498b6b4112c9425346addf4fa7d7bbedf816c6059b740c848ff4df"
+      "sha256": "a93cc52d3d7d344b8ede822f58efcbde53cbc7e0b4938b1f03766260586e8430",
+      "exportSha256": "a93cc52d3d7d344b8ede822f58efcbde53cbc7e0b4938b1f03766260586e8430"
     },
     {
       "source": "monolith-2026-10-10-admin-sold-visibility",
@@ -26,10 +26,10 @@
       "exportSha256": "04c85469aea1e6d5388c1317005510fbfea035919c70f3917052cff67982f022"
     },
     {
-      "source": "monolith-2026-10-11-loyalty-card",
+      "source": "monolith-2026-10-12-member-invite",
       "path": "app/layout.tsx",
-      "sha256": "d82dd851cbf8fee22f29b48af9b740447a6f5825d0fec77ccef50321d50f302e",
-      "exportSha256": "d82dd851cbf8fee22f29b48af9b740447a6f5825d0fec77ccef50321d50f302e"
+      "sha256": "4a33910c45568af1e1f130b01b5cb34149738a3f418ad3b28d5ed38cc6de87c7",
+      "exportSha256": "4a33910c45568af1e1f130b01b5cb34149738a3f418ad3b28d5ed38cc6de87c7"
     },
     {
       "source": "monolith-2026-10-09",
@@ -392,10 +392,10 @@
       "exportSha256": "a72a90505002e2248576622924a4383ffae52fc867047aae9b5665caf9358677"
     },
     {
-      "source": "monolith-2026-10-11-loyalty-card",
+      "source": "monolith-2026-10-12-member-invite",
       "path": "components/customer-account.tsx",
-      "sha256": "71e5b2436ef5d5ec3593344431b65890b3ffd92713a2d4a350d4d1add0c3a6e0",
-      "exportSha256": "71e5b2436ef5d5ec3593344431b65890b3ffd92713a2d4a350d4d1add0c3a6e0"
+      "sha256": "463f8e0cc69cf7947d940f42f2290c24ca9660a6e61f049ad658faadc1faa5df",
+      "exportSha256": "463f8e0cc69cf7947d940f42f2290c24ca9660a6e61f049ad658faadc1faa5df"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4548,6 +4548,30 @@
       "path": "EFFICIENCY_AUDIT_2026-10-12.md",
       "sha256": "f54e6251ff29b5c8939a09830e23e7f9e6786ca60ca4e4b0a38cb912e288468e",
       "exportSha256": "f54e6251ff29b5c8939a09830e23e7f9e6786ca60ca4e4b0a38cb912e288468e"
+    },
+    {
+      "source": "monolith-2026-10-12-member-invite",
+      "path": "components/member-invite.tsx",
+      "sha256": "e991f24dbbd1e305358613f8c0471abfd29f000b32224e6a6be4a4c86a02515c",
+      "exportSha256": "e991f24dbbd1e305358613f8c0471abfd29f000b32224e6a6be4a4c86a02515c"
+    },
+    {
+      "source": "monolith-2026-10-12-member-invite",
+      "path": "modules/catalog/member-invite.ts",
+      "sha256": "79f6cfdaa087fa84e034e2fdfb4f8d6dfa99a3f618094f096c598a7aa18375d8",
+      "exportSha256": "79f6cfdaa087fa84e034e2fdfb4f8d6dfa99a3f618094f096c598a7aa18375d8"
+    },
+    {
+      "source": "monolith-2026-10-12-member-invite",
+      "path": "app/member-invite.css",
+      "sha256": "47e3717b3572685ca06121a9e75a4c44473da53fdb03c158c979ecde99dcfe31",
+      "exportSha256": "47e3717b3572685ca06121a9e75a4c44473da53fdb03c158c979ecde99dcfe31"
+    },
+    {
+      "source": "monolith-2026-10-12-member-invite",
+      "path": "tests/member-invite.test.mjs",
+      "sha256": "a140d006debb7618280d9b7597deeb8ea06893b3c9e45c7f1c034a0cc27bc769",
+      "exportSha256": "a140d006debb7618280d9b7597deeb8ea06893b3c9e45c7f1c034a0cc27bc769"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -4807,6 +4831,17 @@
     "newDraftsOnly": true,
     "editable": true,
     "existingProductsUntouched": true,
+    "migrations": [],
+    "privateFiles": 0
+  },
+  "memberInvite": {
+    "guestOnly": true,
+    "delayMs": 6000,
+    "oncePerSession": true,
+    "shoppingPagesOnly": true,
+    "existingSignup": true,
+    "deferDuringInputsAndDialogs": true,
+    "extraAccountRequests": 0,
     "migrations": [],
     "privateFiles": 0
   }
