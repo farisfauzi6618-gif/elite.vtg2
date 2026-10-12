@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import {bucket} from './server';
 
-export const PHOTO_PREVIEW_EDGES={thumb:240,card:800,detail:1600} as const;
+export const PHOTO_PREVIEW_EDGES={thumb:240,cardSmall:480,card:800,detail:1600} as const;
 export type PhotoPreviewSize=keyof typeof PHOTO_PREVIEW_EDGES;
 type PhotoBytes={body:Uint8Array;contentType:string};
 type Entry<T>={value:T;expires:number;bytes:number};
@@ -34,5 +34,10 @@ export function createPhotoPreviewCache(load:(key:string)=>Promise<PhotoBytes|nu
   const request=(async()=>{await enter();try{const original=await source(key);if(!original)return null;const result=await(options.render??renderPhotoPreview)(original,size);previews.set(id,result,result.body.byteLength);return result}finally{leave()}})().finally(()=>pending.delete(id));pending.set(id,request);return request;
  };
 }
-const previews=createPhotoPreviewCache(async key=>{const object=await bucket().get(key,{useCache:true});if(!object)return null;if(object.size>8*1024*1024){if(object.body instanceof ReadableStream)await object.body.cancel();return null}return {body:new Uint8Array(await object.arrayBuffer()),contentType:object.httpMetadata?.contentType??'image/jpeg'}},{namespace:()=>process.env.BLOB_STORE_ID??process.env.TURSO_DATABASE_URL??'local'});
-export function photoPreview(key:string,size:PhotoPreviewSize){return previews(key,size)}
+const namespace=()=>process.env.BLOB_STORE_ID??process.env.TURSO_DATABASE_URL??'local';
+async function loadPhoto(key:string,useCache:boolean){const object=await bucket().get(key,{useCache});if(!object)return null;if(object.size>8*1024*1024){if(object.body instanceof ReadableStream)await object.body.cancel();return null}return {body:new Uint8Array(await object.arrayBuffer()),contentType:object.httpMetadata?.contentType??'image/jpeg'}}
+const previews=createPhotoPreviewCache(key=>loadPhoto(key,true),{namespace});
+// Drafts never opt into the Blob shared cache. Authorization is checked by the
+// route on every request, including before returning these in-memory bytes.
+const privatePreviews=createPhotoPreviewCache(key=>loadPhoto(key,false),{namespace,sourceLimit:8*1024*1024,previewLimit:16*1024*1024,previewTtl:60_000});
+export function photoPreview(key:string,size:PhotoPreviewSize,published=true){return (published?previews:privatePreviews)(key,size)}

@@ -122,10 +122,10 @@
       "exportSha256": "e19330f0c81d84ed9483cf23789dbd3e379fce1820647ec219df6aba4a39391c"
     },
     {
-      "source": "monolith-2026-10-12-admin-defaults-gallery",
+      "source": "monolith-2026-10-12-budget-efficiency",
       "path": "app/admin/katalog/admin.tsx",
-      "sha256": "4570a98b6685d46fc2179abc0c74d309a8d8d610a86f0c2471b1fe12f01f2269",
-      "exportSha256": "4570a98b6685d46fc2179abc0c74d309a8d8d610a86f0c2471b1fe12f01f2269"
+      "sha256": "2fa7ed547b9023eb05c07164bccc8f19f35928c671a2b5000e5636d9acf9666a",
+      "exportSha256": "2fa7ed547b9023eb05c07164bccc8f19f35928c671a2b5000e5636d9acf9666a"
     },
     {
       "source": "monolith-2026-10-09",
@@ -326,10 +326,10 @@
       "exportSha256": "73b51f62cadfaf86824a7284154227bfc2793008846e2ba6a6aefb60b1e0f0f0"
     },
     {
-      "source": "monolith-2026-10-12-photo-efficiency",
+      "source": "monolith-2026-10-12-budget-efficiency",
       "path": "app/api/photos/[key]/route.ts",
-      "sha256": "2c9cafc598115bb98485400e2e85cdca85cd3e09533b58df13409bc9d3a1c8f4",
-      "exportSha256": "2c9cafc598115bb98485400e2e85cdca85cd3e09533b58df13409bc9d3a1c8f4"
+      "sha256": "f53b07774a3aa4e67d2f4647bece686cf5334237a6b21984c67223518fe17534",
+      "exportSha256": "f53b07774a3aa4e67d2f4647bece686cf5334237a6b21984c67223518fe17534"
     },
     {
       "source": "monolith-2026-10-11-resource-efficiency",
@@ -422,10 +422,10 @@
       "exportSha256": "6746f63d5f38c2c90bca32c167324c2879d6af6f93b3eff5d8d32b8523c1b460"
     },
     {
-      "source": "monolith-2026-10-12-photo-efficiency",
+      "source": "monolith-2026-10-12-budget-efficiency",
       "path": "components/product-card.tsx",
-      "sha256": "da0f47fa0ac93d06f8e371291f0511e23f95fcae0ed6c2e72c6949a98fd29738",
-      "exportSha256": "da0f47fa0ac93d06f8e371291f0511e23f95fcae0ed6c2e72c6949a98fd29738"
+      "sha256": "ff0729b48d28ad073c30a899a999d63515d1c03b19ae8754df3e455b07a887f6",
+      "exportSha256": "ff0729b48d28ad073c30a899a999d63515d1c03b19ae8754df3e455b07a887f6"
     },
     {
       "source": "monolith-2026-10-12-photo-efficiency",
@@ -4526,22 +4526,22 @@
       "exportSha256": "f8b3fd2f77686492c0e2c269e5c8207200359a4bf59e95fcb184c38a393ce5b0"
     },
     {
-      "source": "monolith-2026-10-12-photo-efficiency",
+      "source": "monolith-2026-10-12-budget-efficiency",
       "path": "modules/catalog/photo-url.ts",
-      "sha256": "a4bf2783fb32caabfd3b8eed7ebf396ca3c55653387fd568297494c1254b65ee",
-      "exportSha256": "a4bf2783fb32caabfd3b8eed7ebf396ca3c55653387fd568297494c1254b65ee"
+      "sha256": "6b50ef4389101f0743ad8103e11d6be4918cdeb8f39f852fc93aee8575dbf7ca",
+      "exportSha256": "6b50ef4389101f0743ad8103e11d6be4918cdeb8f39f852fc93aee8575dbf7ca"
     },
     {
-      "source": "monolith-2026-10-12-photo-efficiency",
+      "source": "monolith-2026-10-12-budget-efficiency",
       "path": "modules/catalog/photo-preview.ts",
-      "sha256": "51b311866d14e9af1a70bfef8b0729bb75c37c44e19edd7da2db601214e1b0db",
-      "exportSha256": "51b311866d14e9af1a70bfef8b0729bb75c37c44e19edd7da2db601214e1b0db"
+      "sha256": "6dd6a58a5c070dd705ac733b0c25ed501d0832c78ad133d42aab8e5e44b38c9d",
+      "exportSha256": "6dd6a58a5c070dd705ac733b0c25ed501d0832c78ad133d42aab8e5e44b38c9d"
     },
     {
-      "source": "monolith-2026-10-12-photo-efficiency",
+      "source": "monolith-2026-10-12-budget-efficiency",
       "path": "tests/photo-preview.test.mjs",
-      "sha256": "534dc8c27edecc99df32f1027e0382b1257754b7600e16ffbcd973c937c35557",
-      "exportSha256": "534dc8c27edecc99df32f1027e0382b1257754b7600e16ffbcd973c937c35557"
+      "sha256": "1db3539d580c8793ba80b64be5201d33538778ccd00bd2328a214da2aa9028ec",
+      "exportSha256": "1db3539d580c8793ba80b64be5201d33538778ccd00bd2328a214da2aa9028ec"
     },
     {
       "source": "monolith-2026-10-12-photo-efficiency",
@@ -4572,6 +4572,12 @@
       "path": "tests/member-invite.test.mjs",
       "sha256": "a140d006debb7618280d9b7597deeb8ea06893b3c9e45c7f1c034a0cc27bc769",
       "exportSha256": "a140d006debb7618280d9b7597deeb8ea06893b3c9e45c7f1c034a0cc27bc769"
+    },
+    {
+      "source": "monolith-2026-10-12-budget-efficiency",
+      "path": "BUDGET_EFFICIENCY_2026-10-12.md",
+      "sha256": "1fd8f33f43a94a6b02d507866fbf762c496701b09570eade3f53071e3614b0a2",
+      "exportSha256": "1fd8f33f43a94a6b02d507866fbf762c496701b09570eade3f53071e3614b0a2"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -4844,5 +4850,25 @@
     "extraAccountRequests": 0,
     "migrations": [],
     "privateFiles": 0
+  },
+  "budgetEfficiency": {
+    "mobileCardEdge": 480,
+    "mobileMaxViewport": 600,
+    "adminThumbnailEdge": 240,
+    "adminMainOriginal": true,
+    "privateDraftPreview": true,
+    "authorizationBeforeCache": true,
+    "privateDraftBlobCache": false,
+    "sharedHttpCache": false,
+    "flowChanges": false,
+    "originalsRewritten": 0,
+    "migrations": [],
+    "privateFiles": 0,
+    "measurement": {
+      "products": 24,
+      "mobileReductionVsDesktopPercent": 67.5,
+      "thumbnailReductionVsOriginalPercent": 98.7
+    },
+    "guide": "BUDGET_EFFICIENCY_2026-10-12.md"
   }
 }

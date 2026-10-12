@@ -9,7 +9,7 @@ export async function GET(request:Request,{params}:{params:Promise<{key:string}>
   if(!publicPhoto&&!await isAdmin(request))throw new AppError(404,'Foto tidak ditemukan.');
   const requestedSize=new URL(request.url).searchParams.get('size');
   if(requestedSize&&!Object.hasOwn(PHOTO_PREVIEW_EDGES,requestedSize))throw new AppError(400,'Ukuran foto tidak didukung.');
-  const previewSize=publicPhoto&&requestedSize?requestedSize as PhotoPreviewSize:null;
+  const previewSize=requestedSize?requestedSize as PhotoPreviewSize:null;
   // Upload/replacement always creates a fresh UUID. Keep this response out of
   // shared HTTP caches: the same endpoint can also serve an owner's private draft.
   const headers=new Headers({
@@ -24,7 +24,7 @@ export async function GET(request:Request,{params}:{params:Promise<{key:string}>
    const matches=request.headers.get('if-none-match')?.split(',').some(value=>value.trim()==='*'||value.trim().replace(/^W\//,'')===etag.replace(/^W\//,''));
    if(matches)return new Response(null,{status:304,headers});
   }
-  if(previewSize){const preview=await photoPreview(key,previewSize);if(!preview)throw new AppError(404,'Foto tidak ditemukan.');headers.set('Content-Type',preview.contentType);return new Response(preview.body as BodyInit,{headers})}
+  if(previewSize){const preview=await photoPreview(key,previewSize,!!publicPhoto);if(!preview)throw new AppError(404,'Foto tidak ditemukan.');headers.set('Content-Type',preview.contentType);return new Response(preview.body as BodyInit,{headers})}
   const object=await bucket().get(key,{useCache:!!publicPhoto});
   if(!object)throw new AppError(404,'Foto tidak ditemukan.');
   headers.set('Content-Type',object.httpMetadata?.contentType??'image/jpeg');
