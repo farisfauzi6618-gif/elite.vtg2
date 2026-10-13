@@ -3,6 +3,7 @@ import './globals.css'
 import './rewards.css';
 import './loyalty.css';
 import './member-invite.css';
+import './checkout-simplification.css';
 import {AnalyticsClient} from '@/components/analytics-client';
 export const metadata: Metadata = {
   title: { default: 'ELITE.VTG — Shop', template: '%s | ELITE.VTG' },

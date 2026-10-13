@@ -1,0 +1,9 @@
+.buy-now-button{width:100%;margin-top:8px;min-height:46px}
+@media(max-width:700px){
+ body:has([data-section="order"]) .side-panel{display:none}
+ body:has([data-section="order"]) .shell{padding-top:20px}
+ body:has([data-section="order"]) .intro{margin-bottom:16px}
+ body:has([data-section="order"]) .intro h1{font-size:30px;margin:0 0 8px}
+ body:has([data-section="order"]) .intro p{margin:0;font-size:13px}
+ body:has([data-section="order"]) .steps{margin-bottom:18px}
+}
