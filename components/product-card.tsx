@@ -1,6 +1,7 @@
 'use client';
 import {useState} from 'react';
 import {photoUrl} from '@/modules/catalog/photo-url';
+import {isNewArrival} from '@/modules/catalog/new-arrivals';
 import {orderingLocked,scheduleLabel} from '@/modules/catalog/product-schedule';
 import {type Product, availableGroups, displayPrice, FITS,isSold} from '@/modules/catalog/catalog-types';
 export function ProductCard({product, onNavigate,now=Date.now()}: {now?:number;product: Product; onNavigate: () => void}) {
@@ -17,7 +18,7 @@ export function ProductCard({product, onNavigate,now=Date.now()}: {now?:number;p
   const condition = conditions.length > 1 ? 'Kondisi bervariasi' : conditions[0] || 'Kondisi belum tercantum';
   return <article className={'product-card'+(sold?' product-sold':'')}>
     <a className="product-card-link" href={'/produk/' + encodeURIComponent(product.id)} onClick={onNavigate}>
-      <div className="product-photo">{sold?<span className="sold-badge">SOLD</span>:orderingLocked(product,now)&&<span className="scheduled-badge">Segera hadir</span>}
+      <div className="product-photo">{sold?<span className="sold-badge">SOLD</span>:orderingLocked(product,now)?<span className="scheduled-badge">Segera hadir</span>:isNewArrival(product,now)&&<span className="new-in-badge">NEW IN</span>}
         {product.photoKey ? <picture>{!useOriginal&&<source media="(max-width: 600px)" srcSet={photoUrl(product.photoKey,'cardSmall')}/>}<img src={photoUrl(product.photoKey,useOriginal?undefined:'card')} onError={()=>{if(!useOriginal)setFailedPhoto(product.photoKey!)}} alt="" width="600" height="750" loading="lazy" decoding="async"/></picture> : <span className="product-photo-empty">ELITE.VTG</span>}
       </div>
       <div className="product-info">

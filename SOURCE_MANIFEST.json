@@ -7,23 +7,23 @@
     "sites-order": "911fda6f8b43b8d8c7ab2b34bb9f747f25fdd98c",
     "sites-shipping": "b7aa13349b65fc38c7ba445104eaab811cffbd36"
   },
-  "liveCatalogUrl": "https://elitevtg.vercel.app/",
-  "liveOrderUrl": "https://elitevtg.vercel.app/order",
+  "liveCatalogUrl": "https://elitevtg.com/",
+  "liveOrderUrl": "https://elitevtg.com/order",
   "monolithSourceDate": "2026-10-10",
   "monolithStatus": "production-cutover-complete-checkout-active",
   "excluded": "Runtime secrets, local environment, databases, customer data, uploaded photos, private proofs, production payment assets, generated builds and old Git histories.",
   "files": [
     {
-      "source": "monolith-2026-10-13-post-purchase",
+      "source": "monolith-2026-10-14-new-arrivals",
       "path": "app/catalog.tsx",
-      "sha256": "328666d7f627afc79c0f07ad9926619dd360ccee1c92d0b3d1ff12c4ffe23e5f",
-      "exportSha256": "328666d7f627afc79c0f07ad9926619dd360ccee1c92d0b3d1ff12c4ffe23e5f"
+      "sha256": "a2497e6f9ed53d20f68559ee47ef9e4d24ee95189567e5e8558f154c37e73ca2",
+      "exportSha256": "a2497e6f9ed53d20f68559ee47ef9e4d24ee95189567e5e8558f154c37e73ca2"
     },
     {
-      "source": "monolith-2026-10-10-admin-sold-visibility",
+      "source": "monolith-2026-10-14-new-arrivals",
       "path": "app/globals.css",
-      "sha256": "04c85469aea1e6d5388c1317005510fbfea035919c70f3917052cff67982f022",
-      "exportSha256": "04c85469aea1e6d5388c1317005510fbfea035919c70f3917052cff67982f022"
+      "sha256": "1600cb8c12d9216cb5153bdc50fd25ff9c8a4a2811a15ddd39daa17d7eb6e298",
+      "exportSha256": "1600cb8c12d9216cb5153bdc50fd25ff9c8a4a2811a15ddd39daa17d7eb6e298"
     },
     {
       "source": "monolith-2026-10-13-post-purchase",
@@ -422,10 +422,10 @@
       "exportSha256": "6746f63d5f38c2c90bca32c167324c2879d6af6f93b3eff5d8d32b8523c1b460"
     },
     {
-      "source": "monolith-2026-10-12-budget-efficiency",
+      "source": "monolith-2026-10-14-new-arrivals",
       "path": "components/product-card.tsx",
-      "sha256": "ff0729b48d28ad073c30a899a999d63515d1c03b19ae8754df3e455b07a887f6",
-      "exportSha256": "ff0729b48d28ad073c30a899a999d63515d1c03b19ae8754df3e455b07a887f6"
+      "sha256": "e78cc51b8cae7ed6c375d1245b6dbda4bc312590f57f12a18739d7254ba53f16",
+      "exportSha256": "e78cc51b8cae7ed6c375d1245b6dbda4bc312590f57f12a18739d7254ba53f16"
     },
     {
       "source": "monolith-2026-10-13-checkout-simplification",
@@ -4662,6 +4662,18 @@
       "path": "POST_PURCHASE_V1.md",
       "sha256": "d83314e4ebf98f99d7d4cd43fd880fdc6ccf258beec62d3d41e98a87247ff112",
       "exportSha256": "d83314e4ebf98f99d7d4cd43fd880fdc6ccf258beec62d3d41e98a87247ff112"
+    },
+    {
+      "source": "monolith-2026-10-14-new-arrivals",
+      "path": "modules/catalog/new-arrivals.ts",
+      "sha256": "8fa0a6f6081f3c2c5b93632f271aff2b9413091dd82d8061db6cb782c4386e2e",
+      "exportSha256": "8fa0a6f6081f3c2c5b93632f271aff2b9413091dd82d8061db6cb782c4386e2e"
+    },
+    {
+      "source": "monolith-2026-10-14-new-arrivals",
+      "path": "tests/new-arrivals.test.mjs",
+      "sha256": "6384a3e736baffaf4e9ec6f60bcfde02a356e5169b0d7ef80450ac85854f9b39",
+      "exportSha256": "6384a3e736baffaf4e9ec6f60bcfde02a356e5169b0d7ef80450ac85854f9b39"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -4686,7 +4698,7 @@
     "transactionsReplayed": false
   },
   "previousVercelOrigin": "https://elite-vtg2.vercel.app",
-  "canonicalDomain": "https://elitevtg.vercel.app",
+  "canonicalDomain": "https://elitevtg.com",
   "verifiedBaseCommit": "2780c4394463f9052df8599116270f7f2c556ebe",
   "domainRelease": {
     "date": "2026-10-10",
@@ -4996,6 +5008,14 @@
     "fullRecipientCopy": true,
     "confirmationBooksShipment": false,
     "legacyDeliveryPreserved": true,
+    "databaseMigration": false
+  },
+  "newArrivals": {
+    "badge": "NEW IN",
+    "windowHours": 72,
+    "timestamp": "publishedAt",
+    "existingSort": true,
+    "extraRequestsPerCard": 0,
     "databaseMigration": false
   }
 }
