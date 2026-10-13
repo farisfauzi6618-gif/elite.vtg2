@@ -18,9 +18,21 @@ export function recipientText(o:Order){
  return [`ELITE.VTG · DETAIL PENERIMA ${o.id}`,"",`Nama: ${o.name}`,`No. HP: ${o.phone}`,"Alamat lengkap:",recipientAddress(o)].join("\n");
 }
 export function recipientMessage(o:Order){
- const text=recipientText(o),address=recipientAddress(o);
+ const text=recipientText(o);
  // Telegram entity offsets use UTF-16 units, matching JavaScript string lengths.
- // The full address stays in one copyable block, even beyond CopyTextButton's limit.
- return {text,entities:[{type:"pre",offset:text.length-address.length,length:address.length}],
-  ...(address.length<=256?{reply_markup:{inline_keyboard:[[{text:"Salin alamat",copy_text:{text:address}}]]}}:{})};
+ // All recipient fields stay in one copyable block, even beyond the button limit.
+ return {text,entities:[{type:"pre",offset:0,length:text.length}],
+  ...(text.length<=256?{reply_markup:{inline_keyboard:[[{text:"Salin detail penerima",copy_text:{text}}]]}}:{})};
+}
+
+// A document caption is limited to 1024 characters. Keep all payment amounts;
+// unusually long item lists remain available in the existing owner dashboard.
+export function telegramInvoiceCaption(o:Order){
+ const items=orderItems(o),q=orderQuote(o),service=q?(q.serviceName||jntServiceName(q.service)):"J&T";
+ const head=`ELITE.VTG · INVOICE ${o.id}\n${dateLabel(o.created_at)}\n\nJumlah barang: ${items.length}\n`;
+ const tail=[...(o.item_amount!=null?[...(o.discount_amount?[`Subtotal barang: ${rupiah(o.item_subtotal??o.item_amount+o.discount_amount)}`,`Diskon: -${rupiah(o.discount_amount)}`]:[]),`Harga barang: ${rupiah(o.item_amount)}`,`Ongkir ${service}: ${rupiah(o.shipping_amount||0)}`]:[]),`Total pembayaran: ${rupiah(o.total)}`,`Metode: ${paymentMethodLabel(o.payment_method)}`,`Status: ${paymentStatusLabel(o)}`,"Bukti pembayaran terlampir.",...(o.catalog_checkout_id?[]:["Pesanan manual: cocokkan harga yang disepakati."])].join("\n");
+ let names=items.map((name,i)=>`${i+1}. ${name}`).join("\n");
+ const budget=1024-head.length-tail.length-2;
+ if(names.length>budget){const note="\n… Daftar lengkap di dashboard pesanan.";names=Array.from(names).slice(0,Math.max(0,budget-note.length-1)).join("");while(names.length+note.length>budget)names=names.slice(0,-1);names+=note;}
+ return head+names+"\n\n"+tail;
 }

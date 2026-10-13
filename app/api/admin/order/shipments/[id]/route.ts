@@ -13,7 +13,7 @@ export const POST=(r:Request,ctx:{params:Promise<{id:string}>})=>api(async()=>{o
  if(v.action==="confirmation-button"){
   const config=await settings();if(!o.proof_key||!o.invoice_message||!config?.bot_cipher||config.chat_id!==o.delivery_chat)throw new AppError(409,"Invoice dan bukti pesanan harus tersedia pada chat Telegram pemilik yang terhubung.");
   if(o.payment_state==="payment_confirmed")throw new AppError(409,"Pembayaran sudah dikonfirmasi.");await ensureTelegramWebhook(config);
-  await telegram(await decrypt(config.bot_cipher),"editMessageReplyMarkup",{chat_id:config.chat_id,message_id:Number(o.invoice_message),reply_markup:{inline_keyboard:[[{text:"Konfirmasi pembayaran & buat resi",callback_data:"confirm:"+id}]]}});return json({ok:true});
+  await telegram(await decrypt(config.bot_cipher),"editMessageReplyMarkup",{chat_id:config.chat_id,message_id:Number(o.invoice_message),reply_markup:{inline_keyboard:[[{text:"Konfirmasi pembayaran",callback_data:"confirm:"+id}]]}});return json({ok:true});
  }
  if(v.action==="reconcile"){await reconcileBooking(id,String(v.providerNo||""));return json(await processShipment(id));}
  if(v.action==="package"){

@@ -2,7 +2,7 @@ import {sameOrigin,clientIp} from '@/lib/request-security';
 import { readLimitedText,readLimitedForm } from '@/modules/order/request-limits';
 import { env } from '@/lib/env';
 import { getOwnerUser } from "@/lib/auth/owner";
-import { invoiceText, recipientMessage, orderQuote, type Order } from "@/modules/order/order-types";
+import { telegramInvoiceCaption, recipientMessage, orderQuote, type Order } from "@/modules/order/order-types";
 import { normalizeOrderItems, orderItems } from "@/modules/order/order-items";
 import { paymentConfig } from '@/modules/order/payment-config';
 import type { PaymentConfig } from '@/modules/order/payment-types';
@@ -44,14 +44,17 @@ export async function notify(id:string){
   if(chat!==s.chat_id)throw new AppError(409,"Penerima Telegram berubah; periksa pesanan lama sebelum mengirim ulang.");
   if(!claimed.proof_message){
    const proof=await bucket().get(claimed.proof_key!);if(!proof)throw new AppError(503,"Bukti pembayaran belum tersedia.");
-   const form=new FormData();form.set("chat_id",chat);form.set("caption",`Bukti pembayaran ${id} · Pesanan berhasil dikirim`);
+   const form=new FormData();form.set("chat_id",chat);form.set("caption",telegramInvoiceCaption(claimed));
+   if(!claimed.invoice_message)form.set("reply_markup",JSON.stringify({inline_keyboard:[[{text:"Konfirmasi pembayaran",callback_data:"confirm:"+id}],[{text:"Detail invoice",url:env.SITE_ORIGIN+"/admin/order"}]]}));
    if(claimed.invoice_message)form.set("reply_parameters",JSON.stringify({message_id:Number(claimed.invoice_message)}));
    form.set("document",new Blob([await proof.arrayBuffer()],{type:claimed.proof_mime||"image/jpeg"}),`bukti-${id}.${claimed.proof_mime==="image/png"?"png":claimed.proof_mime==="image/webp"?"webp":"jpg"}`);
-   const sent=await telegram(token,"sendDocument",form);await db().prepare("UPDATE orders SET proof_message=? WHERE id=?").bind(String(sent.message_id),id).run();
+   const sent=await telegram(token,"sendDocument",form);await db().prepare("UPDATE orders SET proof_message=?,invoice_message=COALESCE(invoice_message,?) WHERE id=?").bind(String(sent.message_id),String(sent.message_id),id).run();
+   claimed.proof_message=String(sent.message_id);claimed.invoice_message ||= String(sent.message_id);
   }
   if(!claimed.invoice_message){
-   const sent=await telegram(token,"sendMessage",{chat_id:chat,text:invoiceText(claimed,{includeRecipient:false})+(claimed.catalog_checkout_id?"\nStok katalog: otomatis dikurangi setelah konfirmasi pembayaran.":"\nPesanan manual: harga diisi pembeli. Cocokkan dengan harga yang disepakati sebelum konfirmasi. Stok katalog tidak terhubung otomatis."),reply_markup:{inline_keyboard:[[{text:"Konfirmasi pembayaran & buat resi",callback_data:"confirm:"+id}]]}});
-   await db().prepare("UPDATE orders SET invoice_message=? WHERE id=?").bind(String(sent.message_id),id).run();
+   // Resume an older partial delivery without sending its proof a second time.
+   await telegram(token,"editMessageCaption",{chat_id:chat,message_id:Number(claimed.proof_message),caption:telegramInvoiceCaption(claimed),reply_markup:{inline_keyboard:[[{text:"Konfirmasi pembayaran",callback_data:"confirm:"+id}]]}});
+   await db().prepare("UPDATE orders SET invoice_message=? WHERE id=?").bind(claimed.proof_message,id).run();
   }
   if(!claimed.recipient_message){
    const sent=await telegram(token,"sendMessage",{chat_id:chat,...recipientMessage(claimed)});
