@@ -1,7 +1,7 @@
 export type TrackingStage="proof_received"|"payment_confirmed"|"preparing"|"awb_available"|"in_transit"|"out_for_delivery"|"delivered"|"returned"|"cancelled";
 export type TrackingEvent={date:string;description:string;status:string;code:string};
 export type TrackingHistory={stage:TrackingStage;lastStatus:string;events:TrackingEvent[]};
-export type CustomerTracking=TrackingHistory&{invoice:string;awb:string|null;courier:string;paymentConfirmed:boolean;checkedAt:number|null;stale:boolean;simulation:boolean;message:string;accessUrl?:string};
+export type CustomerTracking=TrackingHistory&{progress?:ReturnType<typeof import('./order-progress').orderProgress>;invoice:string;awb:string|null;courier:string;paymentConfirmed:boolean;checkedAt:number|null;stale:boolean;simulation:boolean;message:string;accessUrl?:string};
 export const trackingStageLabels:Record<TrackingStage,string>={proof_received:"Bukti pembayaran diterima",payment_confirmed:"Pembayaran dikonfirmasi",preparing:"Pesanan sedang disiapkan",awb_available:"Resi tersedia · menunggu pembaruan kurir",in_transit:"Paket dalam perjalanan",out_for_delivery:"Paket diantar ke penerima",delivered:"Paket telah diterima",returned:"Paket dalam proses retur",cancelled:"Pengiriman dibatalkan"};
 const object=(value:unknown):Record<string,unknown>=>value&&typeof value==="object"&&!Array.isArray(value)?value as Record<string,unknown>:{};
 const clean=(value:unknown,max:number)=>typeof value==="string"?value.replace(/[\x00-\x1f\x7f]/g," ").trim().slice(0,max):"";

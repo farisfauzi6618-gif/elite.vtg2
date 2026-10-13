@@ -24,7 +24,7 @@ export function catalogInventory(products:Product[],now=Date.now()) {
 }
 export function catalogListing(products:Product[],filters:CatalogFilters&{sort?:string},terms:Feature[]=DEFAULT_FEATURES,now=Date.now(),archive=false) {
  const inventory=catalogInventory(products,now);
- const matching=(archive?inventory.recentlySold:inventory.main).filter(p=>matchesProduct(p,filters,terms,true));
+ const matching=(archive?[...inventory.main.filter(isSold),...inventory.recentlySold]:inventory.main).filter(p=>matchesProduct(p,filters,terms,true));
  const price=(p:Product)=>Math.min(...(isSold(p)?p.groups:availableGroups(p)).filter(g=>matchesSizePrice(p,g,filters)).map(g=>g.price??p.price??0));
  const sort=(a:Product,b:Product)=>filters.sort==='low'?price(a)-price(b):filters.sort==='high'?price(b)-price(a):(b.publishedAt??'').localeCompare(a.publishedAt??'')||a.id.localeCompare(b.id);
  if(archive)return matching.sort((a,b)=>(b.soldAt??'').localeCompare(a.soldAt??'')||a.id.localeCompare(b.id));

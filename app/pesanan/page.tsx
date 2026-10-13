@@ -1,0 +1,10 @@
+'use client';
+import {useEffect,useState,useRef} from 'react';
+import {CustomerAccount} from '@/components/customer-account';
+import {dateLabel} from '@/modules/order/order-types';
+type Row={id:string;createdAt:number;label:string;items:string[]};
+export default function MyOrders(){const [orders,setOrders]=useState<Row[]>([]),[before,setBefore]=useState<string|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const generation=useRef(0); async function load(append=false){const current=++generation.current;setBusy(true);try{const r=await fetch('/api/customer/orders'+(append&&before?'?before='+encodeURIComponent(before):''),{cache:'no-store'}),v=await r.json();if(!r.ok)throw Error(v.error||'Pesanan belum dapat dimuat.');if(current!==generation.current)return;setOrders(old=>append?[...old,...v.orders]:v.orders);setBefore(v.nextBefore);setError('')}catch(e){if(current===generation.current)setError((e as Error).message)}finally{if(current===generation.current)setBusy(false)}}
+ useEffect(()=>{void load();const change=()=>{setOrders([]);setBefore(null);void load()};window.addEventListener('elite:customer-change',change);return()=>{generation.current++;window.removeEventListener('elite:customer-change',change)}},[]);
+ return <main className="customer-orders"><header><a href="/">elite.vtg</a><CustomerAccount/></header><h1>Pesanan saya</h1>{error&&<p role="alert">{error}</p>}{orders.map(o=><article key={o.id}><a href={'/lacak?invoice='+encodeURIComponent(o.id)}><b>{o.id}</b><p>{o.label}</p><small>{dateLabel(o.createdAt)}</small><p>{o.items.join(' · ')}</p><span>View Order →</span></a></article>)}{!busy&&!error&&!orders.length&&<p>Pesanan akan tampil setelah bukti pembayaran dikirim menggunakan akun ini.</p>}<button className="button secondary" disabled={busy} onClick={()=>void load()}>Perbarui pesanan</button>{before&&<button className="button secondary" disabled={busy} onClick={()=>void load(true)}>Pesanan sebelumnya</button>}<p><a href="/lacak">Cari dengan invoice dan nomor HP penerima</a></p><a href="/">Lihat koleksi tersedia</a></main>;
+}

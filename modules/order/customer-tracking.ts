@@ -1,3 +1,4 @@
+import {currentCustomer} from '@/modules/catalog/customers';
 import { env } from '@/lib/env';
 import { AppError,db,hash,random,encrypt,decrypt,session } from "@/modules/order/order-server";
 import { shippingClient,kiriminClient } from "@/modules/order/shipping-settings";
@@ -27,11 +28,13 @@ export async function trackingAccess(o:Order){
  return {token,url:origin+"/lacak#"+token,expiresAt:link.expires_at};
 }
 export async function trackingOrder(req:Request){
+ const invoice=new URL(req.url).searchParams.get("invoice");if(invoice&&!invoicePattern.test(invoice))throw new AppError(404,"Pesanan tidak ditemukan.");
  const authorization=req.headers.get("authorization");
  if(authorization){const token=authorization.startsWith("Bearer ")?authorization.slice(7):"";if(!validToken(token))throw new AppError(404,"Tautan pelacakan tidak berlaku.");
   const o=await db().prepare("SELECT orders.* FROM tracking_links JOIN orders ON orders.id=tracking_links.order_id WHERE tracking_links.token_hash=? AND tracking_links.expires_at>?").bind(await hash(token),Date.now()).first<Order>();
-  if(!o||!o.proof_key)throw new AppError(404,"Tautan pelacakan tidak berlaku.");return o;
+  if(!o||!o.proof_key||invoice&&o.id!==invoice)throw new AppError(404,"Tautan pelacakan tidak berlaku.");return o;
  }
+ if(invoice){const customer=await currentCustomer(req.headers.get("cookie"));if(customer){const owned=await db().prepare("SELECT * FROM orders WHERE id=? AND customer_id=? AND proof_key IS NOT NULL").bind(invoice,customer.id).first<Order>();if(owned)return owned;}const saved=session(req);if(validToken(saved)){const owned=await db().prepare("SELECT * FROM orders WHERE id=? AND session_hash=? AND proof_key IS NOT NULL AND created_at>? AND (customer_id IS NULL OR customer_id IS ?)").bind(invoice,await hash(saved),Date.now()-TOKEN_LIFE,customer?.id??null).first<Order>();if(owned)return owned;}throw new AppError(404,"Masuk ke akun pemilik pesanan atau gunakan invoice dan nomor HP penerima.");}
  const token=session(req);if(!validToken(token))throw new AppError(404,"Buka tautan pelacakan atau masukkan nomor invoice dan nomor HP.");
  const o=await db().prepare("SELECT * FROM orders WHERE session_hash=? AND created_at>? AND proof_key IS NOT NULL ORDER BY created_at DESC LIMIT 1").bind(await hash(token),Date.now()-TOKEN_LIFE).first<Order>();
  if(!o)throw new AppError(404,"Pesanan belum ditemukan. Gunakan invoice dan nomor HP penerima.");return o;
@@ -46,6 +49,7 @@ function cacheHistory(c:Cache|null,awb:string):TrackingHistory|null{if(c?.awb!==
 export async function customerTracking(o:Order):Promise<CustomerTracking>{
  let s=await shipment(o.id);const confirmed=o.payment_state==="payment_confirmed";
  const base:CustomerTracking={invoice:o.id,awb:s?.awb||null,courier:"J&T Express",paymentConfirmed:confirmed,checkedAt:null,stale:false,simulation:s?.environment==="sandbox",stage:confirmed?s?.provider_no?"preparing":"payment_confirmed":"proof_received",lastStatus:"",events:[],message:confirmed?"Pesanan sedang disiapkan oleh ELITE.VTG.":"Bukti pembayaran sudah diterima dan menunggu pemeriksaan ELITE.VTG."};
+ if(confirmed&&(o.preparing_at||o.shipped_at)){const shipped=confirmed&&!!o.shipped_at&&!!o.tracking_number;return {...base,awb:shipped?o.tracking_number!:null,courier:o.courier_name||"J&T Regular",stage:shipped?"in_transit":"preparing",message:shipped?"Pesanan sudah dikirim. Nomor resi tersedia di bawah.":"Pesanan sedang dipacking oleh ELITE.VTG. Nomor resi akan tersedia setelah dikirim."};}
  // Read-only provider lookup may discover a delayed AWB. Never create a booking or pickup here.
  if(confirmed&&s?.provider_no&&!s.awb){
   const now=Date.now();await db().prepare("INSERT INTO shipment_tracking(order_id,awb) VALUES(?,'') ON CONFLICT(order_id) DO NOTHING").bind(o.id).run();
