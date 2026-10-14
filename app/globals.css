@@ -75,3 +75,11 @@ body:has([data-section="order"]) .summary .discount-line,body:has([data-section=
 .stock-card-footer:has(.product-share){flex-wrap:wrap}.stock-card-footer .product-share{flex-basis:100%;margin:0}.stock-card-footer .product-share-entry{font-size:12px}
 /* Vaul's drag-background extension must not become empty scrollable content. */
 .elite-share-sheet[data-vaul-drawer]::after{display:none}
+
+/* Card sharing uses the caption corner without nesting controls inside the product link. */
+.product-card:has(.product-share-card){position:relative}
+.product-card:has(.product-share-card) .product-card-condition{padding-right:40px;min-height:32px}
+.product-card:has(.product-share-card) .product-card-schedule{padding-right:40px;min-height:32px}
+.product-share-card{position:absolute;right:6px;bottom:4px;z-index:2;margin:0;color:#092139}
+.product-share-card .product-share-entry{width:44px;height:44px;min-height:44px;padding:0;justify-content:center}
+.product-share-card>.product-share-notice,.product-share-card>.product-share-manual{display:none}

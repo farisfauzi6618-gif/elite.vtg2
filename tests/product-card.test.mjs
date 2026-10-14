@@ -16,6 +16,9 @@ const html=selected.map(product=>renderToStaticMarkup(createElement(ProductCard,
 assert.equal((html.match(/<article /g)||[]).length,1);assert.ok(html.includes('Size S / M'));assert.ok(!html.includes('Details size'));assert.ok(!html.includes('72 cm'));assert.ok(!html.includes('50 cm'));assert.ok(!html.includes('1 pcs'));
 assert.match(html,/<a class="product-card-link" href="\/produk\/p"/);
 assert.equal((html.match(/<a /g)||[]).length,1);
+assert.match(html,/<\/a><div class="product-share product-share-card"/);
+assert.match(html,/aria-label="Share product"/);
+assert.ok(!/<a class="product-card-link"[^>]*>[\s\S]*?<button[\s\S]*?<\/a>/.test(html));
 assert.ok(!html.includes('instagram.com'));assert.ok(!html.includes('Lihat di Instagram'));
 const native=renderToStaticMarkup(createElement(ProductCard,{...props,product:{...p,instagramUrl:''}}));assert.match(native,/<a class="product-card-link" href="\/produk\/p"/);
 const support=renderToStaticMarkup(createElement(CustomerSupport,{hasCart:true}));assert.match(support,/class="customer-support has-cart"/);assert.ok(support.includes('Got question? ask us on dm or Whatsapp'));assert.match(support,/href="https:\/\/wa.me\/6285174389305" target="_blank" rel="noopener noreferrer"/);assert.ok(!support.includes('fbclid'));assert.ok(support.includes('Kirim DM lewat profil @elite.vtg'));

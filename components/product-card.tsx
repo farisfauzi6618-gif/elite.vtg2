@@ -1,5 +1,6 @@
 'use client';
 import {useState} from 'react';
+import {ProductShare} from './product-share';
 import {photoUrl} from '@/modules/catalog/photo-url';
 import {isNewArrival} from '@/modules/catalog/new-arrivals';
 import {orderingLocked,scheduleLabel} from '@/modules/catalog/product-schedule';
@@ -31,5 +32,6 @@ export function ProductCard({product, onNavigate,now=Date.now()}: {now?:number;p
         <p className="product-card-condition" aria-label={'Kondisi: ' + condition}>{condition}</p>
       {!sold&&orderingLocked(product,now)&&<p className="product-card-schedule">Buka {scheduleLabel(product.orderableAt!)}</p>}</div>
     </a>
+    <ProductShare product={product} compact/>
   </article>;
 }
