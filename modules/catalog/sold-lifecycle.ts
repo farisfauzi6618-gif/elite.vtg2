@@ -1,3 +1,4 @@
+import {transactionPrice,groupPricing} from './sale-price';
 import {availableGroups,isSold,isReserved,matchesProduct,matchesSizePrice,type Product,type CatalogFilters} from './catalog-types';
 import {DEFAULT_FEATURES,type Feature} from './taxonomy';
 import {PRODUCTS_PER_PAGE} from './catalog-pagination';
@@ -26,7 +27,7 @@ export function catalogInventory(products:Product[],now=Date.now()) {
 export function catalogListing(products:Product[],filters:CatalogFilters&{sort?:string},terms:Feature[]=DEFAULT_FEATURES,now=Date.now(),archive=false) {
  const inventory=catalogInventory(products,now);
  const matching=(archive?[...inventory.main.filter(isSold),...inventory.recentlySold]:inventory.main).filter(p=>matchesProduct(p,filters,terms,true));
- const price=(p:Product)=>Math.min(...(isSold(p)||isReserved(p)?p.groups:availableGroups(p)).filter(g=>matchesSizePrice(p,g,filters)).map(g=>g.price??p.price??0));
+ const price=(p:Product)=>Math.min(...(isSold(p)||isReserved(p)?p.groups:availableGroups(p)).filter(g=>matchesSizePrice(p,g,filters)).map(g=>transactionPrice(p,g)??0));
  const sort=(a:Product,b:Product)=>filters.sort==='low'?price(a)-price(b):filters.sort==='high'?price(b)-price(a):(b.publishedAt??'').localeCompare(a.publishedAt??'')||a.id.localeCompare(b.id);
  if(archive)return matching.sort((a,b)=>(b.soldAt??'').localeCompare(a.soldAt??'')||a.id.localeCompare(b.id));
  const available=matching.filter(p=>!isSold(p)&&!isReserved(p)).sort(sort);

@@ -1,3 +1,4 @@
+import {salePriceIssue} from './sale-price';
 import {AppError,textValue,integerValue,optionalText} from './server';
 import type {ColorVariant} from './color-variants';
 import type {Product,SizeGroup} from './catalog-types';
@@ -11,7 +12,8 @@ export async function validateColors(input:any,current:Product,groups:SizeGroup[
   if(!name||!/^#[a-f0-9]{6}$/i.test(hex)||!['COLOR','IMAGE'].includes(swatchType)||typeof v.active!=='boolean')throw new AppError(400,'Isi nama warna dan kode HEX yang valid.');
   const photoKeys=await photos(photoKey,v.photoKeys??[]);if(swatchType==='IMAGE'){if(!swatchImage)throw new AppError(400,'Pilih foto untuk pattern swatch.');await photos(swatchImage,[]);}
   if(v.active&&!photoKey)throw new AppError(400,'Warna aktif membutuhkan foto utama.');
-  variants.push({id:v.id,name,hex,swatchType,swatchImage,active:v.active,photoKey,photoKeys,price:integerValue(v.price,'Harga warna'),condition:optionalText(v.condition),defects:optionalText(v.defects)??'None'});
+  const salePrice=integerValue(v.salePrice,'Sale Price'),price=integerValue(v.price,'Regular Price'),issue=salePriceIssue(salePrice,price??integerValue(input.price,'Regular Price'));if(issue)throw new AppError(400,name+': '+issue);
+  variants.push({salePrice,discountTitle:optionalText(v.discountTitle,100),id:v.id,name,hex,swatchType,swatchImage,active:v.active,photoKey,photoKeys,price,condition:optionalText(v.condition),defects:optionalText(v.defects)??'None'});
  }
  for(const old of current.colorVariants??[])if(!ids.has(old.id))throw new AppError(400,'Warna tersimpan tidak dapat dihapus. Nonaktifkan agar riwayat tetap tersimpan.');
  if(variants.length&&groups.some(g=>!g.colorVariantId||!ids.has(g.colorVariantId)))throw new AppError(400,'Setiap ukuran harus terhubung ke warna.');

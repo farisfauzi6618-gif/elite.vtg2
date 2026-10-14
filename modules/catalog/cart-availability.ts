@@ -1,3 +1,4 @@
+import {transactionPrice,groupPricing} from './sale-price';
 import {colorPhoto} from './color-variants';
 import {orderingLocked} from './product-schedule';
 import {choiceLabel,money,type Product} from './catalog-types';
@@ -6,7 +7,7 @@ export function cartAvailability(cart:CartLine[],products:Product[],catalogLoade
  return cart.map(line=>{
   const product=products.find(p=>p.id===line.productId),group=product?.groups.find(g=>g.id===line.groupId);
   const pending=!product&&!catalogLoaded;
-  return {...line,label:group?choiceLabel(group):line.label,pending,scheduled:!!product&&orderingLocked(product,now),orderableAt:product?.orderableAt??null,available:!!group&&group.qty!=null&&group.qty>=line.quantity,stock:group?.qty??0,photoKey:product&&group?colorPhoto(product,group):product?.photoKey??null,price:group?.price??product?.price??null};
+  return {...line,label:group?choiceLabel(group):line.label,pending,scheduled:!!product&&orderingLocked(product,now),orderableAt:product?.orderableAt??null,available:!!group&&group.qty!=null&&group.qty>=line.quantity,stock:group?.qty??0,photoKey:product&&group?colorPhoto(product,group):product?.photoKey??null,price:product&&group?transactionPrice(product,group):null};
  });
 }
 export type CartRow=ReturnType<typeof cartAvailability>[number];

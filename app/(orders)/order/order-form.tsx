@@ -103,7 +103,7 @@ export default function OrderForm(){
  function editQuery(v:string){setQuery(v);setDestination(null);setLocations([]);field("postcode","");setShippingError("");invalidate();}
  function selectLocation(l:ShippingLocation|null){if(!l){editQuery("");return;}invalidate();setDestination(l);setQuery(l.label);setLocations([l]);field("postcode",l.postalCode);}
  const goods=Number(form.itemAmount);
- const rewards=useRewardQuote(step===1&&!reserveMode&&!catalogLoading&&goods>=1000?(linked&&catalogToken?{context:'checkout',catalogToken,choice:rewardChoice}:!linked?{context:'manual',itemAmount:goods,choice:rewardChoice}:null):null);
+ const rewards=useRewardQuote(step===1&&!reserveMode&&!catalogLoading&&goods>0&&(linked||goods>=1000)?(linked&&catalogToken?{context:'checkout',catalogToken,choice:rewardChoice}:!linked?{context:'manual',itemAmount:goods,choice:rewardChoice}:null):null);
  const discount=step>1&&order?(order.discount_amount??0):reserveMode?0:rewards.quote?.discount??0,rewardLabel=step>1&&order?order.discount_label||'ELITE Reward · Pembelian pertama 5%':rewards.quote?.selected?.label,total=step>1&&order?order.total:reserveMode&&quote?goods+quote.amount:quote&&rewards.quote?rewards.quote.net+quote.amount:0;
  const currentQuote=step>1?order?.quote:quote;
  const returnHref=order&&typeof window!=="undefined"?catalogReturnHref(order,window.location.search):"/";

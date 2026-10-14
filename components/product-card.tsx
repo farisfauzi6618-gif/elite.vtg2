@@ -1,4 +1,5 @@
 'use client';
+import {ProductPrice} from './product-price';
 import {useState} from 'react';
 import {ProductShare} from './product-share';
 import {photoUrl} from '@/modules/catalog/photo-url';
@@ -28,7 +29,7 @@ export function ProductCard({product, onNavigate,now=Date.now()}: {now?:number;p
           <p className="product-card-size">Size {sizes.length ? sizes.join(' / ') : 'belum tercantum'}</p>
         </div>
         <h2>{product.name}</h2>
-        <p className="product-card-price">{displayPrice(product)}</p>
+        <ProductPrice product={product}/>
         <p className="product-card-condition" aria-label={'Kondisi: ' + condition}>{condition}</p>
       {!sold&&orderingLocked(product,now)&&<p className="product-card-schedule">Buka {scheduleLabel(product.orderableAt!)}</p>}</div>
     </a>

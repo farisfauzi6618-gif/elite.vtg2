@@ -1,3 +1,4 @@
+import {transactionPrice,groupPricing} from './sale-price';
 import {activeColorSql} from './color-variants';
 import {reservedQuantitySql} from './reserve-inventory';
 import {sellableQuantity} from './catalog-types';
@@ -6,7 +7,7 @@ import {orderingLocked,scheduleLabel} from './product-schedule';
 import { choiceLabel } from '@/modules/catalog/catalog-types';
 import { AppError,db,readProduct,textValue } from '@/modules/catalog/server';
 
-export type CheckoutLine={productId:string;groupId:string;quantity:number;name:string;label:string;instagramUrl:string;unitPrice:number};
+export type CheckoutLine={productId:string;groupId:string;quantity:number;name:string;label:string;instagramUrl:string;unitPrice:number;regularPrice?:number|null;salePrice?:number|null;discountTitle?:string};
 type Checkout={id:string;token_hash:string;lines_json:string;amount:number;expires_at:number;customer_id:string|null;order_type?:string};
 export async function digest(value:string){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));return Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('')}
 export function checkoutConfigured(){return true}
@@ -16,7 +17,7 @@ export async function createCheckout(input:any,customerId:string|null=null,onCre
  const grouped=new Map<string,{productId:string;groupId:string;quantity:number}>();
  for(const raw of input.lines){const productId=textValue(raw?.productId,100),groupId=textValue(raw?.groupId,100),quantity=raw?.quantity;if(!productId||!groupId||!Number.isSafeInteger(quantity)||quantity<1||quantity>20)throw new AppError(400,'Pilihan barang dan jumlah tidak valid.');const old=grouped.get(groupId);if(old&&old.productId!==productId)throw new AppError(400,'Kelompok ukuran tidak cocok.');grouped.set(groupId,{productId,groupId,quantity:quantity+(old?.quantity||0)})}
  const lines:CheckoutLine[]=[];let quantity=0,amount=0;
- for(const raw of grouped.values()){const p=await readProduct(raw.productId),g=p.groups.find(g=>g.id===raw.groupId);if(p.status!=='published'||!g||g.colorActive===false||g.qty==null||(sellableQuantity(g)??0)<raw.quantity)throw new AppError(409,'Stok pilihan berubah. Perbarui katalog dan pilih kembali.');if(orderingLocked(p))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(p.orderableAt!)+'. Foto dan detail sudah bisa dilihat.');const price=g.price??p.price;if(price==null||price<1000)throw new AppError(409,'Harga barang belum dapat digunakan untuk pembayaran. Hubungi ELITE.VTG.');quantity+=raw.quantity;amount+=price*raw.quantity;lines.push({...raw,name:p.name,label:choiceLabel(g),instagramUrl:p.instagramUrl,unitPrice:price})}
+ for(const raw of grouped.values()){const p=await readProduct(raw.productId),g=p.groups.find(g=>g.id===raw.groupId);if(p.status!=='published'||!g||g.colorActive===false||g.qty==null||(sellableQuantity(g)??0)<raw.quantity)throw new AppError(409,'Stok pilihan berubah. Perbarui katalog dan pilih kembali.');if(orderingLocked(p))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(p.orderableAt!)+'. Foto dan detail sudah bisa dilihat.');const price=transactionPrice(p,g);if(price==null||price<=0||price<1000&&groupPricing(p,g).sale==null)throw new AppError(409,'Harga barang belum dapat digunakan untuk pembayaran. Hubungi ELITE.VTG.');quantity+=raw.quantity;amount+=price*raw.quantity;lines.push({...raw,name:p.name,label:choiceLabel(g),instagramUrl:p.instagramUrl,unitPrice:price,regularPrice:groupPricing(p,g).regular,salePrice:groupPricing(p,g).sale,discountTitle:groupPricing(p,g).title})}
  if(quantity>20||amount>10000000)throw new AppError(400,'Maksimal 20 unit dan harga barang Rp10.000.000 per pesanan.');
  const mode=input.mode==='reserve'?'reserve':'normal';if(input.mode!=null&&!['reserve','normal'].includes(input.mode))throw new AppError(400,'Mode checkout tidak valid.');if(mode==='reserve'){try{minimumReserveDeposit(amount)}catch(e){throw new AppError(400,(e as Error).message)}}
  const token=crypto.randomUUID().replaceAll('-','')+crypto.randomUUID().replaceAll('-',''),id=crypto.randomUUID(),expiresAt=Date.now()+86400000;
@@ -29,7 +30,7 @@ export async function quoteCheckout(token:unknown){
  const c=await db().prepare('SELECT * FROM catalog_checkouts WHERE token_hash=?').bind(await digest(token)).first<Checkout>();if(!c||c.expires_at<Date.now())throw new AppError(410,'Tautan pilihan barang telah berakhir. Pilih kembali di katalog.');
  const used=await db().prepare('SELECT order_id FROM catalog_sales WHERE checkout_id=?').bind(c.id).first();if(used)throw new AppError(409,'Pilihan barang ini sudah dikonfirmasi. Buat pilihan baru di katalog.');
  const lines=JSON.parse(c.lines_json) as CheckoutLine[];
- for(const line of lines){const p=await readProduct(line.productId),g=p.groups.find(g=>g.id===line.groupId);if(p.status!=='published'||!g||g.colorActive===false||g.qty==null||(sellableQuantity(g)??0)<line.quantity)throw new AppError(409,'Barang pilihan sudah tidak tersedia. Pilih kembali di katalog.');if(orderingLocked(p))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(p.orderableAt!)+'.');if((g.price??p.price)!==line.unitPrice)throw new AppError(409,'Harga barang berubah. Pilih kembali di katalog untuk melihat harga terbaru.')}
+ for(const line of lines){const p=await readProduct(line.productId),g=p.groups.find(g=>g.id===line.groupId);if(p.status!=='published'||!g||g.colorActive===false||g.qty==null||(sellableQuantity(g)??0)<line.quantity)throw new AppError(409,'Barang pilihan sudah tidak tersedia. Pilih kembali di katalog.');if(orderingLocked(p))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(p.orderableAt!)+'.');if((transactionPrice(p,g))!==line.unitPrice)throw new AppError(409,'Harga barang berubah. Pilih kembali di katalog untuk melihat harga terbaru.')}
  const customer=c.customer_id?await db().prepare('SELECT name,phone FROM customers WHERE id=?').bind(c.customer_id).first<{name:string;phone:string|null}>():null;
  return {id:c.id,lines,amount:c.amount,orderType:c.order_type??'normal',expiresAt:c.expires_at,...(customer?{customer}: {})};
 }

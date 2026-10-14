@@ -11,7 +11,7 @@ type Story={file:File;url:string;copied:boolean;canShare:boolean};
 export function ProductShare({product,admin=false,compact=false}:{product:Product;admin?:boolean;compact?:boolean}){
  const [open,setOpen]=useState(false),[busy,setBusy]=useState(false),[notice,setNotice]=useState(''),[manual,setManual]=useState(false),[story,setStory]=useState<Story|null>(null);
  const pending=useRef(false),asset=useRef<Story|null>(null),generation=useRef(0);
- const storyKey=JSON.stringify([product.id,product.name,product.brand,product.price,product.photoKey,product.photoKeys,product.groups.map(g=>[g.qty,g.fits,g.price])]);
+ const storyKey=JSON.stringify([product.id,product.name,product.brand,product.price,product.salePrice,product.discountTitle,product.saleColorsShared,product.photoKey,product.photoKeys,product.groups.map(g=>[g.qty,g.fits,g.price,g.salePrice,g.discountTitle])]);
  useEffect(()=>{setStory(null);setNotice('');setManual(false);return()=>{generation.current++;if(asset.current)URL.revokeObjectURL(asset.current.url);asset.current=null;}},[storyKey]);
  if(product.status!=='published')return null;
  const url=productShareUrl(product),copy=()=>navigator.clipboard?.writeText?copyProductLink(product,value=>navigator.clipboard.writeText(value)):Promise.resolve(false);
