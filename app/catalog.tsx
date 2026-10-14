@@ -15,6 +15,7 @@ import {ProductCard} from '@/components/product-card';
 import {catalogPage, catalogPageNumbers, parseCatalogPage} from '@/modules/catalog/catalog-pagination';
 import { ProductDetail } from '@/components/product-detail';
 import { reconcileReturnedCart } from '@/modules/catalog/cart-return';
+import {canAddQuantity} from '@/modules/catalog/product-availability';
 import {directPurchaseLines,checkoutHandoffLines,type CheckoutLine} from '@/modules/catalog/direct-purchase';
 import { checkoutDestination } from '@/modules/catalog/checkout-navigation';
 import {visibleRefresh} from '@/modules/catalog/visible-refresh';
@@ -68,12 +69,12 @@ export default function Catalog({productId,initialProduct,archive=false}:{produc
  useEffect(()=>{if(!cart.length)setCartOpen(false)},[cart.length]);
  useEffect(()=>{if(!ready)return;const previous=analyticsCart.current;analyticsCart.current=cart;if(!previous)return;for(const row of cart){if(row.quantity>(previous.find(x=>x.groupId===row.groupId)?.quantity??0))track('add_to_cart',{productId:row.productId})}},[cart,ready]);
  useEffect(()=>{if(detail)track('product_view',{productId:detail.id},'view:'+detail.id);else if(detailError)trackError('critical_404',productId)},[detail?.id,detailError]);
- function pick(p:Product,g:Product['groups'][number]){if(isSold(p)||orderingLocked(p,saleNow)||cart.reduce((n,x)=>n+x.quantity,0)>=20||(cart.find(x=>x.groupId===g.id)?.quantity??0)>=(g.qty??0))return;setCheckoutError('');setAddedNote(p.name+' · '+fitLabel(g)+' ditambahkan ke keranjang.');setCart(all=>{const old=all.find(x=>x.groupId===g.id);if(all.reduce((n,x)=>n+x.quantity,0)>=20||(old?.quantity||0)>=(g.qty||0))return all;return old?all.map(x=>x.groupId===g.id?{...x,quantity:x.quantity+1}:x):[...all,{productId:p.id,groupId:g.id,quantity:1,name:p.name,label:choiceLabel(g)}]})}
+ function pick(p:Product,g:Product['groups'][number],quantity=1){if(isSold(p)||orderingLocked(p,saleNow)||!canAddQuantity(g.qty,cart.find(x=>x.groupId===g.id)?.quantity??0,cart.reduce((n,x)=>n+x.quantity,0),quantity))return;setCheckoutError('');setAddedNote(p.name+' · '+fitLabel(g)+' ditambahkan ke keranjang.');setCart(all=>{const old=all.find(x=>x.groupId===g.id);if(!canAddQuantity(g.qty,old?.quantity??0,all.reduce((n,x)=>n+x.quantity,0),quantity))return all;return old?all.map(x=>x.groupId===g.id?{...x,quantity:x.quantity+quantity}:x):[...all,{productId:p.id,groupId:g.id,quantity,name:p.name,label:choiceLabel(g)}]})}
  function cartQuantity(groupId:string,delta:number){setCart(all=>all.map(x=>x.groupId===groupId?{...x,quantity:x.quantity+delta}:x).filter(x=>x.quantity>0));setCheckoutError('')}
  const cartRows=cartAvailability(cart,products,catalogLoaded,saleNow),cartCount=cart.reduce((n,x)=>n+x.quantity,0),cartState=cartSummary(cartRows);
  const rewards=useRewardQuote(cartOpen&&cartState.canCheckout?{context:'cart',lines:cart.map(({productId,groupId,quantity})=>({productId,groupId,quantity})),choice:rewardChoice}:null,JSON.stringify(cartRows.map(r=>[r.price,r.stock,r.scheduled])));
  const checkoutFlight=useRef(false);
- async function buyNow(p:Product,g:Product['groups'][number]){try{await checkout(directPurchaseLines(p,g.id,saleNow),true)}catch(e){setCheckoutError((e as Error).message)}}
+ async function buyNow(p:Product,g:Product['groups'][number],quantity=1){try{await checkout(directPurchaseLines(p,g.id,saleNow,quantity),true)}catch(e){setCheckoutError((e as Error).message)}}
  async function checkout(lines:CheckoutLine[]=cart.map(({productId,groupId,quantity})=>({productId,groupId,quantity})),direct=false){if(checkoutFlight.current)return;checkoutFlight.current=true;setCheckoutBusy(true);setCheckoutError('');try{const v=await catalogRequest('/api/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({lines})});const basket=crypto.randomUUID(),target=checkoutDestination(v.url+(v.url.includes('?')?'&':'?')+'reward='+encodeURIComponent(direct?'auto':rewardChoice),window.location.origin,basket);try{sessionStorage.setItem('elite.catalog.checkout',JSON.stringify({id:basket,lines:checkoutHandoffLines(lines,direct)}))}catch{}remember();window.location.assign(target.href)}catch(e){setCheckoutError((e as Error).message);trackError('checkout_error');void load()}finally{checkoutFlight.current=false;setCheckoutBusy(false)}}
  function change(key:keyof typeof defaults,value:string){restore.current=null;setPage(1);setFilters(f=>({...f,[key]:value}))}
  function resetFilters(next=defaults){restore.current=null;setPage(1);setFilters(next)}

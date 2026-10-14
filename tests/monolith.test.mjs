@@ -1,7 +1,7 @@
 import test, { after } from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
-import { mkdtemp, mkdir, writeFile, rm, readFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, rm, readFile, readdir } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -109,7 +109,7 @@ after(async () => {
 
 test('the unified migration sequence is repeatable and prepares all three domains', async () => {
   const result = await migrate(client, new URL('../migrations/', import.meta.url));
-  assert.equal(result.pending.length, 0); assert.equal(result.total, 32);
+  assert.equal(result.pending.length, 0); assert.equal(result.total, (await readdir(new URL('../migrations/',import.meta.url))).filter(name=>name.endsWith('.sql')).length);
   const tables = (await client.execute("SELECT name FROM sqlite_master WHERE type='table'")).rows.map(row => row.name);
   for (const name of ['products','orders','shipping_config','customers','customer_giveaway_entries','customer_trash','owner_sessions','loyalty_config','loyalty_cycles','loyalty_rewards','loyalty_order_credits','loyalty_stamp_history']) assert.ok(tables.includes(name));
 });
@@ -150,7 +150,7 @@ test('new admin drafts use editable defaults and persist up to 17 gallery photos
   const keys=[];for(let i=0;i<18;i++)keys.push(await m.storePhoto(png,'simulation-gallery'));
   const draftId=crypto.randomUUID(),payload={op:'create',draftId,photoKey:keys[0],photoKeys:keys.slice(0,17)};
   const response=await m.catalogAdminPost(request('/api/admin/katalog',payload,ownerCookie));assert.equal(response.status,200);
-  const {product:p}=await response.json();assert.equal(p.brand,'Polo Ralph Lauren');assert.equal(p.defects,'tidak ada');assert.equal(p.status,'draft');assert.equal(p.reviewed,false);
+  const {product:p}=await response.json();assert.equal(p.brand,'Polo Ralph Lauren');assert.equal(p.defects,'None');assert.equal(p.status,'draft');assert.equal(p.reviewed,false);
   assert.equal(p.price,null);assert.equal(p.groups[0].qty,null);assert.deepEqual(p.groups[0].fits,[]);assert.equal(p.groups[0].defects,null);
   assert.deepEqual(m.productPhotos(p),keys.slice(0,17));assert.deepEqual(m.publicProduct(p).photoKeys,keys.slice(0,17));
   const saved=await m.catalogAdminPost(request('/api/admin/katalog',{...p,op:'save',brand:'Beanpole',defects:'Noda kecil',status:'draft'},ownerCookie));assert.equal(saved.status,200);

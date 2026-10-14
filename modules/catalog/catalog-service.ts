@@ -15,7 +15,7 @@ export async function createManualDraft(input:any){
  const photoKey=optionalText(input.photoKey,100),photoKeys=await validatePhotos(photoKey,input.photoKeys??[]);
  const id=crypto.randomUUID(),gid=crypto.randomUUID(),now=new Date().toISOString();
  const group:SizeGroup={id:gid,label:'',tagSize:'',fits:[],lengthCm:null,widthCm:null,qty:null,price:null,condition:null,defects:null,revision:0,sortOrder:0};
- const brand='Polo Ralph Lauren',defects='tidak ada';
+ const brand='Polo Ralph Lauren',defects='None';
  const warnings=publicationIssues({name:'',brand,category:'',color:'',price:null,condition:null,defects,photoKey,groups:[group]});
  const result=await d.batch([
   d.prepare("INSERT OR IGNORE INTO products (id,shortcode,instagram_url,name,brand,category,feature_ids,color,price,condition,defects,photo_key,photo_keys,caption,warnings,reviewed,status,created_at,updated_at,version) VALUES (?,?,'','',?,'','[]','',NULL,NULL,?,?,?,'',?,0,'draft',?,?,0)").bind(id,shortcode,brand,defects,photoKey,JSON.stringify(photoKeys),JSON.stringify(warnings),now,now),

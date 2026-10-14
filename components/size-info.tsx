@@ -1,8 +1,8 @@
 import type { SizeGroup } from '@/modules/catalog/catalog-types';
 import { fitValue } from '@/modules/catalog/catalog-types';
-export function SizeInfo({group}:{group:SizeGroup}){
+export function SizeInfo({group,showStock=true}:{group:SizeGroup;showStock?:boolean}){
   return <div className="size-info">
-    <p className="size-stock">Stok: <strong>{group.qty??'—'} pcs</strong></p>
+    {showStock&&<p className="size-stock">Stok: <strong>{group.qty??'—'} pcs</strong></p>}
     <dl className="size-spec-row">
       <div><dt>Size on tag</dt><dd>{group.tagSize?.trim() || 'Belum tercantum'}</dd></div>
       <div><dt>Size fit to</dt><dd>{fitValue(group)}</dd></div>
