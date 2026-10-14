@@ -32,6 +32,20 @@ export async function collect(r:Request,v:Record<string,unknown>){
  await db().prepare('UPDATE analytics_sessions SET last_seen_at=? WHERE id=?').bind(Date.now(),s.id).run();
  const customer=await currentCustomer(r.headers.get('cookie'));if(customer)s.user_id=customer.id;
  const productId=typeof v.productId==='string'&&v.productId.length<=100?v.productId:undefined;
+ if(v.event==='featured_product_view'||v.event==='featured_product_click'){
+  const view=v.event==='featured_product_view',input=view?v.products:[{productId:v.productId,position:v.position}];
+  if(!Array.isArray(input)||!input.length||input.length>8)return;
+  const rows=input.filter(p=>p&&typeof p.productId==='string'&&p.productId.length<=100&&Number.isInteger(p.position)&&p.position>=1&&p.position<=8);
+  if(rows.length!==input.length||new Set(rows.map(p=>p.productId)).size!==rows.length)return;
+  const nonce=typeof v.id==='string'&&ID.test(v.id)?v.id:'';if(!nonce)return;
+  const found=await db().prepare(`SELECT id,featured_position FROM products WHERE status='published' AND is_featured=1 AND sold_at IS NULL AND (orderable_at IS NULL OR julianday(orderable_at)<=julianday('now')) AND id IN (${rows.map(()=>'?').join(',')})`).bind(...rows.map(p=>p.productId)).all<{id:string;featured_position:number}>();
+  const statements=[];
+  for(const row of found.results){if(!rows.some(p=>p.productId===row.id&&p.position===row.featured_position))continue;const id=crypto.randomUUID(),key=view?'featured-view:'+s.id+':'+row.id+':'+row.featured_position:'featured-click:'+s.id+':'+nonce;
+   statements.push(db().prepare('INSERT OR IGNORE INTO analytics_events(id,dedupe_key,event_name,timestamp,session_id,visitor_id,product_id,traffic_source) VALUES(?,?,?,?,?,?,?,?)').bind(id,key,v.event,Date.now(),s.id,s.visitor_id,row.id,s.traffic_source));
+   statements.push(db().prepare('INSERT OR IGNORE INTO analytics_featured_values(event_id,featured_position) SELECT id,? FROM analytics_events WHERE dedupe_key=?').bind(row.featured_position,key));
+  }
+  if(statements.length)await db().batch(statements);return;
+ }
  if(v.event==='product_color_selected'){
   const id=typeof v.variantId==='string'&&ID.test(v.variantId)?v.variantId:'',nonce=typeof v.id==='string'&&ID.test(v.id)?v.id:'';if(!productId||!id||!nonce)return;
   const row=await db().prepare("SELECT c.value FROM products p,json_each(p.color_variants) c WHERE p.id=? AND p.status='published' AND json_extract(c.value,'$.id')=? AND json_extract(c.value,'$.active')=1").bind(productId,id).first<{value:string}>();if(!row)return;const color=JSON.parse(row.value),key='color:'+s.id+':'+nonce;

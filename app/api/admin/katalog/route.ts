@@ -1,3 +1,4 @@
+import {setFeatured} from '@/modules/catalog/featured-server';
 import {readTaxonomy} from '@/modules/catalog/taxonomy-service';
 import { boundary, requireAdmin, requireOwner, readJson, response, readProducts, readProduct, readHistory, db, AppError, textValue } from '@/modules/catalog/server';
 import { instagramConfig } from '@/modules/catalog/instagram';
@@ -12,6 +13,7 @@ export async function GET(request:Request){return boundary(async()=>{await requi
 })}
 export async function POST(request:Request){return boundary(async()=>{const user=await requireAdmin(request);const data=await readJson(request);if(!data||typeof data!=='object')throw new AppError(400,'Data formulir tidak valid.');switch(data.op){
  case 'create':return response(await createManualDraft(data));
+ case 'featured':return response({product:await setFeatured(data)});
  case 'soldVisibility':return response({product:await setSoldVisibility(data)});
  case 'manualImport':
  case 'instagramImport':throw new AppError(410,'Impor caption dan Instagram sudah dihapus. Tambahkan barang melalui formulir manual.');

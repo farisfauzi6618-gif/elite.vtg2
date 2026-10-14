@@ -5,3 +5,5 @@ export const analyticsEvents=sqliteTable('analytics_events',{id:text('id').prima
 export const analyticsEventProducts=sqliteTable('analytics_event_products',{eventId:text('event_id').notNull(),productId:text('product_id').notNull()},t=>[primaryKey({columns:[t.eventId,t.productId]}),index('idx_analytics_event_products_product').on(t.productId,t.eventId)]);
 export const analyticsCheckoutContext=sqliteTable('analytics_checkout_context',{checkoutId:text('checkout_id').primaryKey(),sessionId:text('session_id').notNull()});
 export const analyticsOrderContext=sqliteTable('analytics_order_context',{orderId:text('order_id').primaryKey(),sessionId:text('session_id').notNull()});
+
+export const analyticsFeaturedValues=sqliteTable('analytics_featured_values',{eventId:text('event_id').primaryKey().references(()=>analyticsEvents.id),featuredPosition:integer('featured_position').notNull()});
