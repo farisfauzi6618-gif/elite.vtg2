@@ -3,6 +3,7 @@ import {currentCustomer} from '@/modules/catalog/customers';
 import {myOrder} from '@/modules/order/order-server';
 import {traffic,normalizeSearch,ERROR_CODES} from './common';
 type Session={id:string;visitor_id:string;user_id:string|null;started_at:number;last_seen_at:number;traffic_source:string;utm_source:string|null;utm_medium:string|null;utm_campaign:string|null;utm_content:string|null};
+const SHARE_METHODS:Record<string,string>={product_share_opened:'opened',product_share_instagram_story:'instagram_story',product_share_whatsapp:'whatsapp',product_share_copy_link:'copy_link',product_share_more:'more'};
 const ID=/^[a-f0-9-]{36}$/;
 const cookie=(r:Request,name:string)=>r.headers.get('cookie')?.split(';').map(s=>s.trim()).find(s=>s.startsWith(name+'='))?.slice(name.length+1)||'';
 export async function requireAnalytics(r?:Request){const user=await requireAdmin(r);if(user.role!=='owner'&&!user.analyticsAllowed)throw new AppError(403,'Akses Analytics belum diberikan oleh pemilik.');return user}
@@ -31,10 +32,10 @@ export async function collect(r:Request,v:Record<string,unknown>){
  await db().prepare('UPDATE analytics_sessions SET last_seen_at=? WHERE id=?').bind(Date.now(),s.id).run();
  const customer=await currentCustomer(r.headers.get('cookie'));if(customer)s.user_id=customer.id;
  const productId=typeof v.productId==='string'&&v.productId.length<=100?v.productId:undefined;
- if(v.event==='product_view'||v.event==='add_to_cart'||v.event==='product_share_clicked'){
+ if(v.event==='product_view'||v.event==='add_to_cart'||v.event==='product_share_clicked'||Object.hasOwn(SHARE_METHODS,String(v.event))){
   const p=productId?await db().prepare("SELECT p.id,EXISTS(SELECT 1 FROM size_groups g WHERE g.product_id=p.id AND g.qty>0) AS stocked,p.orderable_at FROM products p WHERE p.id=? AND p.status='published'").bind(productId).first<{id:string;stocked:number;orderable_at:string|null}>():null;if(!p)return;
   if(v.event==='add_to_cart'&&(!p.stocked||(p.orderable_at&&Date.parse(p.orderable_at)>Date.now())))return;
-  if(v.event==='product_share_clicked'){const nonce=typeof v.id==='string'&&ID.test(v.id)?v.id:'';if(!nonce||!['native_share','copy_link'].includes(String(v.shareMethod)))return;await event(s,'product_share_clicked','share:'+s.id+':'+nonce,{productId:p.id,shareMethod:String(v.shareMethod)});return;}
+  if(v.event==='product_share_clicked'||Object.hasOwn(SHARE_METHODS,String(v.event))){const nonce=typeof v.id==='string'&&ID.test(v.id)?v.id:'';const method=SHARE_METHODS[String(v.event)];if(!nonce||(method?method!==v.shareMethod:!['native_share','copy_link'].includes(String(v.shareMethod))))return;await event(s,String(v.event),'share:'+s.id+':'+nonce,{productId:p.id,shareMethod:String(v.shareMethod)});return;}
   const nonce=typeof v.id==='string'&&ID.test(v.id)?v.id:'';if(v.event==='add_to_cart'&&!nonce)return;
   await event(s,String(v.event),v.event==='product_view'?'view:'+s.id+':'+p.id:'cart:'+s.id+':'+nonce,{productId:p.id});return;
  }
