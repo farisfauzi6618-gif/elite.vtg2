@@ -22,18 +22,19 @@ export async function startVisit(r:Request,input:Record<string,unknown>){
  const secure=new URL(r.url).protocol==='https:'?'Secure; ':'';
  return [`elite_visitor=${visitor}; Path=/; HttpOnly; ${secure}SameSite=Lax; Max-Age=31536000`,`elite_visit=${s.id}; Path=/; HttpOnly; ${secure}SameSite=Lax; Max-Age=1800`];
 }
-type Detail={productId?:string;orderId?:string;query?:string;resultCount?:number;errorCode?:string;userId?:string|null};
+type Detail={productId?:string;orderId?:string;query?:string;resultCount?:number;errorCode?:string;userId?:string|null;shareMethod?:string};
 export async function event(s:Session|null,name:string,key:string,v:Detail={},products:string[]=[]){
- const id=crypto.randomUUID(),d=db();await d.batch([d.prepare('INSERT OR IGNORE INTO analytics_events(id,dedupe_key,event_name,timestamp,session_id,visitor_id,user_id,product_id,order_id,search_query,result_count,traffic_source,utm_source,utm_medium,utm_campaign,utm_content,error_code) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(id,key,name,Date.now(),s?.id,s?.visitor_id,v.userId??s?.user_id,v.productId,v.orderId,v.query,v.resultCount,s?.traffic_source??'Other',s?.utm_source,s?.utm_medium,s?.utm_campaign,s?.utm_content,v.errorCode),...products.map(p=>d.prepare('INSERT OR IGNORE INTO analytics_event_products(event_id,product_id) SELECT id,? FROM analytics_events WHERE dedupe_key=?').bind(p,key))]);
+ const id=crypto.randomUUID(),d=db();await d.batch([d.prepare('INSERT OR IGNORE INTO analytics_events(id,dedupe_key,event_name,timestamp,session_id,visitor_id,user_id,product_id,order_id,search_query,result_count,traffic_source,utm_source,utm_medium,utm_campaign,utm_content,error_code,share_method) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(id,key,name,Date.now(),s?.id,s?.visitor_id,v.userId??s?.user_id,v.productId,v.orderId,v.query,v.resultCount,s?.traffic_source??'Other',s?.utm_source,s?.utm_medium,s?.utm_campaign,s?.utm_content,v.errorCode,v.shareMethod??null),...products.map(p=>d.prepare('INSERT OR IGNORE INTO analytics_event_products(event_id,product_id) SELECT id,? FROM analytics_events WHERE dedupe_key=?').bind(p,key))]);
 }
 export async function collect(r:Request,v:Record<string,unknown>){
  const s=await analyticsSession(r);if(!s)return;
  await db().prepare('UPDATE analytics_sessions SET last_seen_at=? WHERE id=?').bind(Date.now(),s.id).run();
  const customer=await currentCustomer(r.headers.get('cookie'));if(customer)s.user_id=customer.id;
  const productId=typeof v.productId==='string'&&v.productId.length<=100?v.productId:undefined;
- if(v.event==='product_view'||v.event==='add_to_cart'){
+ if(v.event==='product_view'||v.event==='add_to_cart'||v.event==='product_share_clicked'){
   const p=productId?await db().prepare("SELECT p.id,EXISTS(SELECT 1 FROM size_groups g WHERE g.product_id=p.id AND g.qty>0) AS stocked,p.orderable_at FROM products p WHERE p.id=? AND p.status='published'").bind(productId).first<{id:string;stocked:number;orderable_at:string|null}>():null;if(!p)return;
   if(v.event==='add_to_cart'&&(!p.stocked||(p.orderable_at&&Date.parse(p.orderable_at)>Date.now())))return;
+  if(v.event==='product_share_clicked'){const nonce=typeof v.id==='string'&&ID.test(v.id)?v.id:'';if(!nonce||!['native_share','copy_link'].includes(String(v.shareMethod)))return;await event(s,'product_share_clicked','share:'+s.id+':'+nonce,{productId:p.id,shareMethod:String(v.shareMethod)});return;}
   const nonce=typeof v.id==='string'&&ID.test(v.id)?v.id:'';if(v.event==='add_to_cart'&&!nonce)return;
   await event(s,String(v.event),v.event==='product_view'?'view:'+s.id+':'+p.id:'cart:'+s.id+':'+nonce,{productId:p.id});return;
  }

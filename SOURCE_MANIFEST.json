@@ -20,10 +20,10 @@
       "exportSha256": "a2497e6f9ed53d20f68559ee47ef9e4d24ee95189567e5e8558f154c37e73ca2"
     },
     {
-      "source": "monolith-2026-10-14-new-arrivals",
+      "source": "monolith-2026-10-14-product-share",
       "path": "app/globals.css",
-      "sha256": "1600cb8c12d9216cb5153bdc50fd25ff9c8a4a2811a15ddd39daa17d7eb6e298",
-      "exportSha256": "1600cb8c12d9216cb5153bdc50fd25ff9c8a4a2811a15ddd39daa17d7eb6e298"
+      "sha256": "2844a016ea0c49a3c70b3401278a90cb4374ccdee360b497faf6994db823f1e1",
+      "exportSha256": "2844a016ea0c49a3c70b3401278a90cb4374ccdee360b497faf6994db823f1e1"
     },
     {
       "source": "monolith-2026-10-13-post-purchase",
@@ -122,10 +122,10 @@
       "exportSha256": "e19330f0c81d84ed9483cf23789dbd3e379fce1820647ec219df6aba4a39391c"
     },
     {
-      "source": "monolith-2026-10-12-budget-efficiency",
+      "source": "monolith-2026-10-14-product-share",
       "path": "app/admin/katalog/admin.tsx",
-      "sha256": "2fa7ed547b9023eb05c07164bccc8f19f35928c671a2b5000e5636d9acf9666a",
-      "exportSha256": "2fa7ed547b9023eb05c07164bccc8f19f35928c671a2b5000e5636d9acf9666a"
+      "sha256": "b6d3a1ecfec62d9b62b560c803e341387a91feef28d1297d020077a546e8955e",
+      "exportSha256": "b6d3a1ecfec62d9b62b560c803e341387a91feef28d1297d020077a546e8955e"
     },
     {
       "source": "monolith-2026-10-09",
@@ -374,10 +374,10 @@
       "exportSha256": "8e33bd8eef08af0916d3a89ba86ea6004ba793c028efdc5b57a8c88230eab078"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-14-product-share",
       "path": "app/produk/[id]/page.tsx",
-      "sha256": "b588c3e4294074370f88dbe1291cfce5bfebc9ffde8aade1ee5f2d9d50da8f1c",
-      "exportSha256": "b588c3e4294074370f88dbe1291cfce5bfebc9ffde8aade1ee5f2d9d50da8f1c"
+      "sha256": "e4c36cd8546e189e570bbb9468fe9a576d54735a60081d9b4e9cc5935a3748f3",
+      "exportSha256": "e4c36cd8546e189e570bbb9468fe9a576d54735a60081d9b4e9cc5935a3748f3"
     },
     {
       "source": "monolith-2026-10-11-customer-directory",
@@ -428,10 +428,10 @@
       "exportSha256": "e78cc51b8cae7ed6c375d1245b6dbda4bc312590f57f12a18739d7254ba53f16"
     },
     {
-      "source": "monolith-2026-10-13-checkout-simplification",
+      "source": "monolith-2026-10-14-product-share",
       "path": "components/product-detail.tsx",
-      "sha256": "f1369ce4f70a11e14bb50c7fd195d1e46d80c2fb03dd8825f8c4ef70d7d3d397",
-      "exportSha256": "f1369ce4f70a11e14bb50c7fd195d1e46d80c2fb03dd8825f8c4ef70d7d3d397"
+      "sha256": "e97f06cc4aa16e49ec0646a653f84ad8bfb371f1276682e6cad3ba85040e7e9c",
+      "exportSha256": "e97f06cc4aa16e49ec0646a653f84ad8bfb371f1276682e6cad3ba85040e7e9c"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4208,10 +4208,10 @@
       "exportSha256": "664c9f95b0aff7a6d64c166fc5cdce1a5047a5402fff80888ec588c21fae6935"
     },
     {
-      "source": "monolith-2026-10-10-website-analytics-v1",
+      "source": "monolith-2026-10-14-product-share",
       "path": "modules/analytics/server.ts",
-      "sha256": "d5fce45735c97da03ae2ae29adb1b711d3e68df1ec54fe7d7ffbc8c6d277860f",
-      "exportSha256": "d5fce45735c97da03ae2ae29adb1b711d3e68df1ec54fe7d7ffbc8c6d277860f"
+      "sha256": "1bbc42069768ceca95356f884d02966a233a9f01ec17c2e6e30a16c130f1a722",
+      "exportSha256": "1bbc42069768ceca95356f884d02966a233a9f01ec17c2e6e30a16c130f1a722"
     },
     {
       "source": "monolith-2026-10-10-website-analytics-v1",
@@ -4232,10 +4232,10 @@
       "exportSha256": "60fb17f471556784f50270820730833f2d3f1327b5663f14a6f6acfdfee75b80"
     },
     {
-      "source": "monolith-2026-10-10-website-analytics-v1",
+      "source": "monolith-2026-10-14-product-share",
       "path": "tests/analytics.test.mjs",
-      "sha256": "b12801fc39c54b89607b503575c7d2dce61f54841e2d3f89cd3adb0d62254552",
-      "exportSha256": "b12801fc39c54b89607b503575c7d2dce61f54841e2d3f89cd3adb0d62254552"
+      "sha256": "6d153deec7c1a5bfd2b81c4e3a673785da7ea6f2820530b7fc1815b60d310839",
+      "exportSha256": "6d153deec7c1a5bfd2b81c4e3a673785da7ea6f2820530b7fc1815b60d310839"
     },
     {
       "source": "monolith-2026-10-10-website-analytics-v1",
@@ -4674,6 +4674,30 @@
       "path": "tests/new-arrivals.test.mjs",
       "sha256": "6384a3e736baffaf4e9ec6f60bcfde02a356e5169b0d7ef80450ac85854f9b39",
       "exportSha256": "6384a3e736baffaf4e9ec6f60bcfde02a356e5169b0d7ef80450ac85854f9b39"
+    },
+    {
+      "source": "monolith-2026-10-14-product-share",
+      "path": "modules/catalog/product-share.ts",
+      "sha256": "52dec8b22c8a2bb6adb4f9ac97b052cc3a9cd4fa6a56cb1a790933c17aa47939",
+      "exportSha256": "52dec8b22c8a2bb6adb4f9ac97b052cc3a9cd4fa6a56cb1a790933c17aa47939"
+    },
+    {
+      "source": "monolith-2026-10-14-product-share",
+      "path": "components/product-share.tsx",
+      "sha256": "fca3ffa27f8eab74ea8f1ab8a195a8b624db2d5fda5f159524d8b1a1013d1f99",
+      "exportSha256": "fca3ffa27f8eab74ea8f1ab8a195a8b624db2d5fda5f159524d8b1a1013d1f99"
+    },
+    {
+      "source": "monolith-2026-10-14-product-share",
+      "path": "migrations/release_0010_product_share_analytics.sql",
+      "sha256": "3104207538a8026cfedb3c4c09ccd8eff2bdb60ebeb0b3bf10dca07a80b6823d",
+      "exportSha256": "3104207538a8026cfedb3c4c09ccd8eff2bdb60ebeb0b3bf10dca07a80b6823d"
+    },
+    {
+      "source": "monolith-2026-10-14-product-share",
+      "path": "tests/product-share.test.mjs",
+      "sha256": "807d5420bc8ef5d5a2cf2f0a464e91f65dc212f22d674b72251ad2637bd7e588",
+      "exportSha256": "807d5420bc8ef5d5a2cf2f0a464e91f65dc212f22d674b72251ad2637bd7e588"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -5017,5 +5041,16 @@
     "existingSort": true,
     "extraRequestsPerCard": 0,
     "databaseMigration": false
+  },
+  "productShare": {
+    "universal": true,
+    "canonicalOrigin": "https://elitevtg.com",
+    "nativeShare": true,
+    "copyFallback": true,
+    "publicProductOnly": true,
+    "adminStoryUtm": true,
+    "dynamicSocialMetadata": true,
+    "analyticsEvent": "product_share_clicked",
+    "migration": "release_0010_product_share_analytics.sql"
   }
 }
