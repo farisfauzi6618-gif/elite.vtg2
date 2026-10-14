@@ -22,8 +22,8 @@
     {
       "source": "monolith-2026-10-14-reserve",
       "path": "app/globals.css",
-      "sha256": "1071c6266106d5f040d538501530a77436461ad58663d14f38dc229229033e46",
-      "exportSha256": "1071c6266106d5f040d538501530a77436461ad58663d14f38dc229229033e46"
+      "sha256": "0fae7b5ab58f030cd2f78cc68e790d9686b44493346ad4ead14daa7083e469fd",
+      "exportSha256": "0fae7b5ab58f030cd2f78cc68e790d9686b44493346ad4ead14daa7083e469fd"
     },
     {
       "source": "monolith-2026-10-13-post-purchase",
