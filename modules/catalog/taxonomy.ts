@@ -1,4 +1,4 @@
-export const CATEGORIES=['Polo','Kemeja','Sweater & Knitwear','Sweatshirt & Hoodie','Kaos','Jaket & Outerwear'];
+export const CATEGORIES=['Polo','Kemeja','Sweater & Knitwear','Sweatshirt & Hoodie','Kaos','Jaket & Outerwear','Topi','Aksesoris'];
 export const FEATURE_GROUPS=[{id:'opening',label:'Bukaan'},{id:'knit',label:'Rajutan'},{id:'sleeve',label:'Lengan'},{id:'style',label:'Model/kerah'}];
 export type Feature={id:string;label:string;groupId:string;aliases:string[]};
 export const DEFAULT_FEATURES:Feature[]=[
@@ -20,7 +20,7 @@ function escaped(s:string){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 function aliasPattern(s:string){return new RegExp('(?:^| )'+[...termKey(s)].map(escaped).join(' *')+'(?= |$)','g')}
 export function hasFeatureText(s:string,f:Feature){const text=plainText(s);return [f.label,...f.aliases].some(a=>aliasPattern(a).test(text))}
 export function normalizeSearch(s:string,features:Feature[]=DEFAULT_FEATURES){let text=plainText(s);const replacements=features.flatMap(f=>[f.label,...f.aliases].map(a=>({a,label:plainText(f.label)}))).sort((a,b)=>b.a.length-a.a.length);for(const {a,label} of replacements)text=text.replace(aliasPattern(a),match=>(match.startsWith(' ')?' ':'')+label);return text}
-export function mainCategory(s:string){const key=termKey(s);const direct=CATEGORIES.find(c=>termKey(c)===key);if(direct)return direct;const legacy:Record<string,string>={shirt:'Kemeja',shirts:'Kemeja',kemeja:'Kemeja',polo:'Polo',tshirt:'Kaos',tshirts:'Kaos',kaos:'Kaos',knitwear:'Sweater & Knitwear',sweater:'Sweater & Knitwear',sweaters:'Sweater & Knitwear',sweatshirt:'Sweatshirt & Hoodie',sweatshirts:'Sweatshirt & Hoodie',jaket:'Jaket & Outerwear',jacket:'Jaket & Outerwear',jackets:'Jaket & Outerwear',outerwear:'Jaket & Outerwear'};return legacy[key]??''}
+export function mainCategory(s:string){const key=termKey(s);const direct=CATEGORIES.find(c=>termKey(c)===key);if(direct)return direct;const legacy:Record<string,string>={shirt:'Kemeja',shirts:'Kemeja',kemeja:'Kemeja',polo:'Polo',tshirt:'Kaos',tshirts:'Kaos',kaos:'Kaos',knitwear:'Sweater & Knitwear',sweater:'Sweater & Knitwear',sweaters:'Sweater & Knitwear',sweatshirt:'Sweatshirt & Hoodie',sweatshirts:'Sweatshirt & Hoodie',jaket:'Jaket & Outerwear',jacket:'Jaket & Outerwear',jackets:'Jaket & Outerwear',outerwear:'Jaket & Outerwear',cap:'Topi',caps:'Topi',hat:'Topi',hats:'Topi',beanie:'Topi',accessory:'Aksesoris',accessories:'Aksesoris'};return legacy[key]??''}
 export function suggestTaxonomy(name:string,explicitCategory='',extra='',features:Feature[]=DEFAULT_FEATURES){
  const text=normalizeSearch(name+' '+extra,features).replace(/\bpolo ralph lauren\b|\bralph lauren\b/g,'');
  const candidates=new Set<string>();
@@ -30,6 +30,8 @@ export function suggestTaxonomy(name:string,explicitCategory='',extra='',feature
  if(polo)candidates.add('Polo');if(tee)candidates.add('Kaos');
  if(!polo&&!tee&&/\b(?:shirt|shirts|kemeja)\b/.test(text))candidates.add('Kemeja');
  if(/\b(?:jacket|jaket|outerwear|coat|windbreaker)\b/.test(text))candidates.add('Jaket & Outerwear');
+ if(/\b(?:cap|caps|hat|hats|topi|beanie)\b/.test(text))candidates.add('Topi');
+ if(/\b(?:accessory|accessories|aksesoris|belt|wallet|tie|scarf|dompet|dasi|syal)\b/.test(text))candidates.add('Aksesoris');
  const category=mainCategory(explicitCategory)||(candidates.size===1?[...candidates][0]:'');
  const selected=features.filter(f=>hasFeatureText(name+' '+extra+' '+explicitCategory,f)).map(f=>f.id);
  return {category,features:selected,categoryNeedsReview:!category};

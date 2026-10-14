@@ -5,7 +5,7 @@ import fs from 'node:fs/promises';
 await fs.mkdir('.test-runtime',{recursive:true});
 const bundle=await build({stdin:{contents:"export * from './modules/catalog/caption-parser';export * from './modules/catalog/catalog-types';export * from './modules/catalog/taxonomy';",resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'esm',platform:'node',write:false});
 await fs.writeFile('.test-runtime/domain.mjs',bundle.outputFiles[0].contents);
-const {parseCaption,normalizeInstagramUrl,parseFit,matchesProduct,totalStock,DEFAULT_FEATURES,normalizeSearch,suggestTaxonomy,QUICK_FILTERS}=await import(pathToFileURL(process.cwd()+'/.test-runtime/domain.mjs'));
+const {parseCaption,normalizeInstagramUrl,parseFit,matchesProduct,totalStock,DEFAULT_FEATURES,normalizeSearch,suggestTaxonomy,QUICK_FILTERS,CATEGORIES,mainCategory}=await import(pathToFileURL(process.cwd()+'/.test-runtime/domain.mjs'));
 const caption=`Nama: PRL Cotton Poplin Shirt — White
 Harga: IDR 365.000
 Kondisi: Very good condition.
@@ -40,4 +40,5 @@ check('Kategori, ciri, size, brand dan harga dapat digabung; L habis tetap ditol
 check('Quick Polo Long Sleeve membutuhkan kategori Polo sekaligus ciri Long Sleeve',()=>{const q=QUICK_FILTERS.find(q=>q.id==='polo-long-sleeve');assert.equal(matchesProduct({...multi,category:'Polo',features:['long-sleeve']},{category:q.category,features:q.features}),true);assert.equal(matchesProduct({...multi,features:['long-sleeve']},{category:q.category,features:q.features}),false)});
 check('Barang lama belum dipetakan tetap ditemukan di Semua',()=>{const legacy={...multi,category:'',legacyCategory:'Lainnya'};assert.equal(matchesProduct(legacy,{}),true);assert.equal(matchesProduct(legacy,{category:'Sweater & Knitwear'}),false);assert.equal(matchesProduct(legacy,{q:'Quarterzip',size:'S'}),true)});
 check('Ciri dan alias tambahan admin ikut pencarian dan filter',()=>{const terms=[...DEFAULT_FEATURES,{id:'custom-mock',label:'Mock Neck',groupId:'style',aliases:['Mockneck','High Collar']}];const product={...multi,features:['custom-mock'],name:'PRL Cotton Top'};assert.equal(matchesProduct(product,{q:'high collar'},terms),true);assert.equal(matchesProduct(product,{features:['custom-mock']},terms),true)});
+check('Topi dan Aksesoris tersedia sebagai kategori terpisah untuk klasifikasi dan filter',()=>{for(const [name,category] of [['Polo Ralph Lauren Ball Cap','Topi'],['Leather Wallet','Aksesoris']]){assert.ok(CATEGORIES.includes(category));assert.equal(suggestTaxonomy(name).category,category);assert.equal(matchesProduct({...multi,name,category},{category}),true);assert.equal(matchesProduct({...multi,name,category},{category:category==='Topi'?'Aksesoris':'Topi'}),false);}assert.equal(mainCategory('Accessories'),'Aksesoris');assert.equal(mainCategory('Hat'),'Topi');});
 console.log(`${count} pengujian domain lulus.`);

@@ -17,7 +17,7 @@ export function MemberInvite({eligible,blocked,onJoin}:{eligible:boolean;blocked
   <DialogOverlay className="member-invite-overlay"/>
   <DialogPrimitive.Content ref={content} className="member-invite-dialog" lang="en" onOpenAutoFocus={event=>{event.preventDefault();content.current?.focus({preventScroll:true})}} onCloseAutoFocus={event=>{if(joining.current)event.preventDefault()}}>
    <DialogTitle className="member-invite-title">A little more for members.</DialogTitle>
-   <DialogDescription asChild><div className="member-invite-copy"><p className="member-invite-benefit">5% off your first order</p><p className="member-invite-rewards">ELITE Card rewards included.</p></div></DialogDescription>
+   <DialogDescription asChild><div className="member-invite-copy"><p className="member-invite-benefit">5% off your first order</p><p className="member-invite-rewards">Up to Rp50.000</p><p className="member-invite-rewards">ELITE Card rewards included.</p></div></DialogDescription>
    <div className="member-invite-actions"><button type="button" className="member-invite-join" onClick={join}>JOIN ELITE</button><button type="button" className="member-invite-continue" onClick={close}>Continue shopping</button></div>
    <DialogClose className="member-invite-close" aria-label="Close"><X size={17} strokeWidth={1.3} aria-hidden="true"/></DialogClose>
   </DialogPrimitive.Content>

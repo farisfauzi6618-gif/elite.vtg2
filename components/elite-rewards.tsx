@@ -15,7 +15,7 @@ export function CatalogRewardNotice({count}:{count:number}){
 }
 export function ProductReward({productId,canOrder,version,variantId,member=true}:{variantId?:string|null;member?:boolean;productId:string;canOrder:boolean;version:string}){
  const {quote}=useRewardQuote(member?{context:'product',productId,...(variantId?{variantId}:{})}:null,version);if(!quote?.loggedIn||!quote.options.length)return null;
- return <div className="personal-reward">{canOrder&&quote.personalPrice!=null?<><span>Your ELITE Price</span><p>{money(quote.personalPrice)}</p></>:<p>ELITE Reward tersedia <small>· diterapkan sesuai syarat saat checkout</small></p>}</div>;
+ return <div className="personal-reward">{canOrder&&quote.personalPrice!=null?<><span>Your ELITE Price</span><p>{money(quote.personalPrice)}</p>{quote.selected?.id==='first-purchase-5'&&<small>Untuk 1 barang · diskon maks. Rp50.000 per pesanan</small>}</>:<p>ELITE Reward tersedia <small>· diterapkan sesuai syarat saat checkout</small></p>}</div>;
 }
 export function RewardSelection({quote,choice,onChange,loading,error,onRetry}:{quote:RewardQuote|null;choice:string;onChange:(v:string)=>void;loading:boolean;error:string;onRetry:()=>void}){
  if(error)return <div className="reward-selection reward-error"><p role="status">{error}</p><button type="button" className="text-button" onClick={()=>{onChange('auto');onRetry()}}>Periksa ulang reward</button></div>;

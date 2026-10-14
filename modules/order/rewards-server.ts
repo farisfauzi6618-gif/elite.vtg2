@@ -1,3 +1,4 @@
+import {FIRST_PURCHASE_MAX_DISCOUNT} from './first-purchase';
 import {activeColorSql,colorPriceSql} from '@/modules/catalog/color-variants';
 import {reservedQuantitySql} from '@/modules/catalog/reserve-inventory';
 import type {Transaction} from '@libsql/client';
@@ -17,7 +18,7 @@ export async function rewardRules(tx:SqlReader,customerId:string,state:PurchaseP
  const rows=(await tx.execute({sql:"SELECT v.*,(SELECT COUNT(*) FROM purchase_voucher_claims c JOIN orders o ON o.id=c.order_id WHERE c.voucher_id=v.id AND c.redeemed_at IS NULL AND c.order_id!=? AND o.status NOT IN ('cancelled','expired') AND (o.proof_key IS NOT NULL OR o.created_at>=?)) AS reserved_count FROM purchase_vouchers v LEFT JOIN loyalty_rewards l ON l.voucher_id=v.id WHERE (owner_user_id IS NULL OR owner_user_id=?) AND (l.id IS NULL OR (l.customer_id=? AND l.status='UNLOCKED' AND l.unlocked_order_id!=? AND (NOT EXISTS(SELECT 1 FROM orders WHERE id=?) OR l.unlocked_at<=(SELECT created_at FROM orders WHERE id=?))))",args:[orderId??'',Date.now()-7*86400000,customerId,customerId,orderId??'',orderId??'',orderId??'']})).rows;
  const rules:RewardRule[]=[];
  for(const row of rows){const categories=ids(row.applicable_categories),products=ids(row.applicable_products);if(!categories||!products)continue;const rule:RewardRule={id:String(row.id),label:String(row.label),ownerUserId:row.owner_user_id==null?null:String(row.owner_user_id),type:row.type as RewardRule['type'],percentage:row.percentage==null?null:Number(row.percentage),fixedAmount:row.fixed_amount==null?null:Number(row.fixed_amount),minimumOrder:Number(row.minimum_order),maximumDiscount:row.maximum_discount==null?null:Number(row.maximum_discount),validFrom:Number(row.valid_from),validUntil:row.valid_until==null?null:Number(row.valid_until),usageLimit:row.usage_limit==null?null:Number(row.usage_limit),usageCount:Number(row.usage_count),reservedCount:Number(row.reserved_count),categories,products,firstOrderOnly:!!row.first_order_only,active:!!row.active};if(ruleAvailable(rule,customerId,confirmed,Date.now()))rules.push(rule);}
- if(!confirmed&&!firstReserved&&(state.state==='available'||state.state==='reserved'&&state.orderId===orderId))rules.unshift({id:FIRST_REWARD_ID,label:'ELITE Reward · Pembelian pertama 5%',ownerUserId:customerId,type:'percentage',percentage:5,fixedAmount:null,minimumOrder:0,maximumDiscount:null,validFrom:0,validUntil:null,usageLimit:1,usageCount:0,reservedCount:0,categories:[],products:[],firstOrderOnly:true,active:true});
+ if(!confirmed&&!firstReserved&&(state.state==='available'||state.state==='reserved'&&state.orderId===orderId))rules.unshift({id:FIRST_REWARD_ID,label:'ELITE Reward · Pembelian pertama 5% · maks. Rp50.000',ownerUserId:customerId,type:'percentage',percentage:5,fixedAmount:null,minimumOrder:0,maximumDiscount:FIRST_PURCHASE_MAX_DISCOUNT,validFrom:0,validUntil:null,usageLimit:1,usageCount:0,reservedCount:0,categories:[],products:[],firstOrderOnly:true,active:true});
  return firstReserved?rules.filter(r=>!r.firstOrderOnly):rules;
 }
 export function priceRewards(lines:RewardLine[],rules:RewardRule[],choice='auto',loggedIn=true):RewardQuote {
@@ -61,7 +62,7 @@ export async function previewRewards(request:Request,input:any):Promise<RewardQu
    const cycle=(await tx.execute({sql:"SELECT id FROM loyalty_cycles WHERE customer_id=? AND status='ACTIVE' LIMIT 1",args:[customer.id]})).rows[0];
    quote.loyaltyLocked=cycle?(await tx.execute({sql:"SELECT milestone,reward_value AS value,minimum_purchase AS minimumPurchase FROM loyalty_rewards WHERE cycle_id=? AND status='LOCKED' ORDER BY milestone",args:[cycle.id]})).rows.map(row=>({milestone:Number(row.milestone),value:Number(row.value),minimumPurchase:Number(row.minimumPurchase)})):[3,5,10].map(m=>({milestone:m,value:m===3?50000:m===5?100000:250000,minimumPurchase:m===3?0:500000}));
   }
-  if(input.context==='product') {const rule=rules.find(r=>r.id===quote.selected?.id);quote.personalPrice=orderable&&uniform&&rule&&exactProductReward(rule)?quote.net:null;if(!orderable)quote.selected=null;}
+  if(input.context==='product') {const rule=rules.find(r=>r.id===quote.selected?.id);quote.personalPrice=orderable&&uniform&&rule&&(rule.id===FIRST_REWARD_ID||exactProductReward(rule))?quote.net:null;if(!orderable)quote.selected=null;}
   await tx.commit();return quote;
  }finally{tx.close();}
 }

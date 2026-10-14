@@ -392,10 +392,10 @@
       "exportSha256": "a72a90505002e2248576622924a4383ffae52fc867047aae9b5665caf9358677"
     },
     {
-      "source": "monolith-2026-10-13-post-purchase",
+      "source": "monolith-2026-10-14-categories-promo-cap",
       "path": "components/customer-account.tsx",
-      "sha256": "486e0a2373cfac4f4ccfc6a359a2b1fb542c7b5104499c960b0b3d1f1a52ba32",
-      "exportSha256": "486e0a2373cfac4f4ccfc6a359a2b1fb542c7b5104499c960b0b3d1f1a52ba32"
+      "sha256": "e2a253834e04dbef4a935600fe2127233cf0f8133e8695c82b59930d703b72cf",
+      "exportSha256": "e2a253834e04dbef4a935600fe2127233cf0f8133e8695c82b59930d703b72cf"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1130,10 +1130,10 @@
       "exportSha256": "dfb4e6ec6586f2e7c0a55c90692133ba96776a4709e700fee3513ee8745166e2"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-14-categories-promo-cap",
       "path": "modules/catalog/taxonomy.ts",
-      "sha256": "17de219927a4a41308ec159f7f0a6296c3a580765a996f7a5db1bd686f1b8acf",
-      "exportSha256": "17de219927a4a41308ec159f7f0a6296c3a580765a996f7a5db1bd686f1b8acf"
+      "sha256": "e2a8fa3d267a78030d656f0d56ebda48efd5a60dc241173a09c176f0a9520281",
+      "exportSha256": "e2a8fa3d267a78030d656f0d56ebda48efd5a60dc241173a09c176f0a9520281"
     },
     {
       "source": "monolith-2026-10-10-website-analytics-v1",
@@ -1454,10 +1454,10 @@
       "exportSha256": "3657f447dddef74de81a4ac2843defd84c17590e72b14692707cd7a4ce241986"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-14-categories-promo-cap",
       "path": "tests/catalog-domain.test.mjs",
-      "sha256": "686c6f6617571544ea396482e5cc6503d276dcba99351bf2ba106dc14dda752a",
-      "exportSha256": "686c6f6617571544ea396482e5cc6503d276dcba99351bf2ba106dc14dda752a"
+      "sha256": "26bca96318bca3aedde55836a89d2d0c4519ac8168fa5b5b710a3246d503dd67",
+      "exportSha256": "26bca96318bca3aedde55836a89d2d0c4519ac8168fa5b5b710a3246d503dd67"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4076,16 +4076,16 @@
       "exportSha256": "a82c0c5a8a91ba958fa5b56595940e5753be6d3368a5b5321e00b8ab204b30cf"
     },
     {
-      "source": "monolith-2026-10-10-promotions-and-scheduled-sales",
+      "source": "monolith-2026-10-14-categories-promo-cap",
       "path": "modules/order/first-purchase.ts",
-      "sha256": "0a84904eb04612e995195e38e1b9e9e89a9555fab7af2b77a6893519e6b308cd",
-      "exportSha256": "0a84904eb04612e995195e38e1b9e9e89a9555fab7af2b77a6893519e6b308cd"
+      "sha256": "93a98db700ad36b58b6d6c7c71083fbd2cfd93bf9c2f3d806b374344d2754af8",
+      "exportSha256": "93a98db700ad36b58b6d6c7c71083fbd2cfd93bf9c2f3d806b374344d2754af8"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-categories-promo-cap",
       "path": "modules/order/first-purchase-server.ts",
-      "sha256": "87ba5085b5ea534ba3e55110e34be099d04f873a7926af90fc3688e4c073fa22",
-      "exportSha256": "87ba5085b5ea534ba3e55110e34be099d04f873a7926af90fc3688e4c073fa22"
+      "sha256": "9b52849607f21cc7aeced793468cd690e56de91e9aed69e04fb29c1afad47962",
+      "exportSha256": "9b52849607f21cc7aeced793468cd690e56de91e9aed69e04fb29c1afad47962"
     },
     {
       "source": "monolith-2026-10-11-resource-efficiency",
@@ -4100,10 +4100,10 @@
       "exportSha256": "20227c3d6b0f029417f8d85c354335525498bdca56c39a5c360fc400cb55c6eb"
     },
     {
-      "source": "monolith-2026-10-11-loyalty-card",
+      "source": "monolith-2026-10-14-categories-promo-cap",
       "path": "tests/promotions-schedules.test.mjs",
-      "sha256": "58102ebf6816e8caa005f3bba40f74914c31729709613c0ba7b56febda5cd015",
-      "exportSha256": "58102ebf6816e8caa005f3bba40f74914c31729709613c0ba7b56febda5cd015"
+      "sha256": "13d31fbb5d93d7806d2be8b511b3de21a868d84b6cf509afc8037f083e38c5fd",
+      "exportSha256": "13d31fbb5d93d7806d2be8b511b3de21a868d84b6cf509afc8037f083e38c5fd"
     },
     {
       "source": "monolith-2026-10-10-promotions-and-scheduled-sales",
@@ -4262,10 +4262,10 @@
       "exportSha256": "8a376b3dc0c2887b2887f510fd18cbe19090935b43a06e09a6cf43524d8eac52"
     },
     {
-      "source": "monolith-2026-10-14-flow-efficiency",
+      "source": "monolith-2026-10-14-categories-promo-cap",
       "path": "components/elite-rewards.tsx",
-      "sha256": "710457d2a7319359fd99d21c5d53bf417bc405283804d7f950f06f01fabf0d63",
-      "exportSha256": "710457d2a7319359fd99d21c5d53bf417bc405283804d7f950f06f01fabf0d63"
+      "sha256": "378198bd9a69eae725a9112c39449840dca42798dae33480bdefe55dee32ab0e",
+      "exportSha256": "378198bd9a69eae725a9112c39449840dca42798dae33480bdefe55dee32ab0e"
     },
     {
       "source": "monolith-2026-10-11-loyalty-card",
@@ -4274,10 +4274,10 @@
       "exportSha256": "ae59eefe6725c326d34502d27342f66677dea75aa3b68c13b8a2aa1ae440cf84"
     },
     {
-      "source": "monolith-2026-10-14-flow-efficiency",
+      "source": "monolith-2026-10-14-categories-promo-cap",
       "path": "modules/order/rewards-server.ts",
-      "sha256": "d1cf399c0bc2d5bc3b40ae5d6268c3713b9086ead27c637a878c58340bd4845f",
-      "exportSha256": "d1cf399c0bc2d5bc3b40ae5d6268c3713b9086ead27c637a878c58340bd4845f"
+      "sha256": "bafa694bbe749511eb7faeb8fcf355812257ba29352818aef48672116a2ae2ba",
+      "exportSha256": "bafa694bbe749511eb7faeb8fcf355812257ba29352818aef48672116a2ae2ba"
     },
     {
       "source": "monolith-2026-10-10-personal-rewards",
@@ -4292,10 +4292,10 @@
       "exportSha256": "a83f1e9c24eb132a3631c5b1d5b3f35cb30c8b75fc2ac070c4b5a6a0b8eee22a"
     },
     {
-      "source": "monolith-2026-10-14-flow-efficiency",
+      "source": "monolith-2026-10-14-categories-promo-cap",
       "path": "tests/rewards.test.mjs",
-      "sha256": "b8002e93ab2c23a2e8dde3132a65f108d4cf100d87486888be65466dbe7b7c7d",
-      "exportSha256": "b8002e93ab2c23a2e8dde3132a65f108d4cf100d87486888be65466dbe7b7c7d"
+      "sha256": "f4349004aa7937f3b0d7429fa68644e2bfc8b46df660305dba4cc3ad72389668",
+      "exportSha256": "f4349004aa7937f3b0d7429fa68644e2bfc8b46df660305dba4cc3ad72389668"
     },
     {
       "source": "monolith-2026-10-10-personal-rewards",
@@ -4550,10 +4550,10 @@
       "exportSha256": "f54e6251ff29b5c8939a09830e23e7f9e6786ca60ca4e4b0a38cb912e288468e"
     },
     {
-      "source": "monolith-2026-10-12-member-invite",
+      "source": "monolith-2026-10-14-categories-promo-cap",
       "path": "components/member-invite.tsx",
-      "sha256": "e991f24dbbd1e305358613f8c0471abfd29f000b32224e6a6be4a4c86a02515c",
-      "exportSha256": "e991f24dbbd1e305358613f8c0471abfd29f000b32224e6a6be4a4c86a02515c"
+      "sha256": "f41bb3d6ff2daf548013a1aaa5b7069b35b230ec9cef9c3fcaee55ac5a61c48b",
+      "exportSha256": "f41bb3d6ff2daf548013a1aaa5b7069b35b230ec9cef9c3fcaee55ac5a61c48b"
     },
     {
       "source": "monolith-2026-10-12-member-invite",
@@ -5240,5 +5240,14 @@
     "guestProductCartRewardQuotes": false,
     "variantRewardPricing": true,
     "responsiveDetailImages": true
+  },
+  "categoriesPromoCap": {
+    "categories": [
+      "Topi",
+      "Aksesoris"
+    ],
+    "firstPurchasePercent": 5,
+    "maximumDiscount": 50000,
+    "shippingDiscount": false
   }
 }

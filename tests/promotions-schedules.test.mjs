@@ -26,7 +26,7 @@ const m=await import(pathToFileURL(path.resolve('.test-runtime/promotions.mjs'))
 await migrate(client,new URL('../migrations/',import.meta.url));
 const originalFetch=globalThis.fetch;
 let messages=[];
-globalThis.fetch=async(input,init={})=>{const url=new URL(typeof input==='string'?input:input.url);assert.equal(url.hostname,'api.telegram.org');if(typeof init.body==='string')messages.push(JSON.parse(init.body));return Response.json({ok:true,result:{message_id:50}});};
+globalThis.fetch=async(input,init={})=>{const url=new URL(typeof input==='string'?input:input.url);assert.equal(url.hostname,'api.telegram.org');if(typeof init.body==='string')messages.push(JSON.parse(init.body));else if(init.body instanceof FormData)messages.push({caption:init.body.get('caption')});return Response.json({ok:true,result:{message_id:50}});};
 const request=(route,body,cookie='')=>new Request('https://elite.test'+route,{method:body===undefined?'GET':'POST',headers:{Origin:'https://elite.test','Content-Type':'application/json',Cookie:cookie},...(body===undefined?{}:{body:JSON.stringify(body)})});
 const payload={name:'Simulated Buyer',phone:'081234567890',address:'Jalan Pengujian Nomor 12 RT 01',postcode:'78243',item:'Simulated vintage',quantity:1,itemAmount:185000,quoteId:'f'.repeat(64),consent:true};
 let buyer,buyerCookie,product,selection;
@@ -72,7 +72,7 @@ test('only owner confirmation consumes the benefit, and confirmation is idempote
  const {order,cookie}=await discounted();assert.equal((await m.purchasePromotion(buyerCookie)).state,'reserved');
  const form=new FormData(),png=new Uint8Array(80);png.set([137,80,78,71,13,10,26,10]);form.set('file',new File([png],'proof.png',{type:'image/png'}));form.set('paymentMethod','bca_transfer');
  const proof=await m.proofPost(new Request('https://elite.test/api/order/proof',{method:'POST',headers:{Origin:'https://elite.test',Cookie:cookie},body:form}));assert.equal(proof.status,200);assert.equal((await m.purchasePromotion(buyerCookie)).state,'reserved');
- assert.ok(messages.some(message=>message.text?.includes('ELITE Reward · Pembelian pertama 5%')));
+ assert.ok(messages.some(message=>/Diskon: -Rp\s*9\.250/.test(message.caption||'')));
  await assert.rejects(m.confirmPayment(order.id,'other-owner',50));assert.equal((await client.execute('SELECT redeemed_at FROM first_purchase_discounts')).rows[0].redeemed_at,null);
  await m.confirmPayment(order.id,'123456',50);await m.confirmPayment(order.id,'123456',50);assert.equal((await m.purchasePromotion(buyerCookie)).state,'redeemed');
  const next=await create();assert.equal(next.status,201);assert.equal((await next.json()).discount_amount,0);
