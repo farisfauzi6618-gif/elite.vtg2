@@ -1,4 +1,5 @@
 "use client";
+import {BCA_DISPLAY_NAME} from '@/modules/order/payment-types';
 /* eslint-disable @next/next/no-img-element -- Display the original owner-controlled payment asset. */
 import { useState } from "react";
 import { Check, Copy, Download, Maximize2, X } from "lucide-react";
@@ -28,7 +29,7 @@ export function PaymentPanel({ order, payment, busy, onSelect, onAssetError }: {
       <legend>Metode pembayaran</legend>
       <label className={method === "bca_transfer" ? "payment-choice selected" : "payment-choice"}>
         <input type="radio" name="paymentMethod" value="bca_transfer" checked={method === "bca_transfer"} disabled={!bank} onChange={() => void onSelect("bca_transfer")} />
-        <span><b>Transfer Bank BCA</b><small>{bank ? "Direkomendasikan" : "Sedang tidak tersedia"}</small></span>
+        <span><b>{BCA_DISPLAY_NAME}</b><small>{bank ? "Direkomendasikan" : "Sedang tidak tersedia"}</small></span>
       </label>
       <label className={method === "qris_dana" ? "payment-choice selected" : "payment-choice"}>
         <input type="radio" name="paymentMethod" value="qris_dana" checked={method === "qris_dana"} disabled={!qris || qrisFailed} onChange={() => void onSelect("qris_dana")} />
@@ -37,7 +38,7 @@ export function PaymentPanel({ order, payment, busy, onSelect, onAssetError }: {
     </fieldset>
     {method === "bca_transfer" ? bank ? <>
       <div className="bank-panel">
-        <span className="eyebrow">TRANSFER BANK BCA</span>
+        <span className="eyebrow">{BCA_DISPLAY_NAME}</span>
         <span className="bank-account">{bank.accountNumber}</span>
         <span className="bank-holder">{bank.accountHolder}</span>
       </div>

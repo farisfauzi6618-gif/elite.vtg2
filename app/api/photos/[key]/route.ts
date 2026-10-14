@@ -5,7 +5,7 @@ export async function GET(request:Request,{params}:{params:Promise<{key:string}>
  return boundary(async()=>{
   const {key}=await params;
   if(!/^[a-f0-9-]{36}$/.test(key))throw new AppError(404,'Foto tidak ditemukan.');
-  const publicPhoto=await db().prepare("SELECT id FROM products WHERE status='published' AND (photo_key=? OR EXISTS (SELECT 1 FROM json_each(products.photo_keys) WHERE value=?)) LIMIT 1").bind(key,key).first();
+  const publicPhoto=await db().prepare("SELECT id FROM products WHERE status='published' AND (photo_key=? OR EXISTS (SELECT 1 FROM json_each(products.photo_keys) WHERE value=?) OR EXISTS (SELECT 1 FROM json_each(products.color_variants) c WHERE json_extract(c.value,'$.active')=1 AND (json_extract(c.value,'$.photoKey')=? OR json_extract(c.value,'$.swatchImage')=? OR EXISTS (SELECT 1 FROM json_each(c.value,'$.photoKeys') gallery WHERE gallery.value=?)))) LIMIT 1").bind(key,key,key,key,key).first();
   if(!publicPhoto&&!await isAdmin(request))throw new AppError(404,'Foto tidak ditemukan.');
   const requestedSize=new URL(request.url).searchParams.get('size');
   if(requestedSize&&!Object.hasOwn(PHOTO_PREVIEW_EDGES,requestedSize))throw new AppError(400,'Ukuran foto tidak didukung.');

@@ -1,3 +1,4 @@
+export const BCA_DISPLAY_NAME='Bank Central Asia (BCA)';
 export type PaymentMethod = "bca_transfer" | "qris_dana";
 export type PaymentConfig = {
   bca: { bank: "BCA"; accountNumber: string; accountHolder: string } | null;
@@ -12,7 +13,7 @@ export function storedPaymentMethod(value?: string | null): PaymentMethod {
   return value === "bca_transfer" ? value : "qris_dana";
 }
 export const paymentMethodLabel = (value?: string | null) =>
-  storedPaymentMethod(value) === "bca_transfer" ? "Transfer Bank BCA" : "QRIS DANA";
+  storedPaymentMethod(value) === "bca_transfer" ? BCA_DISPLAY_NAME : "QRIS DANA";
 export const paymentStatusLabel = (order: { payment_state?: string; status: string }) =>
   order.payment_state === "payment_confirmed" ? "Dikonfirmasi pemilik" :
   order.status === "awaiting_proof" ? "Menunggu bukti pembayaran" : "Menunggu verifikasi";

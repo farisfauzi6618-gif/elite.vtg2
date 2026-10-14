@@ -68,10 +68,10 @@
       "exportSha256": "361a987575ec2dc25b678cebaf23f2535e2535cebe729c2d0bdca0485b0d0177"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-variant-photo-fix",
       "path": "app/(orders)/admin/order/ui.tsx",
-      "sha256": "737b36190729b982ca58cd3b99adff3fd293e75594e0b424589e9e94f8e5210d",
-      "exportSha256": "737b36190729b982ca58cd3b99adff3fd293e75594e0b424589e9e94f8e5210d"
+      "sha256": "209da082e8a952017e4a4cf2e3f9f05fc13bac46c83ff67e9b8748e513130b42",
+      "exportSha256": "209da082e8a952017e4a4cf2e3f9f05fc13bac46c83ff67e9b8748e513130b42"
     },
     {
       "source": "monolith-2026-10-09",
@@ -104,10 +104,10 @@
       "exportSha256": "75284f52865537dd78551c0ddad7a2b29a17c5306416aa8cccd67856cc318e84"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-14-variant-photo-fix",
       "path": "app/(orders)/order/payment-panel.tsx",
-      "sha256": "1b4cf573a6154161c952d307778ffa4d05e20a307521c73586f5e5619e966b50",
-      "exportSha256": "1b4cf573a6154161c952d307778ffa4d05e20a307521c73586f5e5619e966b50"
+      "sha256": "9f650f7e380d392e542261f9e8c750d2ed02a8e753b561812c51e9765c1d1d6a",
+      "exportSha256": "9f650f7e380d392e542261f9e8c750d2ed02a8e753b561812c51e9765c1d1d6a"
     },
     {
       "source": "monolith-2026-10-09",
@@ -326,10 +326,10 @@
       "exportSha256": "73b51f62cadfaf86824a7284154227bfc2793008846e2ba6a6aefb60b1e0f0f0"
     },
     {
-      "source": "monolith-2026-10-12-budget-efficiency",
+      "source": "monolith-2026-10-14-variant-photo-fix",
       "path": "app/api/photos/[key]/route.ts",
-      "sha256": "f53b07774a3aa4e67d2f4647bece686cf5334237a6b21984c67223518fe17534",
-      "exportSha256": "f53b07774a3aa4e67d2f4647bece686cf5334237a6b21984c67223518fe17534"
+      "sha256": "73ddf411f18c49c1829a372d480f1a14cdc797337e4cdcfc2dfa859977189cb7",
+      "exportSha256": "73ddf411f18c49c1829a372d480f1a14cdc797337e4cdcfc2dfa859977189cb7"
     },
     {
       "source": "monolith-2026-10-11-resource-efficiency",
@@ -1256,10 +1256,10 @@
       "exportSha256": "06bebe466aa5c3988e4eafd26b9c803897512637cdc2d69d272d4968697dc23f"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-14-variant-photo-fix",
       "path": "modules/order/payment-types.ts",
-      "sha256": "7d9d38863fc635a123eb809b49c1fb50219e4748686ab79e07f6abef81a9aa9c",
-      "exportSha256": "7d9d38863fc635a123eb809b49c1fb50219e4748686ab79e07f6abef81a9aa9c"
+      "sha256": "db179d7b7447088a0400487396cbc59acab353b19ab70b24fc265da814d20073",
+      "exportSha256": "db179d7b7447088a0400487396cbc59acab353b19ab70b24fc265da814d20073"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4538,10 +4538,10 @@
       "exportSha256": "6dd6a58a5c070dd705ac733b0c25ed501d0832c78ad133d42aab8e5e44b38c9d"
     },
     {
-      "source": "monolith-2026-10-12-budget-efficiency",
+      "source": "monolith-2026-10-14-variant-photo-fix",
       "path": "tests/photo-preview.test.mjs",
-      "sha256": "1db3539d580c8793ba80b64be5201d33538778ccd00bd2328a214da2aa9028ec",
-      "exportSha256": "1db3539d580c8793ba80b64be5201d33538778ccd00bd2328a214da2aa9028ec"
+      "sha256": "0b3047a41d9e48db715e38188733da8a703e5c6971871245d50d3d900345acea",
+      "exportSha256": "0b3047a41d9e48db715e38188733da8a703e5c6971871245d50d3d900345acea"
     },
     {
       "source": "monolith-2026-10-12-photo-efficiency",
@@ -4742,10 +4742,10 @@
       "exportSha256": "1b57df1a7c4825a2ca1c4911d1df8a341845e90c7d954837fa11d394ad9268cc"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-variant-photo-fix",
       "path": "components/reserve-admin.tsx",
-      "sha256": "986b00787ff6190e1f0c0d3654d27b531e454f6c48429d191d961ed72408e1c1",
-      "exportSha256": "986b00787ff6190e1f0c0d3654d27b531e454f6c48429d191d961ed72408e1c1"
+      "sha256": "b294a36e706ded81782ae2e20166af902d78131391eb33d184b6897b706c1934",
+      "exportSha256": "b294a36e706ded81782ae2e20166af902d78131391eb33d184b6897b706c1934"
     },
     {
       "source": "monolith-2026-10-14-color-variants",
