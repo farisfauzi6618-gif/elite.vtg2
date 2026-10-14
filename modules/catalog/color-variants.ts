@@ -14,3 +14,5 @@ export function resolveColorGroups(p:Product):Product{
 export function colorPhoto(p:Product,g:SizeGroup){return groupColor(p,g)?.photoKey??p.photoKey}
 // Used by stock-confirmation gates too: unpublished colors cannot be sold through an old checkout.
 export function activeColorSql(g='g',p='p'){return `(${g}.color_variant_id IS NULL OR EXISTS (SELECT 1 FROM json_each(${p}.color_variants) c WHERE json_extract(c.value,'$.id')=${g}.color_variant_id AND json_extract(c.value,'$.active')=1))`}
+
+export function colorPriceSql(g='g',p='p'){return `COALESCE(${g}.price,(SELECT json_extract(c.value,'$.price') FROM json_each(${p}.color_variants) c WHERE json_extract(c.value,'$.id')=${g}.color_variant_id LIMIT 1),${p}.price)`;}

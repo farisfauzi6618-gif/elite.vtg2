@@ -14,10 +14,10 @@
   "excluded": "Runtime secrets, local environment, databases, customer data, uploaded photos, private proofs, production payment assets, generated builds and old Git histories.",
   "files": [
     {
-      "source": "monolith-2026-10-14-color-variants",
+      "source": "monolith-2026-10-14-flow-efficiency",
       "path": "app/catalog.tsx",
-      "sha256": "2cabefa01b1f222d29de4f4394f377e05d7ab8f7fbe828c05f5707d13c3885d7",
-      "exportSha256": "2cabefa01b1f222d29de4f4394f377e05d7ab8f7fbe828c05f5707d13c3885d7"
+      "sha256": "5945f79e89abe39d0641712edc4b6bd3ef7f2b113335d1ae7ee2f407d3977ff3",
+      "exportSha256": "5945f79e89abe39d0641712edc4b6bd3ef7f2b113335d1ae7ee2f407d3977ff3"
     },
     {
       "source": "monolith-2026-10-14-color-variants",
@@ -428,10 +428,10 @@
       "exportSha256": "36ff9825b105aa20f0d26a33d093d86d89a81370c3aafb5c46fcbb04b17186ee"
     },
     {
-      "source": "monolith-2026-10-14-color-variants",
+      "source": "monolith-2026-10-14-flow-efficiency",
       "path": "components/product-detail.tsx",
-      "sha256": "797753cda0ee34469f5592979b8000636fd99cf7f1ed5041c74ef9e1741868de",
-      "exportSha256": "797753cda0ee34469f5592979b8000636fd99cf7f1ed5041c74ef9e1741868de"
+      "sha256": "005a2fde4b88e0408ef742e0b2abfd1ef94071f3058bce3085bf6a4d31c96105",
+      "exportSha256": "005a2fde4b88e0408ef742e0b2abfd1ef94071f3058bce3085bf6a4d31c96105"
     },
     {
       "source": "monolith-2026-10-14-product-availability",
@@ -4046,10 +4046,10 @@
       "exportSha256": "4a4ae55bd72d2152f1f2eaf721ae862b668f3dc7dc28dcaa50fd20d4c58c0660"
     },
     {
-      "source": "monolith-2026-10-12-photo-efficiency",
+      "source": "monolith-2026-10-14-flow-efficiency",
       "path": "modules/catalog/catalog-request.ts",
-      "sha256": "dd507c38a18d9cfed24917dd213b3eca1f46db253894bba417a3ac429ca00e4c",
-      "exportSha256": "dd507c38a18d9cfed24917dd213b3eca1f46db253894bba417a3ac429ca00e4c"
+      "sha256": "0a6e6c11af8f0bfc60928f868e30365ce960519fd30b9c6f8c4dc69a20077eab",
+      "exportSha256": "0a6e6c11af8f0bfc60928f868e30365ce960519fd30b9c6f8c4dc69a20077eab"
     },
     {
       "source": "monolith-2026-10-12-photo-efficiency",
@@ -4262,10 +4262,10 @@
       "exportSha256": "8a376b3dc0c2887b2887f510fd18cbe19090935b43a06e09a6cf43524d8eac52"
     },
     {
-      "source": "monolith-2026-10-13-checkout-simplification",
+      "source": "monolith-2026-10-14-flow-efficiency",
       "path": "components/elite-rewards.tsx",
-      "sha256": "a48f8e7661ec8729e30c25adf4a8f60e7c857510379e1308f8508eecf282ac0d",
-      "exportSha256": "a48f8e7661ec8729e30c25adf4a8f60e7c857510379e1308f8508eecf282ac0d"
+      "sha256": "710457d2a7319359fd99d21c5d53bf417bc405283804d7f950f06f01fabf0d63",
+      "exportSha256": "710457d2a7319359fd99d21c5d53bf417bc405283804d7f950f06f01fabf0d63"
     },
     {
       "source": "monolith-2026-10-11-loyalty-card",
@@ -4274,10 +4274,10 @@
       "exportSha256": "ae59eefe6725c326d34502d27342f66677dea75aa3b68c13b8a2aa1ae440cf84"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-flow-efficiency",
       "path": "modules/order/rewards-server.ts",
-      "sha256": "e1a1135d9f2cb440dc28ba26ba162cf61cf6d3e7d3aa2ac909c6168ed7cfcdc3",
-      "exportSha256": "e1a1135d9f2cb440dc28ba26ba162cf61cf6d3e7d3aa2ac909c6168ed7cfcdc3"
+      "sha256": "d1cf399c0bc2d5bc3b40ae5d6268c3713b9086ead27c637a878c58340bd4845f",
+      "exportSha256": "d1cf399c0bc2d5bc3b40ae5d6268c3713b9086ead27c637a878c58340bd4845f"
     },
     {
       "source": "monolith-2026-10-10-personal-rewards",
@@ -4292,10 +4292,10 @@
       "exportSha256": "a83f1e9c24eb132a3631c5b1d5b3f35cb30c8b75fc2ac070c4b5a6a0b8eee22a"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-flow-efficiency",
       "path": "tests/rewards.test.mjs",
-      "sha256": "be1dbd8cdb0d654a9b72c7fcbc49af28d05cc1032e150dafbe399109ac8f16d4",
-      "exportSha256": "be1dbd8cdb0d654a9b72c7fcbc49af28d05cc1032e150dafbe399109ac8f16d4"
+      "sha256": "b8002e93ab2c23a2e8dde3132a65f108d4cf100d87486888be65466dbe7b7c7d",
+      "exportSha256": "b8002e93ab2c23a2e8dde3132a65f108d4cf100d87486888be65466dbe7b7c7d"
     },
     {
       "source": "monolith-2026-10-10-personal-rewards",
@@ -4526,10 +4526,10 @@
       "exportSha256": "f8b3fd2f77686492c0e2c269e5c8207200359a4bf59e95fcb184c38a393ce5b0"
     },
     {
-      "source": "monolith-2026-10-12-budget-efficiency",
+      "source": "monolith-2026-10-14-flow-efficiency",
       "path": "modules/catalog/photo-url.ts",
-      "sha256": "6b50ef4389101f0743ad8103e11d6be4918cdeb8f39f852fc93aee8575dbf7ca",
-      "exportSha256": "6b50ef4389101f0743ad8103e11d6be4918cdeb8f39f852fc93aee8575dbf7ca"
+      "sha256": "04638d68e79ef7146238a9102bc6d9e35c23f2d6ca732d28b06d1d5da5692e34",
+      "exportSha256": "04638d68e79ef7146238a9102bc6d9e35c23f2d6ca732d28b06d1d5da5692e34"
     },
     {
       "source": "monolith-2026-10-12-budget-efficiency",
@@ -4538,10 +4538,10 @@
       "exportSha256": "6dd6a58a5c070dd705ac733b0c25ed501d0832c78ad133d42aab8e5e44b38c9d"
     },
     {
-      "source": "monolith-2026-10-14-variant-photo-fix",
+      "source": "monolith-2026-10-14-flow-efficiency",
       "path": "tests/photo-preview.test.mjs",
-      "sha256": "0b3047a41d9e48db715e38188733da8a703e5c6971871245d50d3d900345acea",
-      "exportSha256": "0b3047a41d9e48db715e38188733da8a703e5c6971871245d50d3d900345acea"
+      "sha256": "4b5de72724dd3207264f9f20cd17bfd2e7fa1c3e38abca8455c4eda68d04ca51",
+      "exportSha256": "4b5de72724dd3207264f9f20cd17bfd2e7fa1c3e38abca8455c4eda68d04ca51"
     },
     {
       "source": "monolith-2026-10-12-photo-efficiency",
@@ -4790,16 +4790,16 @@
       "exportSha256": "c7c31e2c5d2f8e6864f3a4712219dc2e4433cc7f1eae7f407b5e0135ef780fb6"
     },
     {
-      "source": "monolith-2026-10-14-color-variants",
+      "source": "monolith-2026-10-14-flow-efficiency",
       "path": "tests/reserve.test.mjs",
-      "sha256": "71155ff56b6f3ebc43a01cc2afa3accb6ae509f84d154de7d302404fcbca6eaa",
-      "exportSha256": "71155ff56b6f3ebc43a01cc2afa3accb6ae509f84d154de7d302404fcbca6eaa"
+      "sha256": "fbeafa100abc42651c5dd753d3feedf7d905ce4a921428c1b87b114d7ebba6b1",
+      "exportSha256": "fbeafa100abc42651c5dd753d3feedf7d905ce4a921428c1b87b114d7ebba6b1"
     },
     {
       "path": "modules/catalog/color-variants.ts",
-      "source": "monolith-2026-10-14-color-variants",
-      "sha256": "876a45dac8519253891e75eb8f0484ca15a5cf96ec825dafca5a564fd13cee16",
-      "exportSha256": "876a45dac8519253891e75eb8f0484ca15a5cf96ec825dafca5a564fd13cee16"
+      "source": "monolith-2026-10-14-flow-efficiency",
+      "sha256": "438869a0edc17e19ac03de4e861b238995344e35aafd7281674f23f7bdf3a56e",
+      "exportSha256": "438869a0edc17e19ac03de4e861b238995344e35aafd7281674f23f7bdf3a56e"
     },
     {
       "path": "modules/catalog/color-validation.ts",
@@ -4818,6 +4818,18 @@
       "source": "monolith-2026-10-14-color-variants",
       "sha256": "ba896b4c3c36aae80d83238014ca055c33606e9a0cb821914eb19a1a97307994",
       "exportSha256": "ba896b4c3c36aae80d83238014ca055c33606e9a0cb821914eb19a1a97307994"
+    },
+    {
+      "path": "modules/catalog/catalog-selection.ts",
+      "source": "monolith-2026-10-14-flow-efficiency",
+      "sha256": "a5f71314cb6829d60722bad312437d69befedf56059bb773105a5fc5b6e2f532",
+      "exportSha256": "a5f71314cb6829d60722bad312437d69befedf56059bb773105a5fc5b6e2f532"
+    },
+    {
+      "path": "app/api/catalog/selection/route.ts",
+      "source": "monolith-2026-10-14-flow-efficiency",
+      "sha256": "4a02a43b6aa800c920648d8d91712c4349c01820581dd2b95f76e9d334553ae2",
+      "exportSha256": "4a02a43b6aa800c920648d8d91712c4349c01820581dd2b95f76e9d334553ae2"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -5220,5 +5232,13 @@
     "reserveIsolatedByGroup": true,
     "imagesOnlyForSelectedColor": true,
     "migration": "release_0012_color_variants.sql"
+  },
+  "flowEfficiency": {
+    "detailStockRequestsPerTick": 1,
+    "freshnessIntervalMs": 15000,
+    "scopedProductLimit": 41,
+    "guestProductCartRewardQuotes": false,
+    "variantRewardPricing": true,
+    "responsiveDetailImages": true
   }
 }
