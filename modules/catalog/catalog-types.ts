@@ -1,35 +1,36 @@
+import {colorAvailable,type ColorVariant} from './color-variants';
 import {CATEGORIES,DEFAULT_FEATURES,normalizeSearch,selectedValues,matchesFeatures,type Feature} from '@/modules/catalog/taxonomy';
 export {CATEGORIES} from '@/modules/catalog/taxonomy';
 export const MAX_PRODUCT_PHOTOS=17;
 export const FITS=['XXS','XS','S','M','L','XL','XXL','3XL','4XL','One size'];
-export type SizeGroup={reservedQty?:number;reserved?:boolean;id:string;productId?:string;label:string;tagSize:string;fits:string[];lengthCm:number|null;widthCm:number|null;qty:number|null;price:number|null;condition:string|null;defects:string|null;revision:number;sortOrder:number};
-export type Product={id:string;shortcode:string;instagramUrl:string;name:string;brand:string;category:string;legacyCategory?:string;features?:string[];categoryNeedsReview?:boolean;color:string;price:number|null;condition:string|null;defects:string|null;photoKey:string|null;photoKeys?:string[];description?:string;caption:string;warnings:string[];reviewed:boolean;status:'draft'|'published';createdAt:string;updatedAt:string;orderableAt?:string|null;publishedAt:string|null;soldAt?:string|null;soldHidden?:boolean;version:number;groups:SizeGroup[]};
+export type SizeGroup={colorPriceInherited?:boolean;colorConditionInherited?:boolean;colorDefectsInherited?:boolean;colorVariantId?:string|null;colorName?:string;colorActive?:boolean;reservedQty?:number;reserved?:boolean;id:string;productId?:string;label:string;tagSize:string;fits:string[];lengthCm:number|null;widthCm:number|null;qty:number|null;price:number|null;condition:string|null;defects:string|null;revision:number;sortOrder:number};
+export type Product={colorVariants?:ColorVariant[];defaultColorVariantId?:string|null;selectedColorVariantId?:string|null;id:string;shortcode:string;instagramUrl:string;name:string;brand:string;category:string;legacyCategory?:string;features?:string[];categoryNeedsReview?:boolean;color:string;price:number|null;condition:string|null;defects:string|null;photoKey:string|null;photoKeys?:string[];description?:string;caption:string;warnings:string[];reviewed:boolean;status:'draft'|'published';createdAt:string;updatedAt:string;orderableAt?:string|null;publishedAt:string|null;soldAt?:string|null;soldHidden?:boolean;version:number;groups:SizeGroup[]};
 export const money=(n:number|null|undefined)=>n==null?'Harga belum diisi':new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
-export const totalStock=(p:Product)=>p.groups.reduce((sum,g)=>sum+(g.qty??0),0);
+export const totalStock=(p:Product)=>p.groups.reduce((sum,g)=>sum+(colorAvailable(p,g)?(g.qty??0):0),0);
 export function hasReserve(g:SizeGroup){return !!g.reserved||(g.reservedQty??0)>0}
 export function sellableQuantity(g:SizeGroup){return g.qty==null?null:Math.max(0,g.qty-(g.reservedQty??0))}
-export function isReserved(p:Product){return p.status==='published'&&p.groups.some(hasReserve)&&!p.groups.some(g=>(sellableQuantity(g)??0)>0)}
-export function isSold(p:Product){return p.status==='published'&&p.groups.length>0&&p.groups.every(g=>g.qty===0&&!hasReserve(g))}
-export function availableGroups(p:Product){return p.groups.filter(g=>(sellableQuantity(g)??0)>0).map(g=>({...g,qty:sellableQuantity(g),reservedQty:0,reserved:hasReserve(g)}))}
-export function displayPrice(p:Product){const prices=(isSold(p)||isReserved(p)?p.groups:availableGroups(p)).map(g=>g.price??p.price).filter((n):n is number=>n!=null); if(!prices.length)return money(p.price);const lo=Math.min(...prices),hi=Math.max(...prices);return lo===hi?money(lo):`${money(lo)} – ${money(hi)}`}
+export function isReserved(p:Product){return p.status==='published'&&p.groups.filter(g=>colorAvailable(p,g)).some(hasReserve)&&!p.groups.filter(g=>colorAvailable(p,g)).some(g=>(sellableQuantity(g)??0)>0)}
+export function isSold(p:Product){return p.status==='published'&&p.groups.filter(g=>colorAvailable(p,g)).length>0&&p.groups.filter(g=>colorAvailable(p,g)).every(g=>g.qty===0&&!hasReserve(g))}
+export function availableGroups(p:Product){return p.groups.filter(g=>colorAvailable(p,g)&&(sellableQuantity(g)??0)>0).map(g=>({...g,qty:sellableQuantity(g),reservedQty:0,reserved:hasReserve(g)}))}
+export function displayPrice(p:Product){const prices=(isSold(p)||isReserved(p)?p.groups.filter(g=>colorAvailable(p,g)):availableGroups(p)).map(g=>g.price??p.price).filter((n):n is number=>n!=null); if(!prices.length)return money(p.price);const lo=Math.min(...prices),hi=Math.max(...prices);return lo===hi?money(lo):`${money(lo)} – ${money(hi)}`}
 export type CatalogFilters={q?:string;size?:string|string[];brand?:string|string[];category?:string|string[];features?:string|string[];min?:string;max?:string;availability?:string};
 export function matchesProduct(p:Product,f:CatalogFilters,terms:Feature[]=DEFAULT_FEATURES,includeSold=false){
  if(p.status!=='published'||(!availableGroups(p).length&&!(includeSold&&(isSold(p)||isReserved(p)))))return false;
  if(f.availability==='available'&&!availableGroups(p).length)return false;
  const selected=terms.filter(t=>(p.features??[]).includes(t.id));
- const haystack=normalizeSearch([p.name,p.brand,p.category,p.legacyCategory??'',p.color,p.description??'',...(p.features??[]),...selected.map(t=>t.label)].join(' '),terms);
+ const haystack=normalizeSearch([p.name,p.brand,p.category,p.legacyCategory??'',p.color,...(p.colorVariants??[]).filter(v=>v.active).map(v=>v.name),p.description??'',...(p.features??[]),...selected.map(t=>t.label)].join(' '),terms);
  if(f.q&&!normalizeSearch(f.q,terms).split(' ').filter(Boolean).every(word=>haystack.includes(word)))return false;
  const brands=selectedValues(f.brand),categories=selectedValues(f.category);
  if(brands.length&&!brands.includes(p.brand))return false;
  if(categories.length&&!categories.includes(p.category))return false;
  if(!matchesFeatures(p.features??[],f.features,terms))return false;
- return (includeSold&&(isSold(p)||isReserved(p))?p.groups:availableGroups(p)).some(g=>matchesSizePrice(p,g,f));
+ return (includeSold&&(isSold(p)||isReserved(p))?p.groups.filter(g=>colorAvailable(p,g)):availableGroups(p)).some(g=>matchesSizePrice(p,g,f));
 }
 export function matchesSizePrice(p:Product,g:SizeGroup,f:CatalogFilters){const sizes=selectedValues(f.size);if(sizes.length&&!sizes.some(s=>g.fits.includes(s)))return false;const price=g.price??p.price;if((f.min||f.max)&&price==null)return false;if(f.min&&price!=null&&price<Number(f.min))return false;if(f.max&&price!=null&&price>Number(f.max))return false;return true}
 
 export function productPhotos(p:Pick<Product,'photoKey'|'photoKeys'>){return [...new Set([p.photoKey,...(p.photoKeys??[])].filter((x):x is string=>!!x))]}
-export function publicProduct(p:Product){const {id,name,brand,category,color,price,condition,defects,photoKey,publishedAt,updatedAt,status,description,features,orderableAt,soldAt}=p;return {id,name,brand,category,color,price,condition,defects,photoKey,photoKeys:productPhotos(p),publishedAt,updatedAt,status,soldAt:soldAt??null,soldHidden:Boolean(p.soldHidden),availability:isReserved(p)?'reserved':isSold(p)?'sold':availableGroups(p).length?'available':'unavailable',orderableAt:orderableAt??null,description:description??'',features:features??[],groups:p.groups.map(g=>({id:g.id,label:g.label,tagSize:g.tagSize,fits:g.fits,lengthCm:g.lengthCm,widthCm:g.widthCm,qty:sellableQuantity(g),reserved:hasReserve(g),price:g.price,condition:g.condition,defects:g.defects}))}}
+export function publicProduct(p:Product){const {id,name,brand,category,color,price,condition,defects,photoKey,publishedAt,updatedAt,status,description,features,orderableAt,soldAt}=p;return {colorVariants:(p.colorVariants??[]).filter(v=>v.active),defaultColorVariantId:p.defaultColorVariantId??null,id,name,brand,category,color,price,condition,defects,photoKey:(p.colorVariants??[]).find(v=>v.active&&v.id===p.defaultColorVariantId)?.photoKey??(p.colorVariants??[]).find(v=>v.active)?.photoKey??photoKey,photoKeys:(p.colorVariants??[]).find(v=>v.active&&v.id===p.defaultColorVariantId)?.photoKeys??(p.colorVariants??[]).find(v=>v.active)?.photoKeys??productPhotos(p),publishedAt,updatedAt,status,soldAt:soldAt??null,soldHidden:Boolean(p.soldHidden),availability:isReserved(p)?'reserved':isSold(p)?'sold':availableGroups(p).length?'available':'unavailable',orderableAt:orderableAt??null,description:description??'',features:features??[],groups:p.groups.filter(g=>colorAvailable(p,g)).map(g=>({id:g.id,label:g.label,tagSize:g.tagSize,fits:g.fits,lengthCm:g.lengthCm,widthCm:g.widthCm,colorVariantId:g.colorVariantId??null,colorName:g.colorName,qty:g.colorActive===false?0:sellableQuantity(g),reserved:g.colorActive!==false&&hasReserve(g),price:g.price,condition:g.condition,defects:g.defects}))}}
 
 export function fitValue(g:Pick<SizeGroup,'fits'>){return g.fits.length?FITS.filter(f=>g.fits.includes(f)).join('/'):'Belum ditentukan'}
 export function fitLabel(g:Pick<SizeGroup,'fits'>){return 'Size fit to: '+fitValue(g)}
-export function choiceLabel(g:Pick<SizeGroup,'fits'|'lengthCm'|'widthCm'>){return 'Fit '+fitValue(g)+(g.lengthCm!=null||g.widthCm!=null?` · Panjang ${g.lengthCm??'—'} cm, Lebar ${g.widthCm??'—'} cm`:'')}
+export function choiceLabel(g:Pick<SizeGroup,'fits'|'lengthCm'|'widthCm'|'colorName'>){return (g.colorName?'Color '+g.colorName+' · ':'')+'Fit '+fitValue(g)+(g.lengthCm!=null||g.widthCm!=null?` · Panjang ${g.lengthCm??'—'} cm, Lebar ${g.widthCm??'—'} cm`:'')}

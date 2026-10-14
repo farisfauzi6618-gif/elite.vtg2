@@ -32,6 +32,11 @@ export async function collect(r:Request,v:Record<string,unknown>){
  await db().prepare('UPDATE analytics_sessions SET last_seen_at=? WHERE id=?').bind(Date.now(),s.id).run();
  const customer=await currentCustomer(r.headers.get('cookie'));if(customer)s.user_id=customer.id;
  const productId=typeof v.productId==='string'&&v.productId.length<=100?v.productId:undefined;
+ if(v.event==='product_color_selected'){
+  const id=typeof v.variantId==='string'&&ID.test(v.variantId)?v.variantId:'',nonce=typeof v.id==='string'&&ID.test(v.id)?v.id:'';if(!productId||!id||!nonce)return;
+  const row=await db().prepare("SELECT c.value FROM products p,json_each(p.color_variants) c WHERE p.id=? AND p.status='published' AND json_extract(c.value,'$.id')=? AND json_extract(c.value,'$.active')=1").bind(productId,id).first<{value:string}>();if(!row)return;const color=JSON.parse(row.value),key='color:'+s.id+':'+nonce;
+  await event(s,'product_color_selected',key,{productId});await db().prepare('INSERT OR IGNORE INTO analytics_color_values(event_id,variant_id,color_name) SELECT id,?,? FROM analytics_events WHERE dedupe_key=?').bind(id,color.name,key).run();return;
+ }
  if(v.event==='product_view'||v.event==='add_to_cart'||v.event==='product_share_clicked'||Object.hasOwn(SHARE_METHODS,String(v.event))){
   const p=productId?await db().prepare("SELECT p.id,EXISTS(SELECT 1 FROM size_groups g WHERE g.product_id=p.id AND g.qty>0) AS stocked,p.orderable_at FROM products p WHERE p.id=? AND p.status='published'").bind(productId).first<{id:string;stocked:number;orderable_at:string|null}>():null;if(!p)return;
   if(v.event==='add_to_cart'&&(!p.stocked||(p.orderable_at&&Date.parse(p.orderable_at)>Date.now())))return;

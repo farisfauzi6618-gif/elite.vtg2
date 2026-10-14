@@ -1,3 +1,4 @@
+import {activeColorSql} from '@/modules/catalog/color-variants';
 import type {Transaction,InValue} from '@libsql/client';
 import {db,AppError,hash,random,myOrder,publicOrder,json} from './order-server';
 import type {Order} from './order-types';
@@ -55,7 +56,7 @@ export async function confirmReservePayment(paymentId:string,actor:string){
   if(o.reservation_status==='AWAITING_DEPOSIT'){
    if(!validReserveDeposit(o.item_amount!,p.amount)||!p.proof_key)throw new AppError(409,'Bukti dan minimum deposit belum terpenuhi.');
    const lines=JSON.parse(o.catalog_items_json!) as CatalogQuote['lines'];
-   const inventory=await tx.batch(lines.map(line=>({sql:`SELECT g.qty-${reservedQuantitySql('g')} AS available,p.status,p.orderable_at FROM size_groups g JOIN products p ON p.id=g.product_id WHERE g.id=? AND g.product_id=?`,args:[line.groupId,line.productId]})));
+   const inventory=await tx.batch(lines.map(line=>({sql:`SELECT g.qty-${reservedQuantitySql('g')} AS available,p.status,p.orderable_at FROM size_groups g JOIN products p ON p.id=g.product_id WHERE g.id=? AND g.product_id=? AND ${activeColorSql('g','p')}`,args:[line.groupId,line.productId]})));
    for(const [index,line] of lines.entries()){const g=inventory[index].rows[0];if(!g||g.status!=='published'||Number(g.available)<line.quantity||g.orderable_at&&Date.parse(String(g.orderable_at))>now)throw new AppError(409,'Sebagian barang sudah tidak tersedia. Tidak ada barang yang dikunci; periksa transfer dan pilihan pesanan.');}
    await execute(tx,"UPDATE orders SET reservation_status='RESERVED',reservation_started_at=?,reservation_deadline=?,deposit_amount=?,payment_method=? WHERE id=?",[now,now+RESERVE_HOURS*3600000,p.amount,p.payment_method,o.id]);
    await tx.batch(lines.map(line=>({sql:'INSERT INTO reserve_items(order_id,group_id,product_id,quantity) VALUES(?,?,?,?)',args:[o.id,line.groupId,line.productId,line.quantity]})));
