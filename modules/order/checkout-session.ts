@@ -1,6 +1,7 @@
 import type { Order } from '@/modules/order/order-types';
 
 export type CatalogSelection = {
+  orderType?: string;
   lines: { name: string; label: string; quantity: number }[];
   amount: number;
   customer?: { name: string; phone: string | null };
@@ -11,7 +12,7 @@ type CheckoutRequest = <T>(path: string, init?: RequestInit) => Promise<T>;
 export async function resumeCatalogSelection(token: string, existing: Order | null, request: CheckoutRequest) {
   // Validate the new selection before releasing the previous invoice's cookie.
   const selection = await request<CatalogSelection>('/api/order/catalog?token=' + encodeURIComponent(token));
-  if (existing && existing.status !== 'awaiting_proof' && existing.catalog_token !== token) {
+  if (existing && (existing.status !== 'awaiting_proof'||existing.order_type==='reserve') && existing.catalog_token !== token) {
     // This endpoint expires only the browser cookie; the saved invoice remains.
     await request('/api/order', { method: 'DELETE' });
   }

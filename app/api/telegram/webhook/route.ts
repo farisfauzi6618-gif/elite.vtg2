@@ -1,6 +1,7 @@
 import { readLimitedText } from '@/modules/order/request-limits';
 import { api,json,settings,db,decrypt,telegram,AppError } from "@/modules/order/order-server";
 import { verifyTelegramRequest,verifyCallback,type Callback } from "@/modules/order/telegram-actions";
+import {confirmReservePayment} from '@/modules/order/reserve-server';
 import { confirmPayment } from "@/modules/order/fulfilment";
 export const POST=(req:Request)=>api(async()=>{
  const s=await settings();await verifyTelegramRequest(req,s);if(Number(req.headers.get("content-length")||0)>32000)throw new AppError(413,"Update terlalu besar.");let v:{update_id?:number;callback_query?:Callback;message?:{text?:string;chat:{id:number;type:string;first_name?:string;last_name?:string;username?:string};from?:{id:number;is_bot:boolean}}};try{const raw=await readLimitedText(req,32000);if(raw.length>32000)throw new AppError(413,"Update terlalu besar.");v=JSON.parse(raw);}catch(e){if(e instanceof AppError)throw e;throw new AppError(400,"Update tidak valid.");}
@@ -13,7 +14,9 @@ export const POST=(req:Request)=>api(async()=>{
    if(!permitted){await telegram(token,"answerCallbackQuery",{callback_query_id:c.id,text:"Hanya akun pemilik yang dapat melakukan tindakan ini.",show_alert:true}).catch(()=>{});}
    else{
     const match=/^confirm:(EV-\d{6}-[A-F0-9]{8})$/.exec(c.data||"");
-    if(match){const [,id]=match;
+    const reserve=/^reservepay:([a-f0-9-]{36})$/.exec(c.data||'');
+    if(reserve){try{const p=await db().prepare("SELECT id FROM reserve_payments WHERE id=? AND delivery_chat=? AND message_id=? AND state IN ('submitted','confirmed')").bind(reserve[1],String(c.from.id),String(c.message!.message_id)).first();if(!p)throw new AppError(403,'Bukti tidak cocok dengan pesan ini.');await confirmReservePayment(reserve[1],String(c.from.id));await telegram(token,'answerCallbackQuery',{callback_query_id:c.id,text:'Pembayaran Reserve dikonfirmasi.'}).catch(()=>{});await telegram(token,'editMessageReplyMarkup',{chat_id:s!.chat_id,message_id:c.message!.message_id,reply_markup:{inline_keyboard:[]}}).catch(()=>{})}catch(e){await telegram(token,'answerCallbackQuery',{callback_query_id:c.id,text:e instanceof AppError?e.message:'Konfirmasi belum berhasil.',show_alert:true}).catch(()=>{})}}
+    else if(match){const [,id]=match;
      try{await confirmPayment(id,String(c.from.id),c.message!.message_id);await telegram(token,"answerCallbackQuery",{callback_query_id:c.id,text:"Pembayaran dikonfirmasi. Pesanan siap diproses."}).catch(()=>{});await telegram(token,"editMessageReplyMarkup",{chat_id:s!.chat_id,message_id:c.message!.message_id,reply_markup:{inline_keyboard:[]}}).catch(()=>{});}catch(e){await telegram(token,"answerCallbackQuery",{callback_query_id:c.id,text:e instanceof AppError?e.message:"Konfirmasi belum berhasil. Coba lagi.",show_alert:true}).catch(()=>{});}
     }else await telegram(token,"answerCallbackQuery",{callback_query_id:c.id,text:"Tombol ini sudah tidak berlaku.",show_alert:true}).catch(()=>{});
    }

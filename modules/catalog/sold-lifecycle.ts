@@ -1,4 +1,4 @@
-import {availableGroups,isSold,matchesProduct,matchesSizePrice,type Product,type CatalogFilters} from './catalog-types';
+import {availableGroups,isSold,isReserved,matchesProduct,matchesSizePrice,type Product,type CatalogFilters} from './catalog-types';
 import {DEFAULT_FEATURES,type Feature} from './taxonomy';
 import {PRODUCTS_PER_PAGE} from './catalog-pagination';
 export const SOLD_MAIN_DAYS=7;
@@ -17,18 +17,19 @@ export function soldGridLimit(availableCount:number) {
 }
 export function catalogInventory(products:Product[],now=Date.now()) {
  const available=products.filter(p=>p.status==='published'&&availableGroups(p).length);
+ const reserved=products.filter(isReserved);
  const sold=products.filter(p=>!p.soldHidden&&soldAge(p,now)<=SOLD_ARCHIVE_DAYS*DAY).sort((a,b)=>(b.soldAt??'').localeCompare(a.soldAt??'')||a.id.localeCompare(b.id));
  const young=sold.filter(p=>soldAge(p,now)<=SOLD_MAIN_DAYS*DAY);
  const mainSold=young.slice(0,soldGridLimit(available.length)),ids=new Set(mainSold.map(p=>p.id));
- return {available,main:[...available,...mainSold],recentlySold:sold.filter(p=>!ids.has(p.id))};
+ return {available,main:[...available,...reserved,...mainSold],recentlySold:sold.filter(p=>!ids.has(p.id))};
 }
 export function catalogListing(products:Product[],filters:CatalogFilters&{sort?:string},terms:Feature[]=DEFAULT_FEATURES,now=Date.now(),archive=false) {
  const inventory=catalogInventory(products,now);
  const matching=(archive?[...inventory.main.filter(isSold),...inventory.recentlySold]:inventory.main).filter(p=>matchesProduct(p,filters,terms,true));
- const price=(p:Product)=>Math.min(...(isSold(p)?p.groups:availableGroups(p)).filter(g=>matchesSizePrice(p,g,filters)).map(g=>g.price??p.price??0));
+ const price=(p:Product)=>Math.min(...(isSold(p)||isReserved(p)?p.groups:availableGroups(p)).filter(g=>matchesSizePrice(p,g,filters)).map(g=>g.price??p.price??0));
  const sort=(a:Product,b:Product)=>filters.sort==='low'?price(a)-price(b):filters.sort==='high'?price(b)-price(a):(b.publishedAt??'').localeCompare(a.publishedAt??'')||a.id.localeCompare(b.id);
  if(archive)return matching.sort((a,b)=>(b.soldAt??'').localeCompare(a.soldAt??'')||a.id.localeCompare(b.id));
- const available=matching.filter(p=>!isSold(p)).sort(sort);
+ const available=matching.filter(p=>!isSold(p)&&!isReserved(p)).sort(sort);
  const sold=matching.filter(isSold).sort((a,b)=>filters.sort==='low'||filters.sort==='high'?sort(a,b):(b.soldAt??'').localeCompare(a.soldAt??'')||a.id.localeCompare(b.id));
- return [...available,...sold.slice(0,soldGridLimit(available.length))];
+ return [...available,...matching.filter(isReserved).sort(sort),...sold.slice(0,soldGridLimit(available.length))];
 }

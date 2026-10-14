@@ -45,7 +45,7 @@ beforeEach(async()=>{
  await client.execute("INSERT INTO size_groups(id,product_id,fits,qty,length_cm,width_cm) VALUES('group','product','[\"M\"]',10,60,50)");
  product=await m.readProduct('product');selection={lines:[{productId:'product',groupId:'group',quantity:1}]};
 });
-after(async()=>{globalThis.fetch=originalFetch;client.close();assert.equal(path.dirname(dir),os.tmpdir());assert.ok(path.basename(dir).startsWith('elite-rewards-'));await rm(dir,{recursive:true,force:true,maxRetries:8,retryDelay:200});});
+after(async()=>{globalThis.fetch=originalFetch;client.close();global.gc?.();await new Promise(resolve=>setTimeout(resolve,100));assert.equal(path.dirname(dir),os.tmpdir());assert.ok(path.basename(dir).startsWith('elite-rewards-'));await rm(dir,{recursive:true,force:true,maxRetries:8,retryDelay:200});});
 async function create(cookie=buyerCookie,extra={}){return m.orderPost(request('/api/order',{...payload,...extra},cookie));}
 async function discounted(){const response=await create();assert.equal(response.status,201,JSON.stringify(await response.clone().json()));return {order:await response.json(),cookie:buyerCookie+'; '+response.headers.get('set-cookie').split(';')[0]};}
 async function voucher(changes={}){

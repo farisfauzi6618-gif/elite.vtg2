@@ -1,3 +1,4 @@
+import {reservedQuantitySql} from '@/modules/catalog/reserve-inventory';
 import type {Transaction,InValue} from '@libsql/client';
 import {db,AppError,random,hash,publicOrder,json} from './order-server';
 import type {Order} from './order-types';
@@ -35,7 +36,7 @@ export async function persistPurchase(request:Request,existing:Order|null,orderI
  try{
   // Recheck stock, price and release time under the same lock as invoice creation.
   for(const line of lines??[]){
-   const row=(await tx.execute({sql:'SELECT p.status,p.orderable_at,p.price,g.price AS group_price,g.qty FROM products p JOIN size_groups g ON g.product_id=p.id WHERE p.id=? AND g.id=?',args:[line.productId,line.groupId]})).rows[0];
+   const row=(await tx.execute({sql:`SELECT p.status,p.orderable_at,p.price,g.price AS group_price,g.qty-${reservedQuantitySql('g')} AS qty FROM products p JOIN size_groups g ON g.product_id=p.id WHERE p.id=? AND g.id=?`,args:[line.productId,line.groupId]})).rows[0];
    if(!row||row.status!=='published'||Number(row.qty)<line.quantity||Number(row.group_price??row.price)!==line.unitPrice)throw new AppError(409,'Stok atau harga berubah. Pilih kembali di katalog.');
    if(orderingLocked({orderableAt:row.orderable_at as string|null}))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(String(row.orderable_at))+'.');
   }

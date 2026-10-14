@@ -1,0 +1,8 @@
+import {api,json,body,originCheck,rate,db,AppError} from '@/modules/order/order-server';
+import {reservationAccess,publicReserveOrder,expireReservations,newReservePayment,rejectReservePayment} from '@/modules/order/reserve-server';
+import {paymentAvailable,paymentConfig} from '@/modules/order/payment-config';
+export const runtime='nodejs';export const dynamic='force-dynamic';
+export const GET=(r:Request)=>api(async()=>{await rate(r,'reserve_read',90);await expireReservations();return json(await publicReserveOrder(await reservationAccess(r)))});
+export const POST=(r:Request)=>api(async()=>{originCheck(r);await rate(r,'reserve_payment',20);const o=await reservationAccess(r),v=await body(r) as Record<string,any>;if(!['payment','method','discard'].includes(v.action))throw new AppError(400,'Tindakan tidak valid.');
+if(['payment','method'].includes(v.action)&&!['bca_transfer','qris_dana'].includes(v.method))throw new AppError(400,'Metode pembayaran tidak valid.');if(v.action==='payment'){if(!paymentAvailable(await paymentConfig(),v.method))throw new AppError(409,'Metode pembayaran belum tersedia.');await newReservePayment(o,v.amount,v.method)}else {const p=await db().prepare("SELECT * FROM reserve_payments WHERE id=? AND order_id=? AND state='awaiting_proof'").bind(v.paymentId,o.id).first<any>();if(!p)throw new AppError(409,'Pembayaran sudah berubah.');if(v.action==='discard')await rejectReservePayment(p.id,'customer');else {if(!paymentAvailable(await paymentConfig(),v.method))throw new AppError(400,'Metode tidak tersedia.');await db().prepare("UPDATE reserve_payments SET payment_method=? WHERE id=? AND state='awaiting_proof'").bind(v.method,p.id).run()}}
+return json(await publicReserveOrder(await reservationAccess(r)))});

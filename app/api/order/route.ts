@@ -1,3 +1,4 @@
+import {createReserveOrder,publicReserveOrder,sweepReserveExpiry,cancelReserve} from '@/modules/order/reserve-server';
 import {attachOrder,observe} from '@/modules/analytics/server';
 import {watch} from '@/modules/analytics/errors';
 import { api,json,body,validateOrder,originCheck,settings,ready,AppError,rate,db,random,hash,myOrder,publicOrder,session } from "@/modules/order/order-server";
@@ -7,13 +8,15 @@ import { orderShippingGrams } from "@/modules/order/order-items";
 import { paymentConfig,paymentAvailable } from "@/modules/order/payment-config";
 import { isPaymentMethod,storedPaymentMethod } from "@/modules/order/payment-types";
 import {persistPurchase,abandonPurchase,orderSessionCookie} from '@/modules/order/first-purchase-server';
-export const GET=(r:Request)=>api(async()=>json(publicOrder(await myOrder(r))));
+export const GET=(r:Request)=>api(async()=>{await sweepReserveExpiry();return json(await publicReserveOrder(await myOrder(r)))});
 export const POST=(r:Request)=>watch(r,'checkout_error',()=>api(async()=>{
  originCheck(r);await rate(r,"order",12);const raw=await body(r);if(Object.keys(raw).some(k=>!allowedOrderFields.has(k)))throw new AppError(400,"Formulir memuat nilai yang tidak boleh diubah. Muat ulang halaman.");const linked=raw.catalogToken?await catalogQuote(raw.catalogToken):null;const v=validateOrder(linked?{...raw,...catalogItems(linked)}:raw),quote=await loadQuote(raw.quoteId,v.postcode);
  if(quote.grams!==orderShippingGrams(v.quantity))throw new AppError(409,"Jumlah barang berubah. Perbarui ongkir sesuai berat paket sebelum melanjutkan.");
  if(linked){const used=await db().prepare("SELECT session_hash FROM orders WHERE catalog_checkout_id=?").bind(linked.id).first<{session_hash:string}>();if(used&&(!session(r)||used.session_hash!==await hash(session(r)!)))throw new AppError(409,"Pilihan barang ini sudah digunakan pesanan lain. Buat pilihan baru di katalog.");}
  const total=v.itemAmount+quote.amount;if(total>10000000)throw new AppError(400,"Total pembayaran maksimal Rp10.000.000.");
  const payment=await paymentConfig();if(!await ready(await settings(),payment))throw new AppError(409,"Pembayaran belum tersedia. Hubungi ELITE.VTG.");
+ if(linked?.orderType==='reserve')return createReserveOrder(r,v,linked,quote,raw.depositAmount,payment.defaultMethod!,String(raw.catalogToken));
+ if(Object.hasOwn(raw,'depositAmount'))throw new AppError(400,'Deposit hanya tersedia pada Reserve Order.');
  const values={name:v.name,phone:v.phone,address:v.address,postcode:v.postcode,item:v.item,quantity:v.quantity,items:v.items,shipping_amount:quote.amount,quote,catalog_checkout_id:linked?.id||null,catalog_token:linked?String(raw.catalogToken):null,stock_sync_state:linked?"pending":"unlinked"};
  try{const existing=await myOrder(r);if(existing.status==="awaiting_proof"){
  const pricing=await persistPurchase(r,existing,existing.id,v.itemAmount,linked?.lines,p=>({sql:"UPDATE orders SET name=?,phone=?,address=?,postcode=?,item=?,quantity=?,items_json=?,total=?,item_amount=?,shipping_amount=?,shipping_json=?,catalog_checkout_id=?,catalog_token=?,catalog_items_json=?,stock_sync_state=?,stock_sync_error=NULL,customer_id=?,item_subtotal=?,discount_amount=?,discount_voucher_id=?,discount_label=? WHERE id=? AND session_hash=? AND status='awaiting_proof' AND proof_key IS NULL",args:[v.name,v.phone,v.address,v.postcode,v.item,v.quantity,JSON.stringify(v.items),p.net+quote.amount,p.net,quote.amount,JSON.stringify(quote),linked?.id||null,linked?String(raw.catalogToken):null,linked?JSON.stringify(linked.lines):null,linked?"pending":"unlinked",p.customerId,p.subtotal,p.discount,p.voucherId,p.voucherLabel,existing.id,existing.session_hash!]}),raw.rewardChoice);
@@ -26,11 +29,11 @@ export const POST=(r:Request)=>watch(r,'checkout_error',()=>api(async()=>{
  await observe(()=>attachOrder(r,id));
  return json({id,created_at:now,...values,item_amount:pricing.net,item_subtotal:pricing.subtotal,discount_amount:pricing.discount,discount_voucher_id:pricing.voucherId,discount_label:pricing.voucherLabel,total:pricing.net+quote.amount,payment_method:payment.defaultMethod,payment_state:"awaiting_proof",status:"awaiting_proof",notify_status:"pending"},201,{"Set-Cookie":orderSessionCookie(r,token)});
 }));
-export const DELETE=(r:Request)=>api(async()=>{originCheck(r);try{await abandonPurchase(await myOrder(r));}catch(e){if(!(e instanceof AppError)||e.status!==404)throw e;}return json({ok:true},200,{"Set-Cookie":"elite_order=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0"});});
+export const DELETE=(r:Request)=>api(async()=>{originCheck(r);try{const order=await myOrder(r);if(order.order_type==='reserve'){if(order.reservation_status==='AWAITING_DEPOSIT'&&!order.proof_key)await cancelReserve(order.id,'guest-discard');}else await abandonPurchase(order);}catch(e){if(!(e instanceof AppError)||e.status!==404)throw e;}return json({ok:true},200,{"Set-Cookie":"elite_order=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0"});});
 
-const allowedOrderFields=new Set(["name","phone","address","postcode","item","items","quantity","itemAmount","quoteId","consent","catalogToken","grams","rewardChoice"]);
+const allowedOrderFields=new Set(["name","phone","address","postcode","item","items","quantity","itemAmount","quoteId","consent","catalogToken","grams","rewardChoice","depositAmount"]);
 export const PATCH=(r:Request)=>api(async()=>{
- originCheck(r);const o=await myOrder(r),raw=await body(r);
+ originCheck(r);const o=await myOrder(r),raw=await body(r);if(o.order_type==='reserve')throw new AppError(409,'Ubah metode melalui panel pembayaran Reserve.');
  if(Object.keys(raw).length!==1||!isPaymentMethod(raw.paymentMethod))throw new AppError(400,"Pilih metode pembayaran yang tersedia. Nominal dan tujuan pembayaran tidak boleh diubah.");
  const method=raw.paymentMethod;
  if(o.status!=="awaiting_proof"||o.proof_key)throw new AppError(409,"Metode pembayaran tidak dapat diganti setelah bukti dikirim.");

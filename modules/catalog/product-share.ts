@@ -1,4 +1,4 @@
-import {availableGroups,displayPrice,FITS,isSold,productPhotos,type Product} from './catalog-types';
+import {availableGroups,displayPrice,FITS,isSold,isReserved,productPhotos,type Product} from './catalog-types';
 export const PRODUCT_SHARE_ORIGIN='https://elitevtg.com';
 export function productShareUrl(product:Product,story=false){
  if(product.status!=='published'||!product.id||!/^[A-Za-z0-9_-]{1,100}$/.test(product.id))throw new Error('Hanya produk terbit yang dapat dibagikan.');
@@ -7,9 +7,9 @@ export function productShareUrl(product:Product,story=false){
  return url.href;
 }
 export function productShareSummary(product:Product){
- const groups=isSold(product)?product.groups:availableGroups(product),fits=new Set(groups.flatMap(g=>g.fits));
+ const groups=isSold(product)||isReserved(product)?product.groups:availableGroups(product),fits=new Set(groups.flatMap(g=>g.fits));
  const sizes=FITS.filter(f=>fits.has(f));
- return [isSold(product)?'SOLD':null,sizes.length?'Size '+sizes.join(' / '):null,displayPrice(product)].filter(Boolean).join(' · ');
+ return [isReserved(product)?'RESERVED':isSold(product)?'SOLD':null,sizes.length?'Size '+sizes.join(' / '):null,displayPrice(product)].filter(Boolean).join(' · ');
 }
 export function productShareData(product:Product,story=false){return {title:product.name,text:product.name+'\n'+productShareSummary(product)+'\nELITE.VTG',url:productShareUrl(product,story)}}
 export function whatsappShareUrl(product:Product){const text=product.name+'\n'+productShareSummary(product)+'\n\nView at ELITE.VTG:\n'+productShareUrl(product);return 'https://wa.me/?text='+encodeURIComponent(text)}

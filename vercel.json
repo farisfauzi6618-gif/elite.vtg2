@@ -3,6 +3,18 @@
   "framework": "nextjs",
   "buildCommand": "pnpm build",
   "installCommand": "pnpm install --frozen-lockfile",
-  "regions": ["sin1"],
-  "functions": { "app/api/**/route.ts": { "maxDuration": 120 } }
+  "regions": [
+    "sin1"
+  ],
+  "functions": {
+    "app/api/**/route.ts": {
+      "maxDuration": 120
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/reserve/expiry",
+      "schedule": "*/15 * * * *"
+    }
+  ]
 }

@@ -40,6 +40,7 @@ export async function saveProduct(input:any,actor:string){
  const oldIds=new Set(current.groups.map(g=>g.id));const missing=current.groups.filter(g=>!groups.some(n=>n.id===g.id));if(missing.length)throw new AppError(400,'Kelompok tersimpan tidak dapat dihapus karena mempunyai riwayat. Set stok ke 0 untuk menonaktifkannya.');
  for(const g of groups)if(!oldIds.has(g.id)&&await db().prepare('SELECT id FROM size_groups WHERE id=?').bind(g.id).first())throw new AppError(400,'Kelompok ukuran bukan milik produk ini.');
  // Preserve historical source metadata; this form cannot change or add Instagram links.
+ for(const old of current.groups){const next=groups.find(g=>g.id===old.id);if((old.reservedQty??0)>0&&(!next||next.qty==null||next.qty<(old.reservedQty??0)))throw new AppError(409,'Stok atau ukuran ini sedang terkunci oleh Reserve aktif.');}
  const normalized={url:current.instagramUrl,shortcode:current.shortcode};
  const category=textValue(input.category,100);if(category&&!CATEGORIES.includes(category))throw new AppError(400,'Pilih kategori utama dari daftar bersama.');const features=await validateFeatures(input.features??current.features??[]);
  const p={name:textValue(input.name,200),brand:textValue(input.brand,100),category,color:textValue(input.color,100),price:integerValue(input.price,'Harga'),condition:optionalText(input.condition),defects:optionalText(input.defects),photoKey:optionalText(input.photoKey,100),groups};
@@ -62,6 +63,7 @@ export async function saveProduct(input:any,actor:string){
 export async function changeStock(input:any,actor:string){
  const id=textValue(input.groupId,100);const d=db();const r=await d.prepare('SELECT g.*,p.status FROM size_groups g JOIN products p ON p.id=g.product_id WHERE g.id=?').bind(id).first<any>();if(!r)throw new AppError(404,'Kelompok ukuran tidak ditemukan.');const revision=integerValue(input.revision,'Versi stok',1e9,false);if(r.revision!==revision)throw new AppError(409,'Stok berubah di perangkat lain. Muat ulang sebelum mencoba lagi.');
  let after:number|null;if(input.mode==='delta'){if(r.qty==null)throw new AppError(400,'Pastikan jumlah stok awal melalui editor terlebih dahulu.');if(input.delta!==1&&input.delta!==-1)throw new AppError(400,'Perubahan cepat hanya +1 atau −1.');after=r.qty+input.delta;integerValue(after,'Stok',100000,false)}else if(input.mode==='set')after=integerValue(input.qty,'Stok',100000,false);else throw new AppError(400,'Jenis perubahan stok tidak valid.');
+ const held=currentHold(await readProduct(r.product_id),id);if(after!=null&&after<held)throw new AppError(409,'Stok tidak boleh lebih kecil daripada jumlah Reserved.');
  if(after===r.qty)return {product:await readProduct(r.product_id),changed:false};const hid=crypto.randomUUID(),now=new Date().toISOString(),reason=textValue(input.reason,200)||(input.mode==='delta'&&input.delta===-1?'Terjual 1 unit':input.mode==='delta'?'Tambah 1 unit':'Koreksi jumlah stok');
  const result=await d.batch([
  d.prepare('INSERT INTO stock_history (id,group_id,product_id,before_qty,after_qty,before_revision,after_revision,reason,actor,created_at) SELECT ?,id,product_id,qty,?,revision,revision+1,?,?,? FROM size_groups WHERE id=? AND revision=?').bind(hid,after,reason,actor,now,id,revision),
@@ -78,3 +80,5 @@ export async function undoStock(input:any,actor:string){
  d.prepare('UPDATE products SET version=version+1,updated_at=?,last_mutation=? WHERE id=? AND EXISTS (SELECT 1 FROM stock_history WHERE id=?)').bind(now,hid,pid,hid),
  ]);if(result[0].meta.changes===0)throw new AppError(409,'Perubahan sudah dibatalkan atau stok telah berubah.');return readProduct(pid);
 }
+
+function currentHold(p:Product,id:string){return p.groups.find(g=>g.id===id)?.reservedQty??0}

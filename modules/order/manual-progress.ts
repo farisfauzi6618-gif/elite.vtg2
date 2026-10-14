@@ -8,7 +8,7 @@ export async function updateManualProgress(id:string,input:Record<string,unknown
  const stage=progressStatus(o),revision=o.post_purchase_revision??0,action=input.action;
  if(revision!==input.revision)throw new AppError(409,'Pesanan berubah. Perbarui halaman sebelum menyimpan.');
  const now=Date.now();
- if(action==='confirm'){
+ if(action==='confirm'){if(o.order_type==='reserve'&&o.reservation_status!=='PAID')throw new AppError(409,'Konfirmasi setiap pembayaran melalui panel Reserve terlebih dahulu.');
   if(stage!=='PAYMENT_RECEIVED')return orderProgress(o);
   const result=await db().batch([
    db().prepare("UPDATE orders SET payment_state='payment_confirmed',confirmed_at=COALESCE(confirmed_at,?),confirmed_by=COALESCE(confirmed_by,?),post_purchase_revision=post_purchase_revision+1,post_purchase_updated_by=? WHERE id=? AND proof_key IS NOT NULL AND status='submitted' AND payment_state!='payment_confirmed' AND post_purchase_revision=?").bind(now,actor,actor,id,revision),

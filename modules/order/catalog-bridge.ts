@@ -4,7 +4,7 @@ import { env } from '@/lib/env';
 import { db,AppError,settings,decrypt,telegram } from '@/modules/order/order-server';
 import type { Order } from '@/modules/order/order-types';
 export type CatalogLine={productId:string;groupId:string;quantity:number;name:string;label:string;instagramUrl:string;unitPrice:number};
-export type CatalogQuote={id:string;lines:CatalogLine[];amount:number;expiresAt:number;customer?:{name:string;phone:string|null}};
+export type CatalogQuote={orderType?:string;id:string;lines:CatalogLine[];amount:number;expiresAt:number;customer?:{name:string;phone:string|null}};
 export function catalogConfigured(){return true}
 async function bridge<T>(data:Record<string,unknown>):Promise<T>{
  try{

@@ -102,7 +102,7 @@ let ownerCookie = '', teamCookie = '', customerCookie = '', checkoutToken = '', 
 const photoKey = crypto.randomUUID();
 const png = new Uint8Array(80); png.set([137,80,78,71,13,10,26,10]);
 after(async () => {
-  globalThis.fetch = originalFetch; client.close();
+  globalThis.fetch = originalFetch; client.close();global.gc?.();await new Promise(resolve=>setTimeout(resolve,100));
   if (path.dirname(path.resolve(temporary)) !== path.resolve(os.tmpdir()) || !path.basename(temporary).startsWith('elite-monolith-')) throw Error('Unexpected temporary cleanup target');
   await rm(temporary, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
 });
