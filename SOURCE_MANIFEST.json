@@ -92,10 +92,10 @@
       "exportSha256": "e603b1030c9fe08e2ebd9c2d0721fec88e1a2bad0557cfe77355f432b4c1081a"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-reserve-48h",
       "path": "app/(orders)/order/order-form.tsx",
-      "sha256": "eec2938553e1d65c633802a30806bb5dab6c0733f526fb2ee1ef1b3f4d9d0711",
-      "exportSha256": "eec2938553e1d65c633802a30806bb5dab6c0733f526fb2ee1ef1b3f4d9d0711"
+      "sha256": "1672f5a3ed6d950f51063a4ba42739bc59e97edca2be2afdf6423aebd35c63cf",
+      "exportSha256": "1672f5a3ed6d950f51063a4ba42739bc59e97edca2be2afdf6423aebd35c63cf"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1238,10 +1238,10 @@
       "exportSha256": "c4effec9d096c1701aa6d3ff10d0c76997c7b98fb8f36d87cde954f2041c0dad"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-reserve-48h",
       "path": "modules/order/order-types.ts",
-      "sha256": "0cabbab6fe1d2de301373a12fc602b43e8be5d429b8f603da77007fb63ad80d5",
-      "exportSha256": "0cabbab6fe1d2de301373a12fc602b43e8be5d429b8f603da77007fb63ad80d5"
+      "sha256": "cd92fdb3dcc77c09d16ab4981ba6bf2c71568dfea9f33885e04af4a58604dbff",
+      "exportSha256": "cd92fdb3dcc77c09d16ab4981ba6bf2c71568dfea9f33885e04af4a58604dbff"
     },
     {
       "source": "monolith-2026-10-11-blob-optimization",
@@ -1598,10 +1598,10 @@
       "exportSha256": "48b7933c2d0ed5ecdbd055d5f1483782428d08d6c33ada90512f85f4552b330f"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-reserve-48h",
       "path": "vercel.json",
-      "sha256": "dc8e66d023d4016049bb41880ecd9b8dc12957d75c96f399b10d3e257cbf7cc9",
-      "exportSha256": "dc8e66d023d4016049bb41880ecd9b8dc12957d75c96f399b10d3e257cbf7cc9"
+      "sha256": "ea5a80de7d35c060ee11df6d52397bfa5cc859c2c9bae7f8d2c29f763944cdc7",
+      "exportSha256": "ea5a80de7d35c060ee11df6d52397bfa5cc859c2c9bae7f8d2c29f763944cdc7"
     },
     {
       "source": "sites-catalog",
@@ -4731,12 +4731,6 @@
     },
     {
       "source": "monolith-2026-10-14-reserve",
-      "path": "app/api/reserve/expiry/route.ts",
-      "sha256": "571e96ae1bb29db695e9721c126320016d281a466b16f1e8df056e826d9e1f2a",
-      "exportSha256": "571e96ae1bb29db695e9721c126320016d281a466b16f1e8df056e826d9e1f2a"
-    },
-    {
-      "source": "monolith-2026-10-14-reserve",
       "path": "app/api/reserve/proof/route.ts",
       "sha256": "a4a7b2731a2c9ea2a9835d175829aaa39d26273d348f6f76cf1cd154fa0505ea",
       "exportSha256": "a4a7b2731a2c9ea2a9835d175829aaa39d26273d348f6f76cf1cd154fa0505ea"
@@ -4754,16 +4748,16 @@
       "exportSha256": "986b00787ff6190e1f0c0d3654d27b531e454f6c48429d191d961ed72408e1c1"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-reserve-48h",
       "path": "components/reserve-basket.tsx",
-      "sha256": "b1c6668f720b1479be51822a07a85a24c75ccf389f8ca21213bf37767256a9f9",
-      "exportSha256": "b1c6668f720b1479be51822a07a85a24c75ccf389f8ca21213bf37767256a9f9"
+      "sha256": "0b2814546c79815657f4cc870dfab38b583b97c20e876d4e8256c5140ab80330",
+      "exportSha256": "0b2814546c79815657f4cc870dfab38b583b97c20e876d4e8256c5140ab80330"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-reserve-48h",
       "path": "components/reserve-order-panel.tsx",
-      "sha256": "05bc7cd93de98c79d47c6cfc5d495dadf96fc95094705b9a576ac53b0096979b",
-      "exportSha256": "05bc7cd93de98c79d47c6cfc5d495dadf96fc95094705b9a576ac53b0096979b"
+      "sha256": "b023476ff11d0c54eeacd18933514c6f302e46ae67cf6bf9c0a5251c38094b11",
+      "exportSha256": "b023476ff11d0c54eeacd18933514c6f302e46ae67cf6bf9c0a5251c38094b11"
     },
     {
       "source": "monolith-2026-10-14-reserve",
@@ -4772,22 +4766,22 @@
       "exportSha256": "5467c943c0d439a5a0158ae3303e81b8ce8930423da8025710f678312b994bf3"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-reserve-48h",
       "path": "modules/order/reserve-notify.ts",
-      "sha256": "aa1c4e49644a872f495cdae23890af88734878eb32b1fc7158549643d592ede2",
-      "exportSha256": "aa1c4e49644a872f495cdae23890af88734878eb32b1fc7158549643d592ede2"
+      "sha256": "ed6c3a3506cb0431386f6f3d5408135e6c3ad11214d9c979bbb6fb6e57dd815e",
+      "exportSha256": "ed6c3a3506cb0431386f6f3d5408135e6c3ad11214d9c979bbb6fb6e57dd815e"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-reserve-48h",
       "path": "modules/order/reserve-server.ts",
-      "sha256": "b125cec81cd21c3c4fb121f8f665d1e8ebdbf2e0c2b7567ab7b84bb5a105eef3",
-      "exportSha256": "b125cec81cd21c3c4fb121f8f665d1e8ebdbf2e0c2b7567ab7b84bb5a105eef3"
+      "sha256": "1ee48d913b9274691044d22df6742a3ab59ad3ed7d958f26f5761165042c4e6a",
+      "exportSha256": "1ee48d913b9274691044d22df6742a3ab59ad3ed7d958f26f5761165042c4e6a"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-reserve-48h",
       "path": "modules/order/reserve-types.ts",
-      "sha256": "9610570dc6524b3194c609893ca3bb8635170e537d4505f742dd57e93f45ca8f",
-      "exportSha256": "9610570dc6524b3194c609893ca3bb8635170e537d4505f742dd57e93f45ca8f"
+      "sha256": "0f6d08e66580ee80e3534ad09f4f42dcd5918bf5c495d5677ddab6bb12031fd0",
+      "exportSha256": "0f6d08e66580ee80e3534ad09f4f42dcd5918bf5c495d5677ddab6bb12031fd0"
     },
     {
       "source": "monolith-2026-10-14-reserve",
@@ -4796,10 +4790,10 @@
       "exportSha256": "c7c31e2c5d2f8e6864f3a4712219dc2e4433cc7f1eae7f407b5e0135ef780fb6"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-14-reserve-48h",
       "path": "tests/reserve.test.mjs",
-      "sha256": "11eecb07ae9c7a5598ffb5b18e5c633a6c7aad20f838e88121b1582d1bbb6e5c",
-      "exportSha256": "11eecb07ae9c7a5598ffb5b18e5c633a6c7aad20f838e88121b1582d1bbb6e5c"
+      "sha256": "29ea340e81244ff7872aa554c68ce89b862b0958b8d23a6cb9d2fb484d97e743",
+      "exportSha256": "29ea340e81244ff7872aa554c68ce89b862b0958b8d23a6cb9d2fb484d97e743"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -5185,13 +5179,15 @@
   "reserve": {
     "minimumDeposit": 50000,
     "percent": 25,
-    "defaultHours": 72,
+    "defaultHours": 48,
     "maxDays": 7,
     "maxPieces": 20,
     "discounts": false,
     "shippingAtSettlement": true,
     "immutablePaymentLedger": true,
     "derivedAvailability": true,
-    "migration": "release_0011_reserve.sql"
+    "migration": "release_0011_reserve.sql",
+    "expiryUsesDatabaseClock": true,
+    "scheduledCronRequired": false
   }
 }

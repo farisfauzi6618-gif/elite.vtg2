@@ -1,4 +1,4 @@
-export const RESERVE_HOURS=72,RESERVE_MAX_DAYS=7;
+export const RESERVE_HOURS=48,RESERVE_MAX_DAYS=7;
 export type ReserveStatus='AWAITING_DEPOSIT'|'RESERVED'|'PARTIALLY_PAID'|'PAID'|'EXPIRED'|'CANCELLED';
 export type ReservePayment={id:string;amount:number;paymentMethod:'bca_transfer'|'qris_dana';state:'awaiting_proof'|'submitted'|'confirmed'|'rejected';createdAt:number;confirmedAt:number|null;hasProof:boolean;source:string;note:string|null};
 export type ReserveSummary={id:string;status:ReserveStatus;itemCount:number;orderValue:number;total:number;shippingAmount:number;depositMinimum:number;depositPaid:number;totalPaid:number;remaining:number;startedAt:number|null;deadline:number|null;payments:ReservePayment[];policy:string};

@@ -10,11 +10,5 @@
     "app/api/**/route.ts": {
       "maxDuration": 120
     }
-  },
-  "crons": [
-    {
-      "path": "/api/reserve/expiry",
-      "schedule": "*/15 * * * *"
-    }
-  ]
+  }
 }
