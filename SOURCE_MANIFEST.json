@@ -92,10 +92,10 @@
       "exportSha256": "e603b1030c9fe08e2ebd9c2d0721fec88e1a2bad0557cfe77355f432b4c1081a"
     },
     {
-      "source": "monolith-2026-10-15-sale-prices",
+      "source": "monolith-2026-10-15-shipping-help",
       "path": "app/(orders)/order/order-form.tsx",
-      "sha256": "30a0e4aba4af58f0d181e84617069112a316573c5102e67e0bb9d4fc8931ddf2",
-      "exportSha256": "30a0e4aba4af58f0d181e84617069112a316573c5102e67e0bb9d4fc8931ddf2"
+      "sha256": "77e1a84b57e76ca476daaf3f01c0bf4a12d8a4694896473c5b586c6155fd2cd8",
+      "exportSha256": "77e1a84b57e76ca476daaf3f01c0bf4a12d8a4694896473c5b586c6155fd2cd8"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1298,10 +1298,10 @@
       "exportSha256": "3a7cc71032c8c86c1f9330a6b5ec209e387e2dac0ef356d724d1634bf56729a4"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-15-shipping-help",
       "path": "modules/shipping/legacy-shipping-server.ts",
-      "sha256": "985db026bb267d0e343a509c545f4e92c03c726b3cd6554da2d9299c6e9bfc00",
-      "exportSha256": "985db026bb267d0e343a509c545f4e92c03c726b3cd6554da2d9299c6e9bfc00"
+      "sha256": "7318c52a9683c186097bb9d6551ec1fef5be4d65b8511fecea923f2f38e231ec",
+      "exportSha256": "7318c52a9683c186097bb9d6551ec1fef5be4d65b8511fecea923f2f38e231ec"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1496,10 +1496,10 @@
       "exportSha256": "bc24d8eff006d48cae8d3db4d737e0d83d4fea9be605c854cc8e47d0727ef9c0"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-15-shipping-help",
       "path": "tests/rajaongkir.test.mjs",
-      "sha256": "6e451faaa77d38758627ea516d8fa0097087b74e2425ef7cf04fa99ec073d350",
-      "exportSha256": "6e451faaa77d38758627ea516d8fa0097087b74e2425ef7cf04fa99ec073d350"
+      "sha256": "d7cac0d38c248a74bd2b49e59105e68dab106da852a4f2bd88af8677cb2c5f9a",
+      "exportSha256": "d7cac0d38c248a74bd2b49e59105e68dab106da852a4f2bd88af8677cb2c5f9a"
     },
     {
       "source": "monolith-2026-10-10-website-analytics-v1",
@@ -5328,5 +5328,12 @@
     "serverTransactionPricing": true,
     "reserveValueUsesSale": true,
     "defaultSaleLabels": false
+  },
+  "shippingHelp": {
+    "provider404IsUnavailableTariff": true,
+    "courierUnchanged": "J&T",
+    "customerRetry": true,
+    "customerWhatsAppHelp": true,
+    "noInventedRate": true
   }
 }

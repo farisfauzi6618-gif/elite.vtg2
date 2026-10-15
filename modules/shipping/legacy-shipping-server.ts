@@ -115,13 +115,14 @@ async function routeRates(destinationId: number, grams: number) {
   const cached = await db().prepare("SELECT payload FROM location_cache WHERE id = ?").bind(destinationId).first<{payload:string}>();
   if (!cached) throw new ShippingError(400,"UNKNOWN_DESTINATION","Cari dan pilih ulang tujuan dari daftar RajaOngkir.");
   const destination = JSON.parse(cached.payload) as Location;
-  const raw = await request("calculate/domestic-cost", config.key, new URLSearchParams({ origin: String(config.origin.id), destination: String(destinationId), weight: String(grams), courier: "jnt", price: "lowest" }));
+  // RajaOngkir returns 404 when no tariff is found, not only an empty data array.
+  const raw = await request("calculate/domestic-cost", config.key, new URLSearchParams({ origin: String(config.origin.id), destination: String(destinationId), weight: String(grams), courier: "jnt", price: "lowest" }), true);
   return {destination,raw};
 }
 export async function rates(destinationId:number,grams:number){
  const {destination,raw}=await routeRates(destinationId,grams);
  let services;try{services=availableJntRates(raw).map(r=>({amount:r.cost,service:r.service,description:r.description||"",etd:r.etd}));}catch{throw new ShippingError(502,"INVALID_RESPONSE","Tarif J&T belum dapat dibaca. Coba lagi.");}
- if(!services.length)throw new ShippingError(404,"NO_JNT_SERVICE","Layanan J&T belum tersedia untuk tujuan dan berat paket ini.");
+ if(!services.length)throw new ShippingError(404,"NO_JNT_SERVICE","Penyedia ongkir belum memberikan tarif J&T untuk tujuan dan berat paket ini. Coba lagi atau hubungi ELITE.VTG untuk bantuan.");
  return {destination:destination.label,weight:grams/1000,services};
 }
 export async function quote(destinationId: number, grams: number) {

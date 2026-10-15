@@ -15,16 +15,36 @@ writeFileSync(".test-runtime/tests/shipping.mjs",result.outputFiles[0].contents)
 const m=await import(pathToFileURL(process.cwd()+"/.test-runtime/tests/shipping.mjs"));
 const origin={id:10,label:"BALEENDAH, BANDUNG, 40375",province_name:"JAWA BARAT",city_name:"BANDUNG",district_name:"BALEENDAH",subdistrict_name:"BALEENDAH",zip_code:"40375"};
 const destination={id:90,label:"TENGAH, PONTIANAK KOTA, PONTIANAK, 78243",province_name:"KALIMANTAN BARAT",city_name:"PONTIANAK",district_name:"PONTIANAK KOTA",subdistrict_name:"TENGAH",zip_code:"78243"};
-let providerRates=[];
+let providerRates=[],providerStatus=200,providerCode=200,rateRequests=0;
 globalThis.fetch=async(input,init={})=>{
  const url=new URL(input);assert.equal(url.origin,"https://rajaongkir.komerce.id");assert.equal(init.headers.key,"SIMULATED_RATE_KEY");
  if(url.pathname.endsWith("/domestic-destination"))return Response.json({meta:{code:200},data:[url.searchParams.get("search")==="Baleendah"?origin:destination]});
  assert.ok(url.pathname.endsWith("/domestic-cost"));const params=new URLSearchParams(init.body);assert.equal(params.get("origin"),"10");assert.equal(params.get("destination"),"90");assert.equal(params.get("weight"),"1000");assert.equal(params.get("courier"),"jnt");
- return Response.json({meta:{code:200},data:providerRates});
+ rateRequests++;
+ return Response.json({meta:{code:providerCode,status:providerCode>=400?'error':'success'},data:providerCode>=400?null:providerRates},{status:providerStatus});
 };
 test("real response shape keeps valid J&T services and filters duplicates, other couriers, and invalid prices",()=>{
  const rows=[{code:"jnt",service:"EZ",description:"Regular",cost:38000,etd:"3-5 day"},{code:"jnt",service:"EZ",cost:39000},{code:"jnt",service:"SUPER",description:"Super",cost:"55000",etd:"1 day"},{code:"jne",service:"REG",cost:20000},{code:"jnt",service:"BAD",cost:-1},{code:"jnt",service:"bad<script>",cost:20000},null];
  assert.deepEqual(m.availableJntRates(rows).map(r=>[r.service,r.cost]),[["EZ",38000],["SUPER",55000]]);assert.equal(m.selectRegularRate(rows).service,"EZ");assert.throws(()=>m.availableJntRates({}));
+});
+
+test("missing J&T tariff from provider HTTP or meta 404 is explained without inventing a rate or changing courier",async()=>{
+ await m.connect("SIMULATED_RATE_KEY");await m.search("78243");
+ for(const status of [404,200]){
+  providerStatus=status;providerCode=404;const before=rateRequests;
+  await assert.rejects(()=>m.rates(90,1000),e=>e.status===404&&e.code==='NO_JNT_SERVICE'&&/belum memberikan tarif J&T/.test(e.message)&&/hubungi ELITE.VTG/.test(e.message)&&!/manual/.test(e.message));
+  assert.equal(rateRequests,before+1);
+ }
+ providerStatus=providerCode=200;
+});
+
+test("authentication, quota and provider failures are not reported as a missing tariff",async()=>{
+ for(const [status,code] of [[401,'INVALID_API_KEY'],[403,'INVALID_API_KEY'],[429,'QUOTA_LIMIT'],[500,'PROVIDER_ERROR']]){
+  providerStatus=providerCode=status;
+  await assert.rejects(()=>m.rates(90,1000),e=>e.code===code);
+ }
+ providerStatus=providerCode=200;providerRates=[{code:'jnt',service:'EZ',cost:38000}];
+ assert.equal((await m.rates(90,1000)).services[0].amount,38000);
 });
 test("route lookup returns available services while existing Regular quote stays compatible",async()=>{
  await m.connect("SIMULATED_RATE_KEY");await m.search("78243");providerRates=[{code:"jnt",service:"EZ",description:"Regular",cost:38000,etd:"3-5 day"},{code:"jnt",service:"SUPER",description:"Super",cost:55000,etd:"1 day"}];
