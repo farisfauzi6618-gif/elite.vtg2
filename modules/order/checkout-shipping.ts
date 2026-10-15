@@ -18,7 +18,7 @@ async function provider<T>(body:Record<string,unknown>):Promise<T>{
   throw new AppError(e.status,e.message);
  }throw e}
 }
-export async function searchDestinations(query:unknown,courier:ShippingCourier='jne'){
+export async function searchDestinations(query:unknown,courier:ShippingCourier='jnt'){
  if(typeof query!=="string"||query.trim().length<3||query.trim().length>100||(!/[\p{L}]/u.test(query)&&!/^\d{5}$/.test(query.trim())))throw new AppError(400,"Ketik kecamatan/kota minimal 3 huruf atau kode pos 5 angka.");
  const data=courier==='jnt'&&await kiriminRatesReady()?{locations:(await (await kiriminClient()).search(query.trim())).map(customerLocation)}:await provider<{locations:ShippingLocation[]}>({action:"search",query:query.trim(),courier});
  if(!Array.isArray(data.locations))throw new AppError(503,"Daftar tujuan belum dapat dimuat.");
@@ -26,7 +26,7 @@ export async function searchDestinations(query:unknown,courier:ShippingCourier='
  if(locations.length)await db().batch(locations.map(l=>db().prepare("INSERT INTO shipping_locations(id,payload,expires_at) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,expires_at=excluded.expires_at").bind(l.id,JSON.stringify(l),Date.now()+7*86400000)));
  return locations;
 }
-export async function shippingQuotes(destinationId:unknown,grams:unknown,courier:ShippingCourier='jne'){
+export async function shippingQuotes(destinationId:unknown,grams:unknown,courier:ShippingCourier='jnt'){
  if(typeof destinationId!=="number"||!Number.isSafeInteger(destinationId)||destinationId<=0||typeof grams!=="number"||!Number.isSafeInteger(grams)||grams<100||grams>30000)throw new AppError(400,"Pilih tujuan dan isi berat paket 0,1–30 kg.");
  const row=await db().prepare("SELECT payload FROM shipping_locations WHERE id=? AND expires_at>?").bind(destinationId,Date.now()).first<{payload:string}>();
  if(!row)throw new AppError(409,"Cari dan pilih ulang tujuan pengiriman.");
@@ -41,18 +41,20 @@ export async function shippingQuotes(destinationId:unknown,grams:unknown,courier
  await db().batch([...quotes.map(q=>db().prepare("INSERT INTO shipping_quotes(id,payload,expires_at) VALUES(?,?,?)").bind(q.id,JSON.stringify(q),q.expiresAt)),db().prepare("DELETE FROM shipping_quotes WHERE expires_at<?").bind(checkedAt)]);
  return quotes;
 }
-export async function shippingQuote(destinationId:unknown,grams:unknown){
- const quotes=await shippingQuotes(destinationId,grams),regular=quotes.find(q=>q.courier==='jne'?q.service.toUpperCase()==='REG':regularJnt(q.service));
+export async function shippingQuote(destinationId:unknown,grams:unknown,courier:ShippingCourier='jnt'){
+ const quotes=await shippingQuotes(destinationId,grams,courier),regular=quotes.find(q=>q.courier==='jne'?q.service.toUpperCase()==='REG':regularJnt(q.service));
  if(!regular)throw new AppError(503,"Pengiriman reguler belum tersedia untuk tujuan ini.");
  return regular;
 }
-export async function loadQuote(id:unknown,postcode:string){
+export async function loadQuote(id:unknown,postcode:string,paymentMode:unknown=undefined):Promise<ShippingQuote>{
+ if(paymentMode!==undefined&&paymentMode!=='prepaid'&&paymentMode!=='collect')throw new AppError(400,'Pilih cara pembayaran ongkir yang tersedia.');
  if(typeof id!=="string"||!/^[a-f0-9]{64}$/.test(id))throw new AppError(400,"Pilih tujuan dan cek ongkir dahulu.");
  const row=await db().prepare("SELECT payload FROM shipping_quotes WHERE id=? AND expires_at>?").bind(id,Date.now()).first<{payload:string}>();
  if(!row)throw new AppError(409,"Tarif telah kedaluwarsa. Tekan Cek ulang ongkir sebelum melanjutkan.");
  const quote=JSON.parse(row.payload) as ShippingQuote;
  if(quote.destination.postalCode!==postcode)throw new AppError(409,"Kode pos berubah. Pilih ulang tujuan untuk menghitung ongkir.");
- return quote;
+ if(paymentMode==='collect'&&quote.courier==='jne')throw new AppError(409,'Bayar ongkir di tempat hanya tersedia untuk pengiriman J&T. Cek ulang ongkir.');
+ return paymentMode===undefined?quote:{...quote,paymentMode};
 }
 export async function kiriminQuoteData(location:ShippingLocation,grams:number){
  const {config}=await kiriminSettings();if(!validKiriminOrigin(config.origin))throw new AppError(409,"Wilayah asal KiriminAja belum tersedia.");

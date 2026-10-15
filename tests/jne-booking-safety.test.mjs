@@ -123,3 +123,10 @@ test('legacy J&T tracking defaults stay unchanged',async()=>{
  assert.equal(tracking.courier,'J&T Express');
  assert.equal(m.orderProgress(state.order).courier,'J&T Regular');assert.deepEqual(state.calls,[]);
 });
+
+test('freight collect never creates a prepaid J&T booking or charges shipping a second time',async()=>{
+ const collect={...quote,courier:'jnt',service:'EZ',serviceName:'J&T Regular',paymentMode:'collect'};
+ for(const action of [m.processShipment,m.processKomshipShipment,m.processKiriminShipment]){
+  reset(order({shipping_amount:0,total:300000,shipping_json:JSON.stringify(collect)}));await assert.rejects(()=>action(state.order.id),e=>e.status===409&&/DFOD/.test(e.message));assert.deepEqual(state.calls,[]);assert.equal(state.reads.length,1);
+ }
+});

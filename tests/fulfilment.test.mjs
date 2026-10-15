@@ -154,18 +154,28 @@ test("incomplete item names, expired quotes, mismatched postcodes, and forged qu
  assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM orders").get().n,0);
 });
 test("available service API validates tariffs and refuses an unavailable route",async()=>{
- await checkoutSetup();providerJneServices.push({service:"FREE",amount:0},{service:"BAD",amount:NaN},{service:"REG",amount:1},{service:'YES',amount:17000});
+ await checkoutSetup();providerServices.push({service:"FREE",amount:0},{service:"BAD",amount:NaN},{service:"EZ",amount:1});
  const request=()=>m.buyerShippingPost(new Request("https://example.test/api/shipping",{method:"POST",headers:{Origin:"https://example.test","Content-Type":"application/json"},body:JSON.stringify({action:"rates",destinationId:90,quantity:1,grams:1000})}));
- const response=await request();assert.equal(response.status,200);const {quotes}=await response.json();assert.deepEqual(quotes.map(q=>q.service),["REG"]);assert.equal(quotes[0].amount,13000);assert.equal(quotes[0].courier,'jne');
- providerJneServices=[];assert.equal((await request()).status,503);
+ const response=await request();assert.equal(response.status,200);const {quotes}=await response.json();assert.deepEqual(quotes.map(q=>q.service),["EZ","SUPER"]);assert.equal(quotes[0].amount,38000);assert.equal(quotes[0].courier,'jnt');
+ providerServices=[];assert.equal((await request()).status,503);
 });
 
-test('new JNE Regular checkout persists actual courier and exact server tariff with a neutral customer invoice',async()=>{
+test('restored J&T checkout persists actual courier and exact server tariff',async()=>{
  await checkoutSetup();
  const rates=await m.buyerShippingPost(new Request('https://example.test/api/shipping',{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json'},body:JSON.stringify({action:'rates',destinationId:90,quantity:2,grams:1})}));
- assert.equal(rates.status,200);const {quotes}=await rates.json();assert.equal(quotes.length,1);assert.equal(quotes[0].grams,1000);assert.equal(quotes[0].amount,13000);assert.equal(quotes[0].courier,'jne');
- const response=await buyerRequest({quantity:2,items:['Kemeja A12','Celana B34'],quoteId:quotes[0].id});assert.equal(response.status,201);const created=await response.json();assert.equal(created.total,313000);assert.equal(created.shipping_amount,13000);assert.equal(created.quote.courier,'jne');
- const saved=sqlite.prepare('SELECT * FROM orders WHERE id=?').get(created.id);assert.equal(JSON.parse(saved.shipping_json).courier,'jne');assert.equal(saved.total,313000);assert.match(m.telegramInvoiceCaption(saved),/JNE Regular/);assert.doesNotMatch(m.invoiceText(saved),/JNE|J&T|Komerce|RajaOngkir/);
+ assert.equal(rates.status,200);const {quotes}=await rates.json();assert.equal(quotes.length,2);assert.equal(quotes[0].grams,1000);assert.equal(quotes[0].amount,38000);assert.equal(quotes[0].courier,'jnt');
+ const response=await buyerRequest({quantity:2,items:['Kemeja A12','Celana B34'],quoteId:quotes[0].id});assert.equal(response.status,201);const created=await response.json();assert.equal(created.total,338000);assert.equal(created.shipping_amount,38000);assert.equal(created.quote.courier,'jnt');
+ const saved=sqlite.prepare('SELECT * FROM orders WHERE id=?').get(created.id);assert.equal(JSON.parse(saved.shipping_json).courier,'jnt');assert.equal(saved.total,338000);assert.match(m.telegramInvoiceCaption(saved),/J&T Regular/);assert.match(m.invoiceText(saved,{includeCourier:true}),/J&T Regular/);
+});
+
+test('freight collect excludes shipping from website invoice, persists estimate and can switch before proof',async()=>{
+ const [quote]=await checkoutSetup();
+ for(const shippingPayment of ['free',null,100])assert.equal((await buyerRequest({item:'Kemeja',quoteId:quote.id,shippingPayment})).status,400);
+ const createdResponse=await buyerRequest({item:'Kemeja',quoteId:quote.id,shippingPayment:'collect'});assert.equal(createdResponse.status,201);const created=await createdResponse.json(),cookie=createdResponse.headers.get('set-cookie').split(';')[0];
+ assert.equal(created.shipping_amount,0);assert.equal(created.total,300000);assert.equal(created.quote.amount,38000);assert.equal(created.quote.paymentMode,'collect');assert.equal(created.quote.courier,'jnt');
+ const saved=sqlite.prepare('SELECT * FROM orders WHERE id=?').get(created.id);assert.equal(saved.total,300000);assert.equal(JSON.parse(saved.shipping_json).amount,38000);assert.equal(JSON.parse(saved.shipping_json).paymentMode,'collect');assert.match(m.invoiceText(saved,{includeCourier:true}),/J&T Regular/);assert.match(m.invoiceText(saved),/Bayar ke kurir saat paket tiba.*38[.,]000/);assert.match(m.telegramInvoiceCaption(saved),/Bayar ke kurir saat paket tiba.*38[.,]000/);assert.doesNotMatch(m.telegramInvoiceCaption(saved),/Ongkir J&T Regular: Rp\s*0/);
+ assert.throws(()=>m.assertJntBookingQuote(saved),/DFOD/);
+ const changed=await buyerRequest({item:'Kemeja',quoteId:quote.id,shippingPayment:'prepaid'},cookie);assert.equal(changed.status,200);const regular=await changed.json();assert.equal(regular.total,338000);assert.equal(regular.shipping_amount,38000);assert.equal(regular.quote.paymentMode,'prepaid');assert.equal(sqlite.prepare('SELECT COUNT(*) AS n FROM orders').get().n,1);
 });
 test("two item names and chosen service reach invoice and Telegram without exposing provider text",async()=>{
  const quotes=await checkoutSetup();const created=await buyerRequest({quantity:2,items:["Kemeja A12","Celana B34"],quoteId:quotes.find(q=>q.service==="SUPER").id});const order=await created.json();
