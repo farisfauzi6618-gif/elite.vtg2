@@ -3,7 +3,7 @@ import { orderQuote,rupiah,type Order } from "@/modules/order/order-types";
 import { kiriminClient,kiriminPin,kiriminSettings,validCoordinatePair } from "@/modules/order/shipping-settings";
 import { pickupSchedule,normalize } from "@/modules/order/komship";
 import { KiriminError,KiriminPinError,record,validKiriminOrigin,selectedKiriminRate,type KiriminLocation,type KiriminRate } from "@/modules/order/kiriminaja";
-import { shipment,shipmentSummary,shipmentNotice,sendLabels } from "@/modules/order/fulfilment";
+import { shipment,shipmentSummary,shipmentNotice,sendLabels,assertJntBookingQuote } from "@/modules/order/fulfilment";
 import type { Shipment,ShippingConfig } from "@/modules/order/fulfilment-types";
 import { orderItems } from "@/modules/order/order-items";
 
@@ -13,6 +13,7 @@ async function update(id:string,sql:string,...values:unknown[]){await db().prepa
 async function loadOrder(id:string){const o=await db().prepare("SELECT * FROM orders WHERE id=?").bind(id).first<Order>();if(!o)throw new AppError(404,"Pesanan tidak ditemukan.");return o;}
 
 export function kiriminPayload(o:Order,c:ShippingConfig,d:KiriminLocation,grams:number,r:KiriminRate,schedule:{date:string;time:string}){
+ assertJntBookingQuote(o);
  if(!validKiriminOrigin(c.origin)||!o.item_amount||!Number.isSafeInteger(o.item_amount)||o.item_amount<=0||r.insurance<=0||r.insurancePercent<=0)throw new AppError(409,"Asuransi wajib belum tersedia untuk nilai barang yang sebenarnya. Booking ditahan; periksa layanan ini dengan KiriminAja.");
  if(r.useGeolocation&&(!validCoordinatePair(c.senderLatitude,c.senderLongitude)||!validCoordinatePair(d.latitude,d.longitude)))throw new AppError(409,"Layanan ini mewajibkan titik lokasi. Lengkapi koordinat pengirim dan penerima pada pengaturan pesanan.");
  const address=o.address+", "+d.label,items=orderItems(o),itemName=items.join("; ");
@@ -29,7 +30,7 @@ export function matchesKiriminBooking(value:unknown,o:Order,p:Record<string,unkn
 }
 
 export async function processKiriminShipment(id:string,allowCreate=true){
- const o=await loadOrder(id),current=await kiriminSettings(),owner=current.settings;
+ const o=await loadOrder(id);assertJntBookingQuote(o);const current=await kiriminSettings(),owner=current.settings;
  if(o.payment_state!=="payment_confirmed"||!o.proof_key)throw new AppError(409,"Konfirmasi pembayaran melalui Telegram dahulu.");
  if(!owner?.chat_id||owner.chat_id!==o.confirmed_by||owner.chat_id!==o.delivery_chat)throw new AppError(409,"Akun Telegram penerima berubah. Periksa pemilik pesanan ini.");
  const now=Date.now(),locked=await db().prepare("UPDATE shipments SET lease=?,updated_at=? WHERE order_id=? AND lease<? RETURNING *").bind(now+240000,now,id,now).first<Shipment>();if(!locked)return {busy:true,shipment:shipmentSummary(await shipment(id))};

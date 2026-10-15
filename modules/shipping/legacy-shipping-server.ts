@@ -1,6 +1,6 @@
 import {sameOrigin} from '@/lib/request-security';
 import { env } from '@/lib/env';
-import { availableJntRates, normalizeLocations, resolveOrigin, selectRegularRate, type Location } from "@/modules/shipping/shipping-data";
+import { availableJntRates, availableJneRegularRates, normalizeLocations, resolveOrigin, selectRegularRate, type Location } from "@/modules/shipping/shipping-data";
 
 const BASE = "https://rajaongkir.komerce.id/api/v1/";
 export class ShippingError extends Error {
@@ -109,15 +109,21 @@ export async function search(query: string) {
   await db().batch(statements);
   return locations;
 }
-async function routeRates(destinationId: number, grams: number) {
+async function routeRates(destinationId: number, grams: number, courier:'jnt'|'jne'='jnt') {
   if (!Number.isSafeInteger(destinationId) || destinationId <= 0 || !Number.isSafeInteger(grams) || grams < 1 || grams > 100000) throw new ShippingError(400,"INVALID_INPUT","Pilih tujuan dari daftar dan isi berat lebih dari 0 hingga 100 kg.");
   const config = await configuration();
   const cached = await db().prepare("SELECT payload FROM location_cache WHERE id = ?").bind(destinationId).first<{payload:string}>();
   if (!cached) throw new ShippingError(400,"UNKNOWN_DESTINATION","Cari dan pilih ulang tujuan dari daftar RajaOngkir.");
   const destination = JSON.parse(cached.payload) as Location;
   // RajaOngkir returns 404 when no tariff is found, not only an empty data array.
-  const raw = await request("calculate/domestic-cost", config.key, new URLSearchParams({ origin: String(config.origin.id), destination: String(destinationId), weight: String(grams), courier: "jnt", price: "lowest" }), true);
+  const raw = await request("calculate/domestic-cost", config.key, new URLSearchParams({ origin: String(config.origin.id), destination: String(destinationId), weight: String(grams), courier, price: "lowest" }), true);
   return {destination,raw};
+}
+export async function jneRates(destinationId:number,grams:number){
+ const {destination,raw}=await routeRates(destinationId,grams,'jne');
+ let services;try{services=availableJneRegularRates(raw).map(r=>({amount:r.cost,service:r.service,description:r.description||'',etd:r.etd}));}catch{throw new ShippingError(502,'INVALID_RESPONSE','Tarif ongkir belum dapat dibaca. Coba lagi.');}
+ if(!services.length)throw new ShippingError(404,'NO_JNE_REGULAR_SERVICE','Tarif pengiriman reguler belum tersedia untuk tujuan dan berat paket ini. Coba lagi atau hubungi ELITE.VTG untuk bantuan.');
+ return {destination:destination.label,weight:grams/1000,courier:'jne' as const,source:'RajaOngkir/Komerce',services};
 }
 export async function rates(destinationId:number,grams:number){
  const {destination,raw}=await routeRates(destinationId,grams);

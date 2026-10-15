@@ -14,7 +14,7 @@ b.onLoad({filter:/.*/,namespace:"fixture"},()=>({contents:'export const env=glob
 b.onResolve({filter:/^@\/lib\/auth\/owner$/},()=>({path:"auth",namespace:"owner"}));
 b.onLoad({filter:/.*/,namespace:"owner"},()=>({contents:'export async function getOwnerUser(){return globalThis.__testUser;}'}));
 b.onResolve({filter:/legacy-shipping-server$/},()=>({path:"legacy",namespace:"legacy"}));
-b.onLoad({filter:/.*/,namespace:"legacy"},()=>({contents:`export class ShippingError extends Error{constructor(status,code,message){super(message);this.status=status;this.code=code}}export async function search(){return []}export async function rates(id,grams){return globalThis.__legacyRates(id,grams)}export async function status(){return {connected:false}}export function assertSameOrigin(){}`}));
+b.onLoad({filter:/.*/,namespace:"legacy"},()=>({contents:`export class ShippingError extends Error{constructor(status,code,message){super(message);this.status=status;this.code=code}}export async function search(){return []}export async function rates(id,grams){return globalThis.__legacyRates(id,grams)}export async function jneRates(id,grams){return globalThis.__jneRates(id,grams)}export async function status(){return {connected:false}}export function assertSameOrigin(){}`}));
 }}]});
 writeFileSync(".test-runtime/tests/bundle.mjs",result.outputFiles[0].contents);
 const sqlite=new DatabaseSync(":memory:");
@@ -25,12 +25,13 @@ globalThis.__testEnv={CONFIG_SECRET:"simulation-secret-not-a-live-credential-123
 globalThis.__testUser={userId:"owner-id",email:"owner@example.test"};
 const m=await import(pathToFileURL(process.cwd()+"/.test-runtime/tests/bundle.mjs"));
 const pdf=new Uint8Array(readFileSync("tests/fixtures/komship-simulated-label.pdf"));
-let telegramTexts=[];let telegramDeliveries=[];let providerServices=[];let counts={};let failed="",nextMessage=100,hook="",lastPayload=null;let providerDelay=0,pickupAccepted=false,trackingResponse=null;
+let telegramTexts=[];let telegramDeliveries=[];let providerServices=[];let providerJneServices=[];let counts={};let failed="",nextMessage=100,hook="",lastPayload=null;let providerDelay=0,pickupAccepted=false,trackingResponse=null;
 function json(data,code=200){return Response.json({meta:{code,status:code<400?"success":"failed"},data},{status:code});}
 const origin={id:10,label:"BALEENDAH, BALEENDAH, BANDUNG, 40375",village:"BALEENDAH",district:"BALEENDAH",city:"BANDUNG",postcode:"40375"};
 const destination={id:20,label:"TENGAH, PONTIANAK KOTA, PONTIANAK, 78243",village:"TENGAH",district:"PONTIANAK KOTA",city:"PONTIANAK",postcode:"78243"};
 const rawLocation=l=>({id:l.id,label:l.label,subdistrict_name:l.village,district_name:l.district,city_name:l.city,zip_code:l.postcode});
 globalThis.__legacyRates=async(id,grams)=>{assert.equal(id,90);assert.equal(grams,1000);return {destination:destination.label,weight:1,services:providerServices}};
+globalThis.__jneRates=async(id,grams)=>{assert.equal(id,90);assert.equal(grams,1000);return {destination:destination.label,weight:1,courier:'jne',services:providerJneServices}};
 globalThis.fetch=async(input,init={})=>{
  const url=new URL(typeof input==="string"?input:input.url);
  if(url.hostname==="api.telegram.org"){
@@ -121,7 +122,8 @@ async function checkoutSetup(){
  const location={id:90,label:destination.label,province:"KALIMANTAN BARAT",city:"PONTIANAK",district:"PONTIANAK KOTA",village:"TENGAH",postalCode:"78243"};
  await prepared("INSERT INTO shipping_locations(id,payload,expires_at) VALUES(?,?,?)").bind(90,JSON.stringify(location),Date.now()+100000).run();
  providerServices=[{service:"SUPER",description:"Super",amount:55000,etd:"1 hari"},{service:"EZ",description:"Regular",amount:38000,etd:"3–5 hari"}];
- return m.shippingQuotes(90,1000);
+ providerJneServices=[{service:'REG',description:'Layanan Reguler',amount:13000,etd:'1 hari'}];
+ return m.shippingQuotes(90,1000,'jnt');
 }
 function buyerRequest(values,cookie=""){
  return m.buyerOrderPost(new Request("https://example.test/api/order",{method:"POST",headers:{Origin:"https://example.test","Content-Type":"application/json",...(cookie?{Cookie:cookie}:{})},body:JSON.stringify({name:"PEMBELI SIMULASI",phone:"081234567890",address:"Jl. Jendral Urip No. 24",postcode:"78243",itemAmount:300000,consent:true,...values})}));
@@ -152,14 +154,22 @@ test("incomplete item names, expired quotes, mismatched postcodes, and forged qu
  assert.equal(sqlite.prepare("SELECT COUNT(*) AS n FROM orders").get().n,0);
 });
 test("available service API validates tariffs and refuses an unavailable route",async()=>{
- await checkoutSetup();providerServices.push({service:"FREE",amount:0},{service:"BAD",amount:NaN},{service:"EZ",amount:1});
+ await checkoutSetup();providerJneServices.push({service:"FREE",amount:0},{service:"BAD",amount:NaN},{service:"REG",amount:1},{service:'YES',amount:17000});
  const request=()=>m.buyerShippingPost(new Request("https://example.test/api/shipping",{method:"POST",headers:{Origin:"https://example.test","Content-Type":"application/json"},body:JSON.stringify({action:"rates",destinationId:90,quantity:1,grams:1000})}));
- const response=await request();assert.equal(response.status,200);const {quotes}=await response.json();assert.deepEqual(quotes.map(q=>q.service),["EZ","SUPER"]);assert.equal(quotes[0].amount,38000);
- providerServices=[];assert.equal((await request()).status,503);
+ const response=await request();assert.equal(response.status,200);const {quotes}=await response.json();assert.deepEqual(quotes.map(q=>q.service),["REG"]);assert.equal(quotes[0].amount,13000);assert.equal(quotes[0].courier,'jne');
+ providerJneServices=[];assert.equal((await request()).status,503);
+});
+
+test('new JNE Regular checkout persists actual courier and exact server tariff with a neutral customer invoice',async()=>{
+ await checkoutSetup();
+ const rates=await m.buyerShippingPost(new Request('https://example.test/api/shipping',{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json'},body:JSON.stringify({action:'rates',destinationId:90,quantity:2,grams:1})}));
+ assert.equal(rates.status,200);const {quotes}=await rates.json();assert.equal(quotes.length,1);assert.equal(quotes[0].grams,1000);assert.equal(quotes[0].amount,13000);assert.equal(quotes[0].courier,'jne');
+ const response=await buyerRequest({quantity:2,items:['Kemeja A12','Celana B34'],quoteId:quotes[0].id});assert.equal(response.status,201);const created=await response.json();assert.equal(created.total,313000);assert.equal(created.shipping_amount,13000);assert.equal(created.quote.courier,'jne');
+ const saved=sqlite.prepare('SELECT * FROM orders WHERE id=?').get(created.id);assert.equal(JSON.parse(saved.shipping_json).courier,'jne');assert.equal(saved.total,313000);assert.match(m.telegramInvoiceCaption(saved),/JNE Regular/);assert.doesNotMatch(m.invoiceText(saved),/JNE|J&T|Komerce|RajaOngkir/);
 });
 test("two item names and chosen service reach invoice and Telegram without exposing provider text",async()=>{
  const quotes=await checkoutSetup();const created=await buyerRequest({quantity:2,items:["Kemeja A12","Celana B34"],quoteId:quotes.find(q=>q.service==="SUPER").id});const order=await created.json();
- const invoice=m.invoiceText(order);assert.match(invoice,/Jumlah barang: 2/);assert.match(invoice,/1\. Kemeja A12\n2\. Celana B34/);assert.match(invoice,/J&T Super/);assert.doesNotMatch(invoice,/RajaOngkir|Komerce/);
+ const invoice=m.invoiceText(order);assert.match(invoice,/Jumlah barang: 2/);assert.match(invoice,/1\. Kemeja A12\n2\. Celana B34/);assert.doesNotMatch(invoice,/J&T|JNE|RajaOngkir|Komerce/);assert.match(m.invoiceText(order,{includeCourier:true}),/J&T Super/);
  const cookie=created.headers.get("set-cookie").split(";")[0],form=new FormData(),bytes=new Uint8Array(80);bytes.set([137,80,78,71,13,10,26,10]);form.set("file",new Blob([bytes],{type:"image/png"}),"proof.png");
  const uploaded=await m.proofUpload(new Request("https://example.test/api/order/proof",{method:"POST",headers:{Origin:"https://example.test",Cookie:cookie},body:form}));assert.equal(uploaded.status,200);
  assert.ok(telegramDeliveries.some(({text})=>text.includes("Jumlah barang: 2")&&text.includes("Kemeja A12")&&text.includes("Celana B34")&&text.includes("J&T Super")));
@@ -309,7 +319,7 @@ test("KiriminAja signed label download cannot access arbitrary hosts",async()=>{
 test("KiriminAja rates select highest eligible pickup discount and retain every J&T service",()=>{const rates=m.kiriminRates([{service:"jnt",service_type:"EZ",cost:"20000",discount_amount:2000},{service:"jnt",service_type:"EZ",cost:20000,discount_amount:5000},{service:"jnt",service_type:"EZ",cost:20000,discount_amount:10000,discount_type:"drop_only"},{service:"jnt",service_type:"SUPER",cost:25000,discount_amount:1000},{service:"jne",service_type:"REG",cost:10000}]);assert.deepEqual(rates.map(r=>[r.service,r.discount]),[["EZ",5000],["SUPER",1000]]);assert.equal(m.insuranceEstimate(315555).premium,700);assert.equal(m.insuranceEstimate(250000).eligible,true);});
 test("KiriminAja customer tracking protects data and does not mark an unscanned AWB as shipped",async()=>{const token=await kiriminSetup();await confirm();await m.processShipment(id);const body=await (await m.trackingGet(trackingRequest(token))).json();assert.equal(body.stage,"awb_available");assert.equal(body.events.length,0);assert.doesNotMatch(JSON.stringify(body),/PIN|SIMULATED_KIRIMINAJA_KEY|destination|PRIVATE DRIVER/);sqlite.prepare("UPDATE shipment_tracking SET next_attempt_at=0").run();kiriminMode="delivered";const delivered=await (await m.trackingGet(trackingRequest(token))).json();assert.equal(delivered.stage,"delivered");assert.equal(delivered.events.length,1);assert.equal(counts[kCreate],1);});
 test("KiriminAja geolocation-required services are held without inventing coordinates",async()=>{await kiriminSetup();await confirm();kiriminMode="geolocation-required";await m.processShipment(id);assert.equal(counts[kCreate]||0,0);assert.match((await m.shipment(id)).last_error,/titik lokasi/);});
-test("KiriminAja production quotes use the same provider without creating a shipment",async()=>{await kiriminSetup();const c={...shippingConfig,origin:kiriminOriginLocation,environment:"production"};sqlite.prepare("UPDATE settings SET kirimin_config=?").run(JSON.stringify(c));const locations=await m.searchDestinations("78243");assert.equal(locations[0].provider,"kiriminaja");assert.equal(locations[0].districtId,2001);const quotes=await m.shippingQuotes(locations[0].id,1000);assert.equal(quotes[0].source,"KiriminAja");assert.equal(quotes[0].amount,38000);assert.equal(counts[kCreate]||0,0);assert.equal(counts["/order/api/v1/orders/store"]||0,0);});
+test("KiriminAja owner J&T quotes use the same provider without creating a shipment",async()=>{await kiriminSetup();const c={...shippingConfig,origin:kiriminOriginLocation,environment:"production"};sqlite.prepare("UPDATE settings SET kirimin_config=?").run(JSON.stringify(c));const locations=await m.searchDestinations("78243",'jnt');assert.equal(locations[0].provider,"kiriminaja");assert.equal(locations[0].districtId,2001);const quotes=await m.shippingQuotes(locations[0].id,1000,'jnt');assert.equal(quotes[0].source,"KiriminAja");assert.equal(quotes[0].amount,38000);assert.equal(counts[kCreate]||0,0);assert.equal(counts["/order/api/v1/orders/store"]||0,0);});
 test("KiriminAja encrypted configuration save does not validate PIN or book",async()=>{await kiriminSetup();const response=await m.shippingPost(new Request("https://example.test/api/admin/shipping",{method:"POST",headers:{Origin:"https://example.test","Content-Type":"application/json"},body:JSON.stringify({action:"save",config:{...shippingConfig,origin:kiriminOriginLocation},pin:"654321"})}));assert.equal(response.status,200);assert.equal(await m.decrypt(sqlite.prepare("SELECT kirimin_pin_cipher FROM settings").get().kirimin_pin_cipher),"654321");assert.equal(counts[kCreate]||0,0);assert.equal(counts["/api/mitra/v6.2/pin/validate"]||0,0);assert.doesNotMatch(JSON.stringify(await response.json()),/654321|SIMULATED_KIRIMINAJA_KEY/);});
 
 async function kiriminCallback(body={method:"processed_packages",data:[{order_id:id,awb:"FORGED-HINT"}]},token=kiriminHookUrl.split("/").at(-1),auth="Bearer SIMULATED_KIRIMINAJA_KEY"){

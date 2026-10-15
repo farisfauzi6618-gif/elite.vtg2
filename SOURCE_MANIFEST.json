@@ -68,10 +68,10 @@
       "exportSha256": "361a987575ec2dc25b678cebaf23f2535e2535cebe729c2d0bdca0485b0d0177"
     },
     {
-      "source": "monolith-2026-10-14-variant-photo-fix",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "app/(orders)/admin/order/ui.tsx",
-      "sha256": "209da082e8a952017e4a4cf2e3f9f05fc13bac46c83ff67e9b8748e513130b42",
-      "exportSha256": "209da082e8a952017e4a4cf2e3f9f05fc13bac46c83ff67e9b8748e513130b42"
+      "sha256": "eaf9fbd3f19d7f81fb4f7ec885bd68a83c794b6994b233c28172cffa355f5006",
+      "exportSha256": "eaf9fbd3f19d7f81fb4f7ec885bd68a83c794b6994b233c28172cffa355f5006"
     },
     {
       "source": "monolith-2026-10-09",
@@ -92,10 +92,10 @@
       "exportSha256": "e603b1030c9fe08e2ebd9c2d0721fec88e1a2bad0557cfe77355f432b4c1081a"
     },
     {
-      "source": "monolith-2026-10-15-shipping-help",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "app/(orders)/order/order-form.tsx",
-      "sha256": "77e1a84b57e76ca476daaf3f01c0bf4a12d8a4694896473c5b586c6155fd2cd8",
-      "exportSha256": "77e1a84b57e76ca476daaf3f01c0bf4a12d8a4694896473c5b586c6155fd2cd8"
+      "sha256": "c5b7c423efb4787e230bab040e97d7669e5523a7f7293a196c465218ccff21b2",
+      "exportSha256": "c5b7c423efb4787e230bab040e97d7669e5523a7f7293a196c465218ccff21b2"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1154,10 +1154,10 @@
       "exportSha256": "248f7e3aa16a9b450face5b0a762615401e705f8409585a487b1b37511e25c21"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "modules/order/checkout-shipping.ts",
-      "sha256": "3bc8a3fa223bedc2d859f305831b0cd96e19418febba6d400911eadb0abb6d3f",
-      "exportSha256": "3bc8a3fa223bedc2d859f305831b0cd96e19418febba6d400911eadb0abb6d3f"
+      "sha256": "f26cf229887fb443b5d7d3940514620d858bdc905cda7f9cffdd50ff67a615ab",
+      "exportSha256": "f26cf229887fb443b5d7d3940514620d858bdc905cda7f9cffdd50ff67a615ab"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1166,10 +1166,10 @@
       "exportSha256": "bd5af14ab8fcc485d6941f7d27417d509a54787ad9cc74d5ed54be66490db1a1"
     },
     {
-      "source": "monolith-2026-10-13-post-purchase",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "modules/order/customer-tracking.ts",
-      "sha256": "c9f88d26e91baf18bf65fdfcfce7b0c502d3c95f794c2fd61f03995f234492a1",
-      "exportSha256": "c9f88d26e91baf18bf65fdfcfce7b0c502d3c95f794c2fd61f03995f234492a1"
+      "sha256": "a765136bd0f8fe782db097134fdaf6ab9e87f98362e67aaefb346c238527a186",
+      "exportSha256": "a765136bd0f8fe782db097134fdaf6ab9e87f98362e67aaefb346c238527a186"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1178,16 +1178,16 @@
       "exportSha256": "aca4225a089826cf438c84d8eeb8ab8a015b904ee65082f522c2449eadb9530b"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "modules/order/fulfilment.ts",
-      "sha256": "a4a1b899bf4a3069162a63422c4c2e2b3d25fa2fcdba32bd610aae89d6468104",
-      "exportSha256": "a4a1b899bf4a3069162a63422c4c2e2b3d25fa2fcdba32bd610aae89d6468104"
+      "sha256": "aa62cfa962164ed4c645cbc73199e479fc4b15d473037b1c3ee0121a7d2da91f",
+      "exportSha256": "aa62cfa962164ed4c645cbc73199e479fc4b15d473037b1c3ee0121a7d2da91f"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "modules/order/kirimin-fulfilment.ts",
-      "sha256": "541ae6eb3c862bedafbc3d2fd442228707b6792a5732333f002742ce8727f40b",
-      "exportSha256": "541ae6eb3c862bedafbc3d2fd442228707b6792a5732333f002742ce8727f40b"
+      "sha256": "ca64a32b6a5859f9401ee114477b4cfa366a141c7e8b42f3a4df9df9c7e81735",
+      "exportSha256": "ca64a32b6a5859f9401ee114477b4cfa366a141c7e8b42f3a4df9df9c7e81735"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1238,10 +1238,10 @@
       "exportSha256": "c936b0ec8dfc71b928e813a5d53b198620fce0fa6369e88cd9395600db433fed"
     },
     {
-      "source": "monolith-2026-10-14-reserve-48h",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "modules/order/order-types.ts",
-      "sha256": "cd92fdb3dcc77c09d16ab4981ba6bf2c71568dfea9f33885e04af4a58604dbff",
-      "exportSha256": "cd92fdb3dcc77c09d16ab4981ba6bf2c71568dfea9f33885e04af4a58604dbff"
+      "sha256": "3405ac2d0a13cd07c11e3487134a830539006906b697b42a775eeeba65a0defe",
+      "exportSha256": "3405ac2d0a13cd07c11e3487134a830539006906b697b42a775eeeba65a0defe"
     },
     {
       "source": "monolith-2026-10-11-blob-optimization",
@@ -1280,10 +1280,10 @@
       "exportSha256": "754efb7b807ee8f3a3cbef5f7e56a1c69e8b32c789869afcef84406fddd8267c"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "modules/order/shipping-types.ts",
-      "sha256": "c99def5e8f905d894b2a1af77d031fd06a0a6e0d220ecb1faaf098fd05f47419",
-      "exportSha256": "c99def5e8f905d894b2a1af77d031fd06a0a6e0d220ecb1faaf098fd05f47419"
+      "sha256": "3a6ca81b76eedd0820d68b3f1fee6ed9337ce34e12892d12feabfb961354b301",
+      "exportSha256": "3a6ca81b76eedd0820d68b3f1fee6ed9337ce34e12892d12feabfb961354b301"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1298,22 +1298,22 @@
       "exportSha256": "3a7cc71032c8c86c1f9330a6b5ec209e387e2dac0ef356d724d1634bf56729a4"
     },
     {
-      "source": "monolith-2026-10-15-shipping-help",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "modules/shipping/legacy-shipping-server.ts",
-      "sha256": "7318c52a9683c186097bb9d6551ec1fef5be4d65b8511fecea923f2f38e231ec",
-      "exportSha256": "7318c52a9683c186097bb9d6551ec1fef5be4d65b8511fecea923f2f38e231ec"
+      "sha256": "9350a3d42a3b887a1639bece3daa439258e7d4f22348af08d00dcb21de776a4e",
+      "exportSha256": "9350a3d42a3b887a1639bece3daa439258e7d4f22348af08d00dcb21de776a4e"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "modules/shipping/shipping-data.ts",
-      "sha256": "c3b7c1a0c2a3d10924bb3f564a84f416e641944ce0bedbfee129c5f76d6711a5",
-      "exportSha256": "c3b7c1a0c2a3d10924bb3f564a84f416e641944ce0bedbfee129c5f76d6711a5"
+      "sha256": "0aaa9d34fa918dd9a9da1082a515edc7b4ad612c5e70c9cf83659d54487bf467",
+      "exportSha256": "0aaa9d34fa918dd9a9da1082a515edc7b4ad612c5e70c9cf83659d54487bf467"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "modules/shipping/shipping-server.ts",
-      "sha256": "4a3bdc49303105f56d2cf2631be81de2ce217b229a321440f359aaf13ee7f304",
-      "exportSha256": "4a3bdc49303105f56d2cf2631be81de2ce217b229a321440f359aaf13ee7f304"
+      "sha256": "1faabe35aa8b9bb98450761c9605ab1bca3f01e3ba8f63127c9421bdb85e9db8",
+      "exportSha256": "1faabe35aa8b9bb98450761c9605ab1bca3f01e3ba8f63127c9421bdb85e9db8"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1466,10 +1466,10 @@
       "exportSha256": "5d53b6fba87ff6ef03969f3ed9531ba96b2d65c0045a46b1af4e81d5bc26f3c3"
     },
     {
-      "source": "monolith-2026-10-13-telegram-simplification",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "tests/fulfilment.test.mjs",
-      "sha256": "5f0ec59aa24b9d897cb28c4c1a3052042a5eee51e1debb835adb3d91b74fa676",
-      "exportSha256": "5f0ec59aa24b9d897cb28c4c1a3052042a5eee51e1debb835adb3d91b74fa676"
+      "sha256": "12912c7f75c9ae905d88214df5e8c311a4b6f4ce65179ca13dcc25b9de077880",
+      "exportSha256": "12912c7f75c9ae905d88214df5e8c311a4b6f4ce65179ca13dcc25b9de077880"
     },
     {
       "source": "monolith-2026-10-14-reserve",
@@ -4610,10 +4610,10 @@
       "exportSha256": "2947c09156768b19f002937a5f7b3f15678de7430fb821fde0382290957da14f"
     },
     {
-      "source": "monolith-2026-10-13-post-purchase",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "modules/order/order-progress.ts",
-      "sha256": "4e287d3f959b14b00c2f734a8eed84a245c8e04a168648ddec2555f584f8e3d9",
-      "exportSha256": "4e287d3f959b14b00c2f734a8eed84a245c8e04a168648ddec2555f584f8e3d9"
+      "sha256": "170839a02f2891e0bbd96853b22e603ab292fcc97f25a20b2e7428eb080b77f4",
+      "exportSha256": "170839a02f2891e0bbd96853b22e603ab292fcc97f25a20b2e7428eb080b77f4"
     },
     {
       "source": "monolith-2026-10-14-reserve",
@@ -4646,10 +4646,10 @@
       "exportSha256": "c088c542f4d40c5f4734e35d7eaa005d74c5f1af0b5301f60c0c1b98c5602e54"
     },
     {
-      "source": "monolith-2026-10-13-post-purchase",
+      "source": "monolith-2026-10-15-jne-checkout",
       "path": "components/manual-order-status.tsx",
-      "sha256": "bc3a1dbf9f8b0791cbee361b76d80d57bf0c5d8645c2c2967f5749dad577147e",
-      "exportSha256": "bc3a1dbf9f8b0791cbee361b76d80d57bf0c5d8645c2c2967f5749dad577147e"
+      "sha256": "b5d7fed99538ada39553e4e1266123a7236a681dc7368104702795144a4545e6",
+      "exportSha256": "b5d7fed99538ada39553e4e1266123a7236a681dc7368104702795144a4545e6"
     },
     {
       "source": "monolith-2026-10-14-reserve",
@@ -4890,6 +4890,18 @@
       "source": "monolith-2026-10-15-sale-prices",
       "sha256": "868033e70b5678c0e99ae3f0c9068f1598da9f22b75520bea3ed265a7b33f852",
       "exportSha256": "868033e70b5678c0e99ae3f0c9068f1598da9f22b75520bea3ed265a7b33f852"
+    },
+    {
+      "path": "tests/jne-shipping.test.mjs",
+      "source": "monolith-2026-10-15-jne-checkout",
+      "sha256": "789ea88ad18a3b718e3c7bc003701f286ef77867aa453172d95e0d8bc25467d4",
+      "exportSha256": "789ea88ad18a3b718e3c7bc003701f286ef77867aa453172d95e0d8bc25467d4"
+    },
+    {
+      "path": "tests/jne-booking-safety.test.mjs",
+      "source": "monolith-2026-10-15-jne-checkout",
+      "sha256": "6288ca4ceae2e62d246ada5c1215274ff4bea7df93a0762e45aa15cc99bf5076",
+      "exportSha256": "6288ca4ceae2e62d246ada5c1215274ff4bea7df93a0762e45aa15cc99bf5076"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
@@ -5335,5 +5347,14 @@
     "customerRetry": true,
     "customerWhatsAppHelp": true,
     "noInventedRate": true
+  },
+  "jneShipping": {
+    "newCheckoutCourier": "jne",
+    "service": "REG",
+    "customerLabel": "Ongkir",
+    "ownerCourierRetained": true,
+    "legacyJntQuotesPreserved": true,
+    "blocksJneFromJntBooking": true,
+    "unchangedWeightAndCheckoutGuards": true
   }
 }

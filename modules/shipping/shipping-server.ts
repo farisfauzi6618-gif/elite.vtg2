@@ -10,9 +10,9 @@ async function bridge(body:Record<string,unknown>){
   const connected=await kiriminRatesReady(),{config}=await kiriminSettings();
   if(body.action==='status')return {connected,provider:'KiriminAja',origin:validKiriminOrigin(config.origin)?customerLocation(config.origin):null,checkedAt:null};
   if(!connected)return null;
-  if(body.action==='search')return {locations:await searchDestinations(body.query)};
+  if(body.action==='search')return {locations:await searchDestinations(body.query,'jnt')};
   if(body.action==='rates'){
-   const quotes=await shippingQuotes(body.destinationId,body.grams),first=quotes[0];
+   const quotes=await shippingQuotes(body.destinationId,body.grams,'jnt'),first=quotes[0];
    return {destination:first.destination.label,weight:first.grams/1000,source:'KiriminAja',services:quotes.map(q=>({amount:q.amount,service:q.service,description:q.serviceName,etd:q.etd}))};
   }
   throw new legacy.ShippingError(400,'INVALID_INPUT','Permintaan ongkir tidak valid.');

@@ -21,20 +21,22 @@ export function resolveOrigin(locations: Location[]): Location {
   if (matches.length !== 1) throw new Error("AMBIGUOUS_ORIGIN");
   return matches[0];
 }
-export function availableJntRates(data: unknown): Rate[] {
+function availableCourierRates(data: unknown,courier:'jnt'|'jne'): Rate[] {
   if (!Array.isArray(data)) throw new Error("INVALID_RATE_RESPONSE");
   const rates = data.flatMap((raw): Rate[] => {
     if (!raw || typeof raw !== "object") return [];
     const row = raw as Row;
     const service = field(row.service, 40);
     const cost = typeof row.cost === "number" ? row.cost : Number(row.cost);
-    if (field(row.code).toLowerCase() !== "jnt" || !/^[A-Za-z0-9][A-Za-z0-9 _&+./()-]{0,39}$/.test(service) || !Number.isSafeInteger(cost) || cost <= 0 || cost > 100000000) return [];
+    if (field(row.code).toLowerCase() !== courier || !/^[A-Za-z0-9][A-Za-z0-9 _&+./()-]{0,39}$/.test(service) || !Number.isSafeInteger(cost) || cost <= 0 || cost > 100000000) return [];
     return [{ cost, service, etd: field(row.etd, 80),description:field(row.description,100) }];
   });
   const unique=new Map<string,Rate>();
   for(const rate of rates){const code=norm(rate.service),previous=unique.get(code);if(!previous||rate.cost<previous.cost)unique.set(code,rate);}
   return [...unique.values()].sort((a,b)=>a.cost-b.cost);
 }
+export const availableJntRates=(data:unknown)=>availableCourierRates(data,'jnt');
+export const availableJneRegularRates=(data:unknown)=>availableCourierRates(data,'jne').filter(r=>norm(r.service)==='REG');
 export function selectRegularRate(data: unknown): Rate | null {
   const rates=availableJntRates(data).filter(r=>["EZ", "REG", "REGULAR", "REGULER"].includes(norm(r.service)));
   if (!rates.length) return null;
