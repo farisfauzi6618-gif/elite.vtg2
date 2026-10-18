@@ -122,10 +122,10 @@
       "exportSha256": "e19330f0c81d84ed9483cf23789dbd3e379fce1820647ec219df6aba4a39391c"
     },
     {
-      "source": "monolith-2026-10-15-sale-prices",
+      "source": "monolith-2026-10-18-admin-condition-options",
       "path": "app/admin/katalog/admin.tsx",
-      "sha256": "c694dcb7d6e3d39933ddc01cd4ca03b37902d111628105d829451c10e7bd8355",
-      "exportSha256": "c694dcb7d6e3d39933ddc01cd4ca03b37902d111628105d829451c10e7bd8355"
+      "sha256": "c877b5bdddff646a8076e14e47951112b63256cb9612229b50a318c0be67bcf3",
+      "exportSha256": "c877b5bdddff646a8076e14e47951112b63256cb9612229b50a318c0be67bcf3"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4815,9 +4815,9 @@
     },
     {
       "path": "components/admin-color-variants.tsx",
-      "source": "monolith-2026-10-15-sale-prices",
-      "sha256": "88552f7d8f110cdc38ce0de0d0f8164e7f82748e30fc95ad2eb3c229996ed8cc",
-      "exportSha256": "88552f7d8f110cdc38ce0de0d0f8164e7f82748e30fc95ad2eb3c229996ed8cc"
+      "source": "monolith-2026-10-18-admin-condition-options",
+      "sha256": "72c625a21d095633366683a74a3a690927c20448c3e5d2ecd0b086fbee4cad52",
+      "exportSha256": "72c625a21d095633366683a74a3a690927c20448c3e5d2ecd0b086fbee4cad52"
     },
     {
       "path": "modules/catalog/catalog-selection.ts",
@@ -4902,6 +4902,12 @@
       "source": "monolith-2026-10-15-jnt-collect",
       "sha256": "028e2f7644b28f2e4de8a06c029aa761288da828acd57ce121c51ec4d60ad318",
       "exportSha256": "028e2f7644b28f2e4de8a06c029aa761288da828acd57ce121c51ec4d60ad318"
+    },
+    {
+      "path": "components/admin-condition-field.tsx",
+      "source": "monolith-2026-10-18-admin-condition-options",
+      "sha256": "ed4ee4318ea722c3087e52a30724682f6d57a2f19b71f0d35eb05e574dd42fab",
+      "exportSha256": "ed4ee4318ea722c3087e52a30724682f6d57a2f19b71f0d35eb05e574dd42fab"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
