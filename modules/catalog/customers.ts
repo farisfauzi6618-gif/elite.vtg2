@@ -86,6 +86,15 @@ export async function logoutCustomer(cookie: string | null) {
   const token = cookieToken(cookie);
   if (token) await db().prepare('DELETE FROM customer_sessions WHERE hash=?').bind(await digest(token)).run();
 }
+export async function updateCustomerBirthday(input:Record<string,unknown>,cookie:string|null){
+  const customer=await currentCustomer(cookie);
+  if(!customer)throw new AppError(401,'Masuk terlebih dahulu untuk memperbarui profil.');
+  if(!input||typeof input!=='object'||Array.isArray(input)||Object.keys(input).some(key=>key!=='birthday')||!Object.hasOwn(input,'birthday'))throw new AppError(400,'Data profil tidak valid.');
+  const birthday=customerBirthday(input.birthday);
+  const saved=await db().prepare('UPDATE customers SET birthday=? WHERE id=? AND NOT EXISTS (SELECT 1 FROM customer_trash WHERE customer_id=?) RETURNING id').bind(birthday,customer.id,customer.id).first();
+  if(!saved)throw new AppError(401,'Akun tidak tersedia. Masuk kembali.');
+  return customerProfile({...customer,birthday});
+}
 export function customerSessionCookie(request: Request, token = '') {
   return `${CUSTOMER_COOKIE}=${token}; Path=/; HttpOnly; ${new URL(request.url).protocol === 'https:' ? 'Secure; ' : ''}SameSite=Lax; Max-Age=${token ? SESSION_MS / 1000 : 0}`;
 }

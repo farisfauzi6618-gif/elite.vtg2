@@ -2,6 +2,29 @@
 @import "../styles/order.css";
 @import "../styles/ongkir.css";
 
+.admin-optional-fields{grid-column:1/-1;border-top:1px solid var(--border);padding-top:10px;min-width:0}
+.admin-optional-fields>summary,.admin-optional-panel>summary{min-height:44px;display:flex;align-items:center;gap:8px;cursor:pointer;color:var(--navy);font-size:14px}
+.admin-optional-fields>summary::before,.admin-optional-panel>summary::before{content:'+';font-size:18px;font-weight:400}
+.admin-optional-fields[open]>summary::before,.admin-optional-panel[open]>summary::before{content:'−'}
+.admin-optional-fields>.form-grid{margin-top:14px}
+.admin-optional-panel{min-width:0}.admin-optional-panel>.panel{margin-top:8px}
+.stock-card-highlight{outline:2px solid #59718b;outline-offset:3px}
+.published-highlight{display:block;font-size:12px;color:#40566c;margin:8px 0}
+.reserve-choice{margin-top:12px}.reserve-choice>summary{min-height:44px;font-size:14px;cursor:pointer;color:#40566c}
+.reserve-choice .help-text{margin:0 0 10px}
+.customer-profile-edit{border-top:1px solid var(--border);padding-top:10px}
+.customer-profile-edit>summary{min-height:44px;cursor:pointer;font-size:14px}
+.customer-profile-edit form{display:grid;gap:12px;padding:12px 0}
+.customer-profile-edit input{width:100%;min-height:44px;border:1px solid var(--border);border-radius:6px;padding:10px;font:inherit}
+.admin-work-tabs{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 24px}
+.admin-work-tabs [aria-current="page"]{background:#071f3a!important;color:#fff!important;border-color:#071f3a!important}
+.admin-order-filters{display:grid;grid-template-columns:minmax(0,1fr) 220px auto;gap:14px;align-items:end;margin:18px 0 24px}
+.admin-order-filters label{margin:0!important;min-width:0}
+.admin-order-details{margin:16px 0}.admin-order-details>summary{min-height:44px;cursor:pointer}
+.admin-order-details p{line-height:1.6;margin:12px 0;overflow-wrap:anywhere}
+.admin-order-pagination{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-top:24px}
+@media(max-width:640px){.admin-order-filters{grid-template-columns:1fr}.admin-work-tabs>*{flex:1}.admin-order-pagination{font-size:13px}}
+
 .elite-admin-nav{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding:16px 24px;background:#071f3a;color:#fff;font:13px Arial,sans-serif}
 .elite-admin-nav a{text-decoration:none;min-height:28px;display:flex;align-items:center}
 .elite-admin-nav a:hover{text-decoration:underline;text-underline-offset:4px}

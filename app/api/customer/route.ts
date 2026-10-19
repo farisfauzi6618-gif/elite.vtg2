@@ -2,7 +2,7 @@ import {purchasePromotion} from '@/modules/order/first-purchase-server';
 import {availableRewardCount} from '@/modules/order/rewards-server';
 import { boundary, readJson, response, checkAdminOrigin, AppError } from '@/modules/catalog/server';
 import { publicRate } from '@/modules/catalog/request-rate';
-import { currentCustomer, customerProfile, customerIdentity, customerSessionCookie, registerCustomer, loginCustomer, logoutCustomer } from '@/modules/catalog/customers';
+import { currentCustomer, customerProfile, customerIdentity, customerSessionCookie, registerCustomer, loginCustomer, logoutCustomer, updateCustomerBirthday } from '@/modules/catalog/customers';
 
 export const GET = (request: Request) => boundary(async () => {
   const customer = await currentCustomer(request.headers.get('cookie'));
@@ -28,6 +28,13 @@ export const DELETE = (request: Request) => boundary(async () => {
   const reply = response({ customer: null });
   reply.headers.set('Set-Cookie', customerSessionCookie(request));
   return reply;
+});
+
+export const PATCH=(request:Request)=>boundary(async()=>{
+  checkAdminOrigin(request);
+  await publicRate(request,'customer-profile',20);
+  const customer=await updateCustomerBirthday(await readJson(request),request.headers.get('cookie'));
+  return response({customer});
 });
 
 export const runtime="nodejs";

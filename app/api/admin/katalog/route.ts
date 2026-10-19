@@ -5,8 +5,10 @@ import { instagramConfig } from '@/modules/catalog/instagram';
 import { createManualDraft, saveProduct, changeStock, undoStock } from '@/modules/catalog/catalog-service';
 import {setSoldVisibility} from '@/modules/catalog/sold-visibility';
 import {conditionalResponse} from '@/modules/catalog/conditional-response';
+import {reservedQuantitySql} from '@/modules/catalog/reserve-inventory';
 export const dynamic='force-dynamic';
 export async function GET(request:Request){return boundary(async()=>{await requireAdmin(request);const q=new URL(request.url).searchParams;
+ if(q.get('view')==='version'){const id=textValue(q.get('id'),100),p=await db().prepare('SELECT version FROM products WHERE id=?').bind(id).first<{version:number}>();if(!p)throw new AppError(404,'Barang tidak ditemukan.');const stock=await db().prepare(`SELECT g.id,g.revision,${reservedQuantitySql('g')} AS reservedQty FROM size_groups g WHERE g.product_id=? ORDER BY g.id`).bind(id).all();return conditionalResponse(request,{version:p.version,stock:stock.results})}
  if(q.has('id')){const p=await readProduct(q.get('id')!);return conditionalResponse(request,{product:p,history:await readHistory(p.id)})}
  if(q.get('view')==='connection'){await requireOwner(request);const last=await db().prepare('SELECT source,caption_status,photo_status,parse_status,message,instagram_url,created_at FROM import_attempts ORDER BY rowid DESC LIMIT 10').all();return response({config:instagramConfig(),attempts:last.results})}
  return conditionalResponse(request,{products:await readProducts(true),taxonomy:await readTaxonomy()});

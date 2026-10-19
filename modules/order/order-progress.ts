@@ -2,7 +2,7 @@ import {orderQuote,type Order} from './order-types';
 import {quoteServiceName} from './shipping-types';
 import {orderItems} from './order-items';
 export type ProgressStatus='PAYMENT_RECEIVED'|'PAYMENT_CONFIRMED'|'PREPARING'|'SHIPPED';
-export const progressLabels:Record<ProgressStatus,string>={PAYMENT_RECEIVED:'Payment received',PAYMENT_CONFIRMED:'Payment confirmed',PREPARING:'Preparing your order',SHIPPED:'Order shipped'};
+export const progressLabels:Record<ProgressStatus,string>={PAYMENT_RECEIVED:'Menunggu verifikasi pembayaran',PAYMENT_CONFIRMED:'Pembayaran dikonfirmasi',PREPARING:'Pesanan sedang disiapkan',SHIPPED:'Pesanan dikirim'};
 export function progressStatus(o:Order):ProgressStatus{
  if(o.payment_state!=='payment_confirmed')return 'PAYMENT_RECEIVED';
  return o.shipped_at&&o.tracking_number?'SHIPPED':o.preparing_at?'PREPARING':'PAYMENT_CONFIRMED';
