@@ -14,10 +14,10 @@
   "excluded": "Runtime secrets, local environment, databases, customer data, uploaded photos, private proofs, production payment assets, generated builds and old Git histories.",
   "files": [
     {
-      "source": "monolith-2026-10-19-flow-simplification",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "app/catalog.tsx",
-      "sha256": "9ef18f14b3e9af59a710a4ce703c0cf58945c33a70241f06fb30e5e80f9dcb71",
-      "exportSha256": "9ef18f14b3e9af59a710a4ce703c0cf58945c33a70241f06fb30e5e80f9dcb71"
+      "sha256": "32b566c5be3fb8e714bb6c853e3af28cd4c4ccc7e299bc89aba7ddea9d3c252b",
+      "exportSha256": "32b566c5be3fb8e714bb6c853e3af28cd4c4ccc7e299bc89aba7ddea9d3c252b"
     },
     {
       "source": "monolith-2026-10-19-flow-simplification",
@@ -122,10 +122,10 @@
       "exportSha256": "e19330f0c81d84ed9483cf23789dbd3e379fce1820647ec219df6aba4a39391c"
     },
     {
-      "source": "monolith-2026-10-19-flow-simplification",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "app/admin/katalog/admin.tsx",
-      "sha256": "f2736a19c06ef9c440a89826ba890af48f105b46a83737142b0949f11e9fc86a",
-      "exportSha256": "f2736a19c06ef9c440a89826ba890af48f105b46a83737142b0949f11e9fc86a"
+      "sha256": "56d36e3b6a752a0077e46a2143f0dfb07b3e14ec4649a920f29d87863c28f0df",
+      "exportSha256": "56d36e3b6a752a0077e46a2143f0dfb07b3e14ec4649a920f29d87863c28f0df"
     },
     {
       "source": "monolith-2026-10-09",
@@ -182,10 +182,10 @@
       "exportSha256": "b078e92dafa88055d6b8634fb00287250b4d9efb99150b048629026bf8062750"
     },
     {
-      "source": "monolith-2026-10-19-flow-simplification",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "app/api/admin/katalog/route.ts",
-      "sha256": "3a0ef27c6699553051d5add06492a99b451c0e4215c4ea11a360a1ed467fe0e6",
-      "exportSha256": "3a0ef27c6699553051d5add06492a99b451c0e4215c4ea11a360a1ed467fe0e6"
+      "sha256": "a5a3700db03719eb7d37b349cb5a0ad7af0953ad36b173cc43499e4cefc3c172",
+      "exportSha256": "a5a3700db03719eb7d37b349cb5a0ad7af0953ad36b173cc43499e4cefc3c172"
     },
     {
       "source": "monolith-2026-10-09",
@@ -422,16 +422,16 @@
       "exportSha256": "6746f63d5f38c2c90bca32c167324c2879d6af6f93b3eff5d8d32b8523c1b460"
     },
     {
-      "source": "monolith-2026-10-15-sale-prices",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "components/product-card.tsx",
-      "sha256": "1fbf1a69cfd091072499e9547957a55f974927ac4f0a3d1e13df3e62e6d44698",
-      "exportSha256": "1fbf1a69cfd091072499e9547957a55f974927ac4f0a3d1e13df3e62e6d44698"
+      "sha256": "c95b30b903bc4ebe9562cf017b496aaf61bd5879474964076037ff171628d00f",
+      "exportSha256": "c95b30b903bc4ebe9562cf017b496aaf61bd5879474964076037ff171628d00f"
     },
     {
-      "source": "monolith-2026-10-19-flow-simplification",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "components/product-detail.tsx",
-      "sha256": "76ea1f4d1af2d669f78e3e66ab14327ec8c2fa3f6d21b0276a939e1c01cbe515",
-      "exportSha256": "76ea1f4d1af2d669f78e3e66ab14327ec8c2fa3f6d21b0276a939e1c01cbe515"
+      "sha256": "d1fb978df493c49bc6305fe9313cb531feb5ffeb1d5f02d73689c6c66a30778d",
+      "exportSha256": "d1fb978df493c49bc6305fe9313cb531feb5ffeb1d5f02d73689c6c66a30778d"
     },
     {
       "source": "monolith-2026-10-19-flow-simplification",
@@ -884,10 +884,10 @@
       "exportSha256": "8f288a4409c9d29eaa98f3266d626f98754e4ebf9961be4e0a56dca50e1fad85"
     },
     {
-      "source": "monolith-2026-10-11-blob-optimization",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "lib/storage.ts",
-      "sha256": "59bf49dd6a5b30a141c1e2d7c35837089d9427dc1aa92492810cafe96f914076",
-      "exportSha256": "59bf49dd6a5b30a141c1e2d7c35837089d9427dc1aa92492810cafe96f914076"
+      "sha256": "4d1ce071f0f8e345ee2e5bef0ddadfbc32150610a2824205622e2d677762992d",
+      "exportSha256": "4d1ce071f0f8e345ee2e5bef0ddadfbc32150610a2824205622e2d677762992d"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1100,10 +1100,10 @@
       "exportSha256": "a9f9066cf9a69b994af74808412d6fb67ecc345978f1dbdc4c2e3f413f55b442"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "modules/catalog/photos.ts",
-      "sha256": "25e0598e240cbfe8a400e0bbb15792a0376a4b861430a7da5b1356c1e64538dd",
-      "exportSha256": "25e0598e240cbfe8a400e0bbb15792a0376a4b861430a7da5b1356c1e64538dd"
+      "sha256": "b33c5991518c101c92d4be1d7e88535fd986690a41066ff4368767983d6de719",
+      "exportSha256": "b33c5991518c101c92d4be1d7e88535fd986690a41066ff4368767983d6de719"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1118,10 +1118,10 @@
       "exportSha256": "89b440330df02684f2514133fbfc5b6778a6e11a01500c707ff20bff2e5683e8"
     },
     {
-      "source": "monolith-2026-10-19-flow-simplification",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "modules/catalog/server.ts",
-      "sha256": "b464b19f455c005417a1cbdc3e538ccf6f507c981424147ff49d07872f9f2182",
-      "exportSha256": "b464b19f455c005417a1cbdc3e538ccf6f507c981424147ff49d07872f9f2182"
+      "sha256": "0d1bde5b85852ebabec40089f61553bfd5733b688c9ad457bd0c6502a0becd6f",
+      "exportSha256": "0d1bde5b85852ebabec40089f61553bfd5733b688c9ad457bd0c6502a0becd6f"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4502,16 +4502,16 @@
       "exportSha256": "0b6a8df64e804a7f47dadb68a0318757fea4838bbad099b710505f4a6408ae4f"
     },
     {
-      "source": "monolith-2026-10-12-product-photo-upload",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "modules/catalog/photo-upload.ts",
-      "sha256": "8880adfc15ff54c38216771afbef11e6aa721c12c799c06ea728bb0447461c4f",
-      "exportSha256": "8880adfc15ff54c38216771afbef11e6aa721c12c799c06ea728bb0447461c4f"
+      "sha256": "7f677c07c29fb87542ec523ca6931472e7f420d74a547b6fd2e28db1df5d2ec8",
+      "exportSha256": "7f677c07c29fb87542ec523ca6931472e7f420d74a547b6fd2e28db1df5d2ec8"
     },
     {
-      "source": "monolith-2026-10-12-product-photo-upload",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "tests/product-photo-client.test.mjs",
-      "sha256": "3d33ba96d54d5319503f47c752ffebf2a3f23519a33d1711e6cedee8401914f6",
-      "exportSha256": "3d33ba96d54d5319503f47c752ffebf2a3f23519a33d1711e6cedee8401914f6"
+      "sha256": "76187e9e04e47ba3d2ce2829c101821e9c70f1cf74fbe3aa945b2d468878aa02",
+      "exportSha256": "76187e9e04e47ba3d2ce2829c101821e9c70f1cf74fbe3aa945b2d468878aa02"
     },
     {
       "source": "monolith-2026-10-12-product-photo-upload",
@@ -4526,10 +4526,10 @@
       "exportSha256": "f8b3fd2f77686492c0e2c269e5c8207200359a4bf59e95fcb184c38a393ce5b0"
     },
     {
-      "source": "monolith-2026-10-14-flow-efficiency",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "modules/catalog/photo-url.ts",
-      "sha256": "04638d68e79ef7146238a9102bc6d9e35c23f2d6ca732d28b06d1d5da5692e34",
-      "exportSha256": "04638d68e79ef7146238a9102bc6d9e35c23f2d6ca732d28b06d1d5da5692e34"
+      "sha256": "8be228260ea1e6ca583622f95b4bf166ca08c0405aac63a930f7bb39037828a2",
+      "exportSha256": "8be228260ea1e6ca583622f95b4bf166ca08c0405aac63a930f7bb39037828a2"
     },
     {
       "source": "monolith-2026-10-12-budget-efficiency",
@@ -4712,10 +4712,10 @@
       "exportSha256": "4c253ed7721ddcfec4912a0c5392ebf6ae8cf770e6d9e74a169daac602f38ba8"
     },
     {
-      "source": "monolith-2026-10-14-share-upgrade",
+      "source": "monolith-2026-10-19-media-efficiency",
       "path": "modules/catalog/story-card.ts",
-      "sha256": "2513955187cfa7ce944b413cad69216be2e87053f76f38079e6616e170b54c46",
-      "exportSha256": "2513955187cfa7ce944b413cad69216be2e87053f76f38079e6616e170b54c46"
+      "sha256": "00e3c519284bfe09f18a51f68cb6104be7a6b9db11dfa6140347b26ad0438a3c",
+      "exportSha256": "00e3c519284bfe09f18a51f68cb6104be7a6b9db11dfa6140347b26ad0438a3c"
     },
     {
       "source": "monolith-2026-10-14-share-upgrade",
@@ -4956,6 +4956,42 @@
       "source": "monolith-2026-10-19-flow-simplification",
       "sha256": "35409152e8368663472d029c56c6449183b8f36ffed75a8550a193972b28f7bd",
       "exportSha256": "35409152e8368663472d029c56c6449183b8f36ffed75a8550a193972b28f7bd"
+    },
+    {
+      "path": "modules/catalog/photo-publication.ts",
+      "source": "monolith-2026-10-19-media-efficiency",
+      "sha256": "719b1681e9e3bb6f3b5dda336bc6e9e05f1007626bd5cdb1f1e6e97ffd56f749",
+      "exportSha256": "719b1681e9e3bb6f3b5dda336bc6e9e05f1007626bd5cdb1f1e6e97ffd56f749"
+    },
+    {
+      "path": "app/api/product-images/[key]/route.ts",
+      "source": "monolith-2026-10-19-media-efficiency",
+      "sha256": "4916ddaef935cd67b8109e2b329fbd8a7bec9cb2c3b5bf51e49688122fcc13f4",
+      "exportSha256": "4916ddaef935cd67b8109e2b329fbd8a7bec9cb2c3b5bf51e49688122fcc13f4"
+    },
+    {
+      "path": "modules/catalog/direct-photo-upload.ts",
+      "source": "monolith-2026-10-19-media-efficiency",
+      "sha256": "18f88698cbdcb1bc19601e2ef2659bfe70868470f5fdbcb9b01b5e52b0f5b04d",
+      "exportSha256": "18f88698cbdcb1bc19601e2ef2659bfe70868470f5fdbcb9b01b5e52b0f5b04d"
+    },
+    {
+      "path": "app/api/photos/upload/route.ts",
+      "source": "monolith-2026-10-19-media-efficiency",
+      "sha256": "16a588b7d6d5ee55b169a44f9bc7ea70f270414e42b28f5f52f1a3766d65dad0",
+      "exportSha256": "16a588b7d6d5ee55b169a44f9bc7ea70f270414e42b28f5f52f1a3766d65dad0"
+    },
+    {
+      "path": "tests/media-efficiency.test.mjs",
+      "source": "monolith-2026-10-19-media-efficiency",
+      "sha256": "aea42c5529e07d0d3f20e0e53939c64068166550feb9e9771bf6b3f302a229c2",
+      "exportSha256": "aea42c5529e07d0d3f20e0e53939c64068166550feb9e9771bf6b3f302a229c2"
+    },
+    {
+      "path": "tests/direct-photo-client.test.mjs",
+      "source": "monolith-2026-10-19-media-efficiency",
+      "sha256": "34e012d5d1053703a8e48834fc9e4a449c31e951087d5cbb7b2ffd4000ffa9e4",
+      "exportSha256": "34e012d5d1053703a8e48834fc9e4a449c31e951087d5cbb7b2ffd4000ffa9e4"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",

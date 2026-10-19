@@ -1,5 +1,5 @@
 import { put, get, head, del, BlobNotFoundError } from '@vercel/blob';
-import { mkdir, readFile, writeFile, rename, rm, stat } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, rename, rm, stat, open } from 'node:fs/promises';
 import path from 'node:path';
 
 function safeKey(key: string) {
@@ -13,6 +13,22 @@ function localRoot() {
 const local = () => !process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID;
 
 export const storage = {
+  // Verify direct uploads with a bounded range read, never download the full image.
+  async prefix(key:string) {
+    safeKey(key);
+    if(local()){
+      const dest=path.join(localRoot(),key);
+      try{const info=await stat(dest),meta=JSON.parse(await readFile(dest+'.meta.json','utf8'));const file=await open(dest,'r');try{const bytes=new Uint8Array(16),result=await file.read(bytes,0,16,0);return {size:info.size,contentType:meta.contentType,bytes:bytes.slice(0,result.bytesRead)}}finally{await file.close()}}
+      catch(error){if((error as NodeJS.ErrnoException).code==='ENOENT')return null;throw error}
+    }
+    const result=await get('elite/'+key,{access:'private',useCache:false,headers:{Range:'bytes=0-15'},token:process.env.BLOB_READ_WRITE_TOKEN});
+    if(!result?.stream)return null;
+    const range=result.headers.get('content-range'),size=range?Number(range.match(/\/(\d+)$/)?.[1]):result.blob.size;
+    const reader=result.stream.getReader(),bytes=new Uint8Array(16);let count=0;
+    try{while(count<16){const value=await reader.read();if(value.done)break;const part=value.value.subarray(0,16-count);bytes.set(part,count);count+=part.length}}
+    finally{await reader.cancel().catch(()=>{});reader.releaseLock()}
+    return {size,contentType:result.blob.contentType,bytes:bytes.slice(0,count)};
+  },
   async head(key: string) {
     safeKey(key);
     if (local()) {

@@ -1,6 +1,6 @@
 import {productPhotos,type Product} from './catalog-types';
 import {productShareSummary,productShareUrl} from './product-share';
-import {photoUrl} from './photo-url';
+import {photoUrl,publicPhotoUrl} from './photo-url';
 
 export const STORY_WIDTH=1080,STORY_HEIGHT=1920;
 export function containImage(width:number,height:number,box={x:96,y:260,width:888,height:1080}){
@@ -33,7 +33,7 @@ function loadImage(src:string){return new Promise<HTMLImageElement>((resolve,rej
 // Loaded only after Instagram Story is chosen. No server rendering or new uploads.
 export async function generateStoryCard(product:Product){
  productShareUrl(product);const key=productPhotos(product)[0];if(!key)throw new Error('Foto produk belum tersedia. Gunakan Copy Link.');
- let image:HTMLImageElement;try{image=await loadImage(photoUrl(key,'detail'))}catch{image=await loadImage(photoUrl(key))}
+ let image:HTMLImageElement;try{image=await loadImage(publicPhotoUrl(key,'detail'))}catch{image=await loadImage(photoUrl(key))}
  const canvas=document.createElement('canvas');canvas.width=STORY_WIDTH;canvas.height=STORY_HEIGHT;
  const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Story image belum didukung. Gunakan Copy Link.');
  drawStoryCard(ctx,image,image.naturalWidth,image.naturalHeight,product);
