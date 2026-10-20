@@ -398,10 +398,10 @@
       "exportSha256": "a5e9804dbfefcc9dc296412fc5a1118bcaf15e21502c745f0809afe877e9b37b"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-20-whatsapp-support",
       "path": "components/customer-support.tsx",
-      "sha256": "0038e0bf46ebf238e0498dc20a2f9fd779e00b4068123a266d9a80fe802694dd",
-      "exportSha256": "0038e0bf46ebf238e0498dc20a2f9fd779e00b4068123a266d9a80fe802694dd"
+      "sha256": "1b505bdab74d3f163d499390178e17beaf6beee501f1234d9d05f89ef6b9cd47",
+      "exportSha256": "1b505bdab74d3f163d499390178e17beaf6beee501f1234d9d05f89ef6b9cd47"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1418,10 +1418,10 @@
       "exportSha256": "fedad814f583ef6e1be06696c19aa5780378d2f0b06ad32185bdaec422dba391"
     },
     {
-      "source": "monolith-2026-10-20-product-trash",
+      "source": "monolith-2026-10-20-whatsapp-support",
       "path": "styles/catalog.css",
-      "sha256": "263a1ced66320bd203e2bc9e37ddda59f9a88cb1a5c04349590652181ceaa677",
-      "exportSha256": "263a1ced66320bd203e2bc9e37ddda59f9a88cb1a5c04349590652181ceaa677"
+      "sha256": "50846e5d07ed4e8e3346804c854c71e87127468d46510ffdacc1dea2173c1ea3",
+      "exportSha256": "50846e5d07ed4e8e3346804c854c71e87127468d46510ffdacc1dea2173c1ea3"
     },
     {
       "source": "monolith-2026-10-09",
@@ -5010,6 +5010,18 @@
       "source": "monolith-2026-10-20-product-trash",
       "sha256": "d2afa1063653414e4ab13ba19a63d43be8fe2c70da57fb7fa22cdbff31edebea",
       "exportSha256": "d2afa1063653414e4ab13ba19a63d43be8fe2c70da57fb7fa22cdbff31edebea"
+    },
+    {
+      "path": "modules/catalog/customer-support.ts",
+      "source": "monolith-2026-10-20-whatsapp-support",
+      "sha256": "4631034b02eb28a8606e3aad3332043a89d564b86a39e16be7a5485815815780",
+      "exportSha256": "4631034b02eb28a8606e3aad3332043a89d564b86a39e16be7a5485815815780"
+    },
+    {
+      "path": "tests/customer-support.test.mjs",
+      "source": "monolith-2026-10-20-whatsapp-support",
+      "sha256": "78223600e5d245b644148a7c2382d1ae2645348a170e2472bae4adb78ee4560f",
+      "exportSha256": "78223600e5d245b644148a7c2382d1ae2645348a170e2472bae4adb78ee4560f"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
