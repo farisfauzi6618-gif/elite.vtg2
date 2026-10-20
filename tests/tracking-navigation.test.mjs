@@ -1,0 +1,21 @@
+import test,{after,beforeEach,afterEach} from 'node:test';import assert from 'node:assert/strict';
+import {build} from 'esbuild';import {mkdir,rm} from 'node:fs/promises';import path from 'node:path';import {pathToFileURL} from 'node:url';
+await mkdir('.test-runtime/tests',{recursive:true});const file=path.resolve('.test-runtime/tests/tracking-navigation.mjs');
+await build({stdin:{contents:`export {TrackingCard} from './app/(orders)/tracking-card';export * from 'tracking-test-hooks';`,resolveDir:process.cwd(),loader:'tsx'},bundle:true,platform:'node',format:'esm',jsx:'automatic',packages:'external',outfile:file,plugins:[{name:'tracking-hooks',setup(b){b.onResolve({filter:/^next\/link$/},()=>({path:'next/link.js',external:true}));b.onResolve({filter:/^tracking-test-hooks$/},()=>({path:'hooks',namespace:'tracking-unit'}));b.onResolve({filter:/^react$/},a=>/[\\/]tracking-card\.tsx$/.test(a.importer)?{path:'hooks',namespace:'tracking-unit'}:undefined);b.onLoad({filter:/.*/,namespace:'tracking-unit'},()=>({loader:'js',contents:`export const states=[],refs=[],effects=[];let s=0,r=0;export function renderStart(){s=r=0}export function reset(){states.length=refs.length=effects.length=0;renderStart()}export function useState(v){const i=s++;if(!(i in states))states[i]=v;return [states[i],v=>{states[i]=typeof v==='function'?v(states[i]):v}]}export function useRef(v){const i=r++;return refs[i]??=( {current:v})}export function useEffect(fn){effects.push(fn)}`}))}}]});
+const m=await import(pathToFileURL(file));const saved={};let timer,cleared=false,history=[];
+const fixture={invoice:'EV-261020-ABCDEF01',awb:'JP12345678',courier:'J&T Regular',stage:'in_transit',events:[],message:'SIMULATED',paymentConfirmed:true,accessUrl:'https://elite.test/lacak#'+'a'.repeat(64)};
+const tick=()=>new Promise(resolve=>setImmediate(resolve));
+function render(){m.renderStart();return m.TrackingCard({lookup:true})}
+function find(node,predicate){if(Array.isArray(node)){for(const child of node){const match=find(child,predicate);if(match)return match}}else if(node?.props){if(predicate(node))return node;return find(node.props.children,predicate)}return null}
+beforeEach(()=>{m.reset();cleared=false;history=[];for(const name of ['window','document','fetch','setInterval','clearInterval'])saved[name]=globalThis[name];globalThis.window={location:{search:'',hash:'',pathname:'/lacak'},history:{replaceState(...args){history.push(args[2])}}};globalThis.document={visibilityState:'visible'};globalThis.setInterval=fn=>{timer=fn;return 17};globalThis.clearInterval=id=>{assert.equal(id,17);cleared=true};globalThis.fetch=async()=>Response.json(fixture)});
+afterEach(()=>{for(const name of Object.keys(saved)){if(saved[name]===undefined)delete globalThis[name];else globalThis[name]=saved[name]}});after(()=>rm(file,{force:true}));
+
+test('search another invoice clears the previous guest result and ignores an in-flight refresh',async()=>{
+ render();const cleanup=m.effects[0]();await tick();let view=render();const refresh=find(view,n=>n.props['aria-label']==='Perbarui status pesanan'),search=find(view,n=>n.props.children==='Cari pesanan lain');assert.ok(refresh);assert.ok(search);
+ let finish,calls=0;globalThis.fetch=()=>{calls++;return new Promise(resolve=>{finish=resolve})};refresh.props.onClick();search.props.onClick();assert.equal(m.states[0],null);assert.equal(m.states[1],false);assert.equal(history.at(-1),'/lacak');
+ timer();assert.equal(calls,1,'manual lookup must not start another automatic read');finish(Response.json(fixture));await tick();assert.equal(m.states[0],null,'the previous response must not restore the old order');view=render();assert.ok(find(view,n=>n.props.id==='tracking-invoice'));assert.ok(find(view,n=>n.props.id==='tracking-phone'));cleanup();assert.equal(cleared,true);
+});
+
+test('invoice query is retained in the guest lookup field when account or browser access is absent',async()=>{
+ globalThis.window.location.search='?invoice='+fixture.invoice;globalThis.fetch=async()=>Response.json({error:'Not found'},{status:404});render();const cleanup=m.effects[0]();await tick();const view=render();assert.equal(find(view,n=>n.props.id==='tracking-invoice').props.value,fixture.invoice);cleanup();
+});

@@ -44,10 +44,10 @@
       "exportSha256": "9366ec342a70e02c46f70a4b21eb565361a69b83c7cb6325029bb2e2ae62ff45"
     },
     {
-      "source": "monolith-2026-10-20-customer-tracking",
+      "source": "monolith-2026-10-20-tracking-navigation",
       "path": "app/(orders)/tracking-card.tsx",
-      "sha256": "7caaf56e747f1dd36904f1f59767d925a865212d9f33a2a93680ba87f9820891",
-      "exportSha256": "7caaf56e747f1dd36904f1f59767d925a865212d9f33a2a93680ba87f9820891"
+      "sha256": "68398fb2b997dd6388a5ee8c6620fbcd135a20b5dbd33eeeaa26183851e1cd63",
+      "exportSha256": "68398fb2b997dd6388a5ee8c6620fbcd135a20b5dbd33eeeaa26183851e1cd63"
     },
     {
       "source": "monolith-2026-10-09",
@@ -5052,6 +5052,12 @@
       "source": "monolith-2026-10-20-customer-tracking",
       "sha256": "41b48113eca158c32b1d270ce17d83259fe91bd4438adca7fd67aa1678b96a31",
       "exportSha256": "41b48113eca158c32b1d270ce17d83259fe91bd4438adca7fd67aa1678b96a31"
+    },
+    {
+      "path": "tests/tracking-navigation.test.mjs",
+      "source": "monolith-2026-10-20-tracking-navigation",
+      "sha256": "aa5d31eb210f0a7ad808e28c7ce8914393f580a943df09e069e0605f99f53d71",
+      "exportSha256": "aa5d31eb210f0a7ad808e28c7ce8914393f580a943df09e069e0605f99f53d71"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
