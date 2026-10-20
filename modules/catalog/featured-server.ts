@@ -8,11 +8,11 @@ export async function setFeatured(input:any){
  if(position===0)throw new AppError(400,'Featured Position harus 1–8.');
  const tx=await getSqlClient().transaction('write');
  try{
-  const current=(await tx.execute({sql:'SELECT id,version,is_featured,status,sold_at FROM products WHERE id=?',args:[id]})).rows[0];
+  const current=(await tx.execute({sql:'SELECT id,version,is_featured,status,sold_at FROM products WHERE id=? AND deleted_at IS NULL',args:[id]})).rows[0];
   if(!current)throw new AppError(404,'Barang tidak ditemukan.');
   if(Number(current.version)!==version)throw new AppError(409,'Data berubah. Muat ulang barang sebelum mengubah Featured.');
   if(input.featured&&current.status==='published'&&current.sold_at!=null)throw new AppError(409,'Barang SOLD tidak dapat ditambahkan ke Featured aktif.');
-  const active=(await tx.execute("SELECT id,featured_position FROM products WHERE is_featured=1 AND (status!='published' OR sold_at IS NULL) ORDER BY featured_position,id")).rows;
+  const active=(await tx.execute("SELECT id,featured_position FROM products WHERE deleted_at IS NULL AND is_featured=1 AND (status!='published' OR sold_at IS NULL) ORDER BY featured_position,id")).rows;
   const others=active.filter(p=>p.id!==id);
   if(input.featured&&others.length>=FEATURED_LIMIT)throw new AppError(409,'Maximum 8 featured products. Hapus salah satu dari Featured terlebih dahulu.',{featuredLimit:FEATURED_LIMIT});
   const ordered=others.map(p=>String(p.id));if(input.featured)ordered.splice(Math.min(position==null?(current.is_featured?Math.max(0,active.findIndex(p=>p.id===id)):ordered.length):position-1,ordered.length),0,id);

@@ -423,3 +423,5 @@ h3{font-size:1rem;font-weight:600}
  .catalog-products .product-grid{padding-top:16px}
  .catalog-filter-body{padding:20px;gap:20px}.catalog-filter-sheet [data-slot=sheet-header]{padding:22px 20px 16px}.catalog-filter-actions{padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px))}
 }
+
+.admin-delete-product{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding-top:16px;border-top:1px solid var(--line,#deded8);font-size:13px}
