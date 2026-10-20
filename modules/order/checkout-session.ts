@@ -9,6 +9,10 @@ export type CatalogSelection = {
 
 type CheckoutRequest = <T>(path: string, init?: RequestInit) => Promise<T>;
 
+export function resumeMemberInvoice(invoice:string,request:CheckoutRequest){
+ return request<Order>('/api/customer/orders/resume',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invoice})});
+}
+
 export async function resumeCatalogSelection(token: string, existing: Order | null, request: CheckoutRequest) {
   // Validate the new selection before releasing the previous invoice's cookie.
   const selection = await request<CatalogSelection>('/api/order/catalog?token=' + encodeURIComponent(token));

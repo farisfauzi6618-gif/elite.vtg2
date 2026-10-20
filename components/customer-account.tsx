@@ -10,7 +10,7 @@ import {LoyaltyCard} from '@/components/loyalty-card';
 import {MemberInvite} from '@/components/member-invite';
 import {CustomerBirthday} from '@/components/customer-birthday';
 
-export function CustomerAccount({inviteMembers=false}:{inviteMembers?:boolean}={}) {
+export function CustomerAccount({inviteMembers=false,showOrdersLink=true}:{inviteMembers?:boolean;showOrdersLink?:boolean}={}) {
   const [promotion,setPromotion]=useState<PurchasePromotion|null>(null);
   const [customer, setCustomer] = useState<CustomerProfile | null>(null), [open, setOpen] = useState(false), [mode, setMode] = useState<'login' | 'register'>('login');
   const [name, setName] = useState(''), [identity, setIdentity] = useState(''), [password, setPassword] = useState(''), [showPassword, setShowPassword] = useState(false);
@@ -47,10 +47,10 @@ export function CustomerAccount({inviteMembers=false}:{inviteMembers?:boolean}={
       setCustomer(null); setPassword(''); setOpen(false);invalidateCustomer();window.dispatchEvent(new Event('elite:customer-change'));
     } catch (error) { setError((error as Error).message); } finally { setBusy(false); }
   }
-  return <><Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) { setPassword(''); setShowPassword(false); } }}>
+  return <><div className="account-navigation">{showOrdersLink&&<a className="quiet-link account-orders-link" href={customer?'/pesanan':'/lacak'}>{customer?'Pesanan saya':'Lacak pesanan'}</a>}<Dialog open={open} onOpenChange={value => { setOpen(value); if (!value) { setPassword(''); setShowPassword(false); } }}>
     <DialogTrigger asChild><button type="button" className="quiet-link account-trigger" aria-label={customer ? 'Buka akun pelanggan' : 'Masuk atau daftar pelanggan'}><UserRound size={19} aria-hidden="true"/><span>{customer ? 'Akun saya' : 'Masuk'}</span></button></DialogTrigger>
     <DialogContent className="customer-account-dialog">
-      <DialogHeader><DialogTitle>{customer ? 'Akun saya' : mode === 'register' ? 'Daftar' : 'Masuk'}</DialogTitle><DialogDescription>{customer ? 'Gunakan akun ini untuk mengisi data penerima lebih cepat.' : mode === 'register' ? 'Daftar untuk diskon 5% harga barang pada pembelian pertama, maksimal Rp50.000. Diskon otomatis saat Anda login.' : 'Masuk dengan email atau nomor HP yang Anda gunakan saat mendaftar.'}</DialogDescription></DialogHeader>
+      <DialogHeader><DialogTitle>{customer ? 'Akun saya' : mode === 'register' ? 'Daftar' : 'Masuk'}</DialogTitle><DialogDescription>{customer ? 'Lihat pesanan, nomor resi, dan data penerima Anda.' : mode === 'register' ? 'Daftar untuk diskon 5% harga barang pada pembelian pertama, maksimal Rp50.000. Diskon otomatis saat Anda login.' : 'Masuk dengan email atau nomor HP yang Anda gunakan saat mendaftar.'}</DialogDescription></DialogHeader>
       {error && <p className="notice error" role="alert">{error}</p>}
       {loading ? <p role="status">Memuat akun…</p> : customer ? <div className="customer-profile">{promotion&&<p className="account-benefit">{promotion.state==='available'?'Diskon pembelian pertama 5% tersedia, maksimal Rp50.000. Login saat checkout agar diterapkan otomatis.':promotion.state==='reserved'?'Diskon 5% tersimpan pada invoice yang menunggu pembayaran.':'Promo pembelian pertama sudah terpakai.'}</p>}<dl><div><dt>Nama lengkap</dt><dd>{customer.name}</dd></div><div><dt>{customer.email ? 'Email' : 'Nomor HP'}</dt><dd>{customer.identity}</dd></div>{customer.birthday && <div><dt>Ulang tahun</dt><dd>{new Date(customer.birthday + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</dd></div>}</dl><CustomerBirthday key={customer.identity} customer={customer} onChange={setCustomer}/><a className="button secondary" href="/pesanan">Pesanan saya</a>{open&&<LoyaltyCard/>}<button type="button" className="button secondary" disabled={busy} onClick={() => void logout()}><LogOut size={17}/>{busy ? 'Keluar…' : 'Keluar dari akun'}</button></div> : <form onSubmit={submit} className="customer-account-form">
         {mode === 'register' && <label htmlFor="customer-name">Nama lengkap<input id="customer-name" name="name" autoComplete="name" required minLength={2} maxLength={120} value={name} onChange={e => setName(e.target.value)} placeholder="Nama lengkap Anda"/></label>}
@@ -62,5 +62,5 @@ export function CustomerAccount({inviteMembers=false}:{inviteMembers?:boolean}={
         <p className="account-guest-note">Anda tetap bisa belanja tanpa membuat akun.</p>
       </form>}
     </DialogContent>
-  </Dialog>{inviteMembers&&<MemberInvite eligible={!loading&&!error&&customer===null} blocked={open} onJoin={()=>{changeMode('register');setOpen(true)}}/>}</>;
+  </Dialog></div>{inviteMembers&&<MemberInvite eligible={!loading&&!error&&customer===null} blocked={open} onJoin={()=>{changeMode('register');setOpen(true)}}/>}</>;
 }

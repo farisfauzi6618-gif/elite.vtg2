@@ -22,7 +22,7 @@ import { MAX_ORDER_ITEMS,normalizeOrderItems,orderItems,orderShippingGrams } fro
 import { PaymentPanel } from "./payment-panel";
 import { paymentMethodLabel,paymentStatusLabel,storedPaymentMethod,type PaymentConfig,type PaymentMethod } from "@/modules/order/payment-types";
 import { TrackingCard } from "../tracking-card";
-import { resumeCatalogSelection,catalogReturnHref,recoverSubmittedOrder } from "@/modules/order/checkout-session";
+import { resumeCatalogSelection,catalogReturnHref,recoverSubmittedOrder,resumeMemberInvoice } from "@/modules/order/checkout-session";
 const blank={name:"",phone:"",address:"",postcode:"",item:"",itemAmount:""};
 async function request<T>(path:string,init?:RequestInit):Promise<T>{const r=await fetch(path,init);const v=await r.json() as {error?:string};if(!r.ok||v.error)throw new Error(v.error||"Permintaan belum berhasil.");return v as T;}
 const shipping=<T,>(body:Record<string,unknown>)=>request<T>("/api/shipping",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -30,7 +30,7 @@ export default function OrderForm(){
  const {promotion,customer,loading:promotionLoading}=usePurchaseBenefit();
  const [postStatus,setPostStatus]=useState<ProgressStatus>('PAYMENT_RECEIVED');
  const [rewardChoice,setRewardChoice]=useState("auto");
- const [invoiceId,setInvoiceId]=useState(""),[cancelPrompt,setCancelPrompt]=useState(false);
+ const [requestedInvoice,setRequestedInvoice]=useState(""),[invoiceId,setInvoiceId]=useState(""),[cancelPrompt,setCancelPrompt]=useState(false);
  const [form,setForm]=useState(blank),[consent,setConsent]=useState(false),[config,setConfig]=useState<{ready:boolean;payment:PaymentConfig;defaultGrams?:number}|null>(null),[order,setOrder]=useState<Order|null>(null),[step,setStep]=useState(1),[busy,setBusy]=useState(false),[error,setError]=useState(""),[info,setInfo]=useState(""),[file,setFile]=useState<File|null>(null),[preview,setPreview]=useState("");
  const [query,setQuery]=useState(""),[locations,setLocations]=useState<ShippingLocation[]>([]),[destination,setDestination]=useState<ShippingLocation|null>(null),[quote,setQuote]=useState<ShippingQuote|null>(null),[searching,setSearching]=useState(false),[quoting,setQuoting]=useState(false),[shippingError,setShippingError]=useState(""),[refresh,setRefresh]=useState(0),[expired,setExpired]=useState(false);
  const [shippingPayment,setShippingPayment]=useState<ShippingPayment>('prepaid');
@@ -52,9 +52,9 @@ export default function OrderForm(){
    const requested=params.get('reward');if(requested&&/^[a-zA-Z0-9_-]{1,100}$/.test(requested))setRewardChoice(requested);
    if(token){setLinked(true);setCatalogLoading(true)}
    try{
-    const reserveInvoice=params.get('reserveInvoice'),reserveCap=/^[a-f0-9]{64}$/.test(window.location.hash.slice(1))?window.location.hash.slice(1):'';if(reserveCap)setReserveAuthorization(reserveCap);
-    const [c,o]=await Promise.all([request<{ready:boolean;payment:PaymentConfig;defaultGrams?:number}>("/api/config"),fetch(reserveInvoice||reserveCap?'/api/reserve'+(reserveInvoice?'?invoice='+encodeURIComponent(reserveInvoice):''):'/api/order',{headers:reserveCap?{Authorization:'Bearer '+reserveCap}:{}}).then(r=>r.ok?r.json() as Promise<Order>:null)]);
-    if(!active)return;setConfig(c);
+    const accountInvoice=params.get('invoice'),reserveInvoice=params.get('reserveInvoice'),reserveCap=/^[a-f0-9]{64}$/.test(window.location.hash.slice(1))?window.location.hash.slice(1):'';if(reserveCap)setReserveAuthorization(reserveCap);if(accountInvoice)setRequestedInvoice(accountInvoice);
+    const [c,o]=await Promise.all([request<{ready:boolean;payment:PaymentConfig;defaultGrams?:number}>("/api/config"),accountInvoice?resumeMemberInvoice(accountInvoice,request):fetch(reserveInvoice||reserveCap?'/api/reserve'+(reserveInvoice?'?invoice='+encodeURIComponent(reserveInvoice):''):'/api/order',{headers:reserveCap?{Authorization:'Bearer '+reserveCap}:{}}).then(r=>r.ok?r.json() as Promise<Order>:null)]);
+    if(!active)return;setConfig(c);if(accountInvoice)window.history.replaceState(null,"","/order");
     if(newManual){await request("/api/order",{method:"DELETE"});return;}
     if(o){
      setReserveMode(o.order_type==='reserve');
@@ -114,6 +114,7 @@ export default function OrderForm(){
  async function copy(){if(!order)return;try{await copyText(invoiceText(order,{includeCourier:true}));setInfo("Invoice berhasil disalin.");}catch{setError("Salin tidak tersedia. Gunakan Simpan invoice untuk menyimpan ringkasan.");}}
  async function selectPayment(paymentMethod:PaymentMethod){if(busy||preparingProof)return;setBusy(true);setError("");try{const o=await request<Order>("/api/order",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentMethod})});setOrder(o);setPaymentAssetFailed(false);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
  async function pick(f:File|undefined){if(!f||busy)return;const seq=++proofSequence.current;setError("");setFile(null);setProofNote("");setPreparingProof(true);try{const prepared=await preparePaymentProof(f);if(seq!==proofSequence.current)return;setFile(prepared);setProofNote("Bukti siap diunggah. Pastikan nominal dan detail transaksi terbaca pada pratinjau.");}catch(e){if(seq===proofSequence.current)setError((e as Error).message);}finally{if(seq===proofSequence.current)setPreparingProof(false);}}
+ if(requestedInvoice&&error&&!order)return <><header className="site-header"><Link href="/" className="brand"><BrandLogo/></Link><CustomerAccount showOrdersLink={false}/></header><main className="shell tracking-shell"><h1>Pesanan belum dapat dibuka</h1><p className="notice error" role="alert">{error}</p><div className="action-row"><Link className="primary link-button" href="/pesanan">Buka Pesanan saya</Link><Link className="secondary link-button" href="/">Kembali ke katalog</Link></div></main></>;
  if(order?.order_type==='reserve'&&order.reservation)return <ReserveOrderPanel initial={order} payment={config?.payment} authorization={reserveAuthorization}/>;
  return <><header className="site-header"><Link href="/" className="brand"><BrandLogo/><small>CURATED VINTAGE</small></Link><div className="order-header-actions"><CustomerAccount/><span className="header-note"><LockKeyhole size={14}/> ORDER & PEMBAYARAN</span></div></header>
  <main className="shell"><div className="intro"><h1>{step===3?progressLabels[postStatus]:"Lengkapi pesanan Anda."}</h1><p>{step===3?postStatus!=="PAYMENT_RECEIVED"?"Status pesanan dan nomor resi tersedia di halaman order.":"Pembayaran Anda sedang kami verifikasi. Pesanan akan diproses setelah pembayaran dikonfirmasi. Nomor resi akan tersedia di halaman order setelah pesanan dikirim.":linked?"Barang dan harga sudah terisi dari katalog. Lengkapi penerima dan ongkir, lalu pilih metode pembayaran.":"Pilih tujuan untuk cek ongkir, masukkan harga barang, lalu pilih metode pembayaran."}</p></div>
