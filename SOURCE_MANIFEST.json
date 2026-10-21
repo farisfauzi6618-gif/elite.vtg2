@@ -70,8 +70,8 @@
     {
       "source": "monolith-2026-10-21-shipping-protection",
       "path": "app/(orders)/admin/order/ui.tsx",
-      "sha256": "2a96bdeebc45a022ffeee5dad3471618bf4def79ae2f16986d093a67e3a7526c",
-      "exportSha256": "2a96bdeebc45a022ffeee5dad3471618bf4def79ae2f16986d093a67e3a7526c"
+      "sha256": "202b300db6b52aaaffca39c8f8f74f6d404750aad87c347ff6fb794e50208a18",
+      "exportSha256": "202b300db6b52aaaffca39c8f8f74f6d404750aad87c347ff6fb794e50208a18"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4744,8 +4744,8 @@
     {
       "source": "monolith-2026-10-21-shipping-protection",
       "path": "components/reserve-admin.tsx",
-      "sha256": "4025ded7e74577042a3d0e136c493f9d3c96336e92ab5461395659c8fdf38cad",
-      "exportSha256": "4025ded7e74577042a3d0e136c493f9d3c96336e92ab5461395659c8fdf38cad"
+      "sha256": "15a5187ee3654528a8146c95b8fe31d63848b9b3028b3b68f30a3a2ac07f531d",
+      "exportSha256": "15a5187ee3654528a8146c95b8fe31d63848b9b3028b3b68f30a3a2ac07f531d"
     },
     {
       "source": "monolith-2026-10-19-flow-simplification",
@@ -4924,8 +4924,8 @@
     {
       "path": "components/admin-order-list.tsx",
       "source": "monolith-2026-10-21-shipping-protection",
-      "sha256": "b932145f72ca1362700cd2b8d0c84a771f48bf71671eeacb4502e1511dba20b9",
-      "exportSha256": "b932145f72ca1362700cd2b8d0c84a771f48bf71671eeacb4502e1511dba20b9"
+      "sha256": "a367cdbcbb2c36f580e00fd1e104d8c86e7427e59c3a073cce4655ad3ea15004",
+      "exportSha256": "a367cdbcbb2c36f580e00fd1e104d8c86e7427e59c3a073cce4655ad3ea15004"
     },
     {
       "path": "modules/catalog/catalog-listing-page.ts",

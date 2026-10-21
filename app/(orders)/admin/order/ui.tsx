@@ -1,5 +1,5 @@
+'use client';
 import {ShippingProtectionSettings} from '@/components/shipping-protection-settings';
-"use client";
 /* eslint-disable @next/next/no-img-element -- Show the original QRIS without an image optimization proxy. */
 import {ReserveAdmin} from '@/components/reserve-admin';
 import {AdminOrderList} from '@/components/admin-order-list';

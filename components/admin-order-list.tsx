@@ -1,5 +1,5 @@
-import {ShippingProtectionDetail} from './shipping-protection-detail';
 'use client';
+import {ShippingProtectionDetail} from './shipping-protection-detail';
 import {useEffect,useState,type FormEvent} from 'react';
 import {ManualOrderStatus} from './manual-order-status';
 import {OrderShipping} from '@/app/(orders)/admin/order/shipping-ui';
