@@ -1,3 +1,6 @@
+import {protectionFields} from './shipping-protection';
+import {legacyProtection,type ProtectionConfig,type ProtectionFields} from './shipping-protection-types';
+import type {ShippingQuote} from './shipping-types';
 import {activeColorSql,colorPriceSql} from '@/modules/catalog/color-variants';
 import {reservedQuantitySql} from '@/modules/catalog/reserve-inventory';
 import type {Transaction,InValue} from '@libsql/client';
@@ -28,8 +31,8 @@ export async function purchasePromotion(cookie:string|null):Promise<PurchaseProm
  const tx=await db().client.transaction('write');
  try{await expireUnpaidClaim(tx,customer.id);const result=await promotion(tx,customer.id);await tx.commit();return result;}finally{tx.close();}
 }
-export type DiscountPricing={customerId:string|null;subtotal:number;discount:number;net:number;voucherId:string|null;voucherLabel:string|null};
-export async function persistPurchase(request:Request,existing:Order|null,orderId:string,subtotal:number,lines:CheckoutLine[]|undefined,statement:(pricing:DiscountPricing)=>{sql:string;args:InValue[]},selectedReward?:unknown) {
+export type DiscountPricing={customerId:string|null;subtotal:number;discount:number;net:number;voucherId:string|null;voucherLabel:string|null}&ProtectionFields;
+export async function persistPurchase(request:Request,existing:Order|null,orderId:string,subtotal:number,lines:CheckoutLine[]|undefined,statement:(pricing:DiscountPricing)=>{sql:string;args:InValue[]},selectedReward?:unknown,protection?:{quote:ShippingQuote;policy:ProtectionConfig}) {
  const customer=await currentCustomer(request.headers.get('cookie'));
  let choice:string;try{choice=rewardChoice(selectedReward)}catch{throw new AppError(400,'Pilihan reward tidak valid.')}
  if(existing?.discount_amount&&existing.customer_id!==customer?.id)throw new AppError(409,'Masuk kembali ke akun yang digunakan untuk invoice diskon ini sebelum mengubahnya.');
@@ -49,7 +52,8 @@ export async function persistPurchase(request:Request,existing:Order|null,orderI
   }
   const pricedLines=lines?await rewardLines(tx,lines):[{productId:null,category:null,amount:subtotal}],rules=customer?await rewardRules(tx,customer.id,state,orderId):[],quote=priceRewards(pricedLines,rules,choice,!!customer);
   if(quote.subtotal!==subtotal)throw new AppError(409,'Harga barang berubah. Pilih kembali barang dari katalog.');
-  const pricing={customerId:customer?.id??null,subtotal,discount:quote.discount,net:subtotal-quote.discount,voucherId:quote.selected?.id??null,voucherLabel:quote.selected?.label??null};
+  const protectedPrice=protection?protectionFields(protection.quote,subtotal-quote.discount,protection.policy,existing):legacyProtection;
+  const pricing={...protectedPrice,customerId:customer?.id??null,subtotal,discount:quote.discount,net:subtotal-quote.discount,voucherId:quote.selected?.id??null,voucherLabel:quote.selected?.label??null};
   const saved=await tx.execute(statement(pricing));
   if(saved.rowsAffected!==1)throw new AppError(409,'Pesanan berubah dari tab lain. Muat ulang halaman sebelum melanjutkan.');
   await tx.execute({sql:'DELETE FROM first_purchase_discounts WHERE order_id=? AND redeemed_at IS NULL',args:[orderId]});

@@ -3,7 +3,7 @@ import {shipmentSummary} from './fulfilment';
 import type {Shipment} from './fulfilment-types';
 import {ADMIN_ORDER_FILTERS,type AdminOrderStatus,type AdminOrderPage,type AdminOrderRow} from './admin-order-types';
 
-const columns='order_type,reservation_status,proof_received_at,preparing_at,shipped_at,courier_name,tracking_number,post_purchase_revision,payment_method,id,created_at,name,phone,address,postcode,item,quantity,items_json,total,item_amount,item_subtotal,discount_amount,discount_voucher_id,discount_label,shipping_amount,status,notify_status,payment_state,confirmed_at,catalog_checkout_id,catalog_items_json,stock_sync_state,stock_sync_error,proof_key IS NOT NULL AS has_proof,shipping_json';
+const columns='shipping_protection_fee,declared_shipping_value,shipping_protection_source,shipping_protection_confirmed_at,shipping_protection_reference,order_type,reservation_status,proof_received_at,preparing_at,shipped_at,courier_name,tracking_number,post_purchase_revision,payment_method,id,created_at,name,phone,address,postcode,item,quantity,items_json,total,item_amount,item_subtotal,discount_amount,discount_voucher_id,discount_label,shipping_amount,status,notify_status,payment_state,confirmed_at,catalog_checkout_id,catalog_items_json,stock_sync_state,stock_sync_error,proof_key IS NOT NULL AS has_proof,shipping_json';
 const base="proof_key IS NOT NULL AND (order_type='normal' OR reservation_status='PAID')";
 const progress="CASE WHEN COALESCE(payment_state,'')!='payment_confirmed' THEN 'received' WHEN shipped_at IS NOT NULL AND COALESCE(tracking_number,'')!='' THEN 'shipped' WHEN preparing_at IS NOT NULL THEN 'preparing' ELSE 'confirmed' END";
 

@@ -1,3 +1,4 @@
+import {ShippingProtectionDetail} from './shipping-protection-detail';
 'use client';
 import {useEffect,useState,type FormEvent} from 'react';
 import {ManualOrderStatus} from './manual-order-status';
@@ -32,7 +33,7 @@ export function AdminOrderList({onReserveCount}:{onReserveCount:(count:number)=>
       <div className="order-top"><b>{order.id}</b><span>{dateLabel(order.created_at)}</span></div><h3>{order.name}</h3><p className="order-item-names">{order.quantity||1} barang · {order.item}</p>
       <div className="order-bottom"><strong>{rupiah(order.total)}</strong><span className="status-badge verified">{progress.label}</span></div>
       <div className="action-row"><a className="secondary link-button" href={'/api/admin/order/orders/'+order.id}>Lihat / unduh bukti</a>{order.notify_status!=='sent'&&<button className="button secondary" disabled={locked} onClick={()=>void action(order.id,'retry')}>Kirim ulang Telegram</button>}</div>
-      <details className="admin-order-details"><summary>Penerima dan rincian pembayaran</summary><p>{order.name}<br/>{order.phone}<br/>{order.address}<br/>{quote?.destination.label||order.postcode}</p><p>{paymentMethodLabel(order.payment_method)}</p>{order.item_amount!=null&&<p>Harga barang {rupiah(order.item_amount)} · Ongkir {quote?quoteServiceName(quote):'J&T'} {shippingDescription(quote,order.shipping_amount??0)}</p>}<p>Telegram: {order.notify_status==='sent'?'terkirim':order.notify_status==='sending'?'sedang dikirim':'perlu dikirim ulang'}</p></details>
+      <details className="admin-order-details"><summary>Penerima dan rincian pembayaran</summary><p>{order.name}<br/>{order.phone}<br/>{order.address}<br/>{quote?.destination.label||order.postcode}</p><p>{paymentMethodLabel(order.payment_method)}</p>{order.item_amount!=null&&<p>Harga barang {rupiah(order.item_amount)} · Ongkir {quote?quoteServiceName(quote):'J&T'} {shippingDescription(quote,order.shipping_amount??0)}</p>}<ShippingProtectionDetail order={order} admin/><p>Telegram: {order.notify_status==='sent'?'terkirim':order.notify_status==='sending'?'sedang dikirim':'perlu dikirim ulang'}</p></details>
       {order.catalog_checkout_id&&order.payment_state==='payment_confirmed'&&order.stock_sync_state!=='applied'&&<div className="notice error"><p>Sinkronisasi stok perlu diperiksa.</p>{order.stock_sync_error&&<p>{order.stock_sync_error}</p>}<button className="button secondary" disabled={locked} onClick={()=>void action(order.id,'stock-sync')}>Coba sinkron stok</button></div>}
       <ManualOrderStatus order={order} refresh={refresh}/>
       {showShipment&&<details><summary>Riwayat pengiriman terintegrasi</summary><OrderShipping order={order} refresh={refresh}/></details>}

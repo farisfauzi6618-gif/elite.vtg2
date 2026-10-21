@@ -9,7 +9,7 @@ import type {PurchasePromotion} from './first-purchase';
 import {purchasePromotion} from './first-purchase-server';
 import {orderingLocked} from '@/modules/catalog/product-schedule';
 import type {CheckoutLine} from '@/modules/catalog/checkout';
-import {catalogQuote} from './catalog-bridge';
+import {catalogQuote,type CatalogQuote} from './catalog-bridge';
 type SqlReader=Pick<Transaction,'execute'>;
 const ids=(value:unknown)=>{try{const v=JSON.parse(String(value));return Array.isArray(v)&&v.every(x=>typeof x==='string')?v:null;}catch{return null;}};
 export async function rewardRules(tx:SqlReader,customerId:string,state:PurchasePromotion,orderId?:string):Promise<RewardRule[]> {
@@ -32,7 +32,7 @@ export async function rewardLines(tx:SqlReader,lines:CheckoutLine[]):Promise<Rew
  const result:RewardLine[]=[];for(const line of lines){const p=(await tx.execute({sql:'SELECT category FROM products WHERE id=?',args:[line.productId]})).rows[0];result.push({productId:line.productId,category:p?String(p.category):null,amount:line.unitPrice*line.quantity});}return result;
 }
 export async function availableRewardCount(cookie:string|null,state:PurchasePromotion){const customer=await currentCustomer(cookie);return customer?(await rewardRules(db().client,customer.id,state)).length:0;}
-export async function previewRewards(request:Request,input:any):Promise<RewardQuote> {
+export async function previewRewards(request:Request,input:any,trustedCheckout?:CatalogQuote):Promise<RewardQuote> {
  if(!input||typeof input!=='object'||Array.isArray(input)||!['cart','product','checkout','manual'].includes(input.context)||Object.keys(input).some(k=>!['context','lines','productId','catalogToken','itemAmount','choice','variantId'].includes(k)))throw new AppError(400,'Permintaan reward tidak valid.');
  if(input.variantId!=null&&(input.context!=='product'||typeof input.variantId!=='string'||!/^[A-Za-z0-9_-]{1,100}$/.test(input.variantId)))throw new AppError(400,'Warna tidak valid.');
  let choice:string;try{choice=rewardChoice(input.choice)}catch{throw new AppError(400,'Pilihan reward tidak valid.')}
@@ -40,11 +40,12 @@ export async function previewRewards(request:Request,input:any):Promise<RewardQu
  // Only the capability-protected current invoice can reuse its own reservation.
  let orderId:string|undefined;
  const {myOrder}=await import('./order-server');try{const o=await myOrder(request);if(o.status==='awaiting_proof'&&o.customer_id===customer?.id&&(input.context==='manual'&&!o.catalog_checkout_id||input.context==='checkout'&&o.catalog_token===input.catalogToken))orderId=o.id;}catch(e){if(!(e instanceof AppError)||e.status!==404)throw e;}
+ const checkout=input.context==='checkout'?(trustedCheckout??await catalogQuote(input.catalogToken)):null;
  const tx=await db().client.transaction('read');
  try{
   let lines:RewardLine[],uniform=true,orderable=true;
   if(input.context==='manual'){const n=input.itemAmount;if(!Number.isSafeInteger(n)||n<1000||n>10000000)throw new AppError(400,'Harga barang belum valid.');lines=[{productId:null,category:null,amount:n}];}
-  else if(input.context==='checkout'){const q=await catalogQuote(input.catalogToken);lines=await rewardLines(tx,q.lines);}
+  else if(input.context==='checkout'){lines=await rewardLines(tx,checkout!.lines);}
   else if(input.context==='product'){
    if(typeof input.productId!=='string'||input.productId.length>100)throw new AppError(400,'Produk tidak valid.');
    const p=(await tx.execute({sql:"SELECT * FROM products WHERE id=? AND status='published'",args:[input.productId]})).rows[0];if(!p)throw new AppError(404,'Produk belum tersedia.');

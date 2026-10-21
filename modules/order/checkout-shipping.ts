@@ -26,16 +26,16 @@ export async function searchDestinations(query:unknown,courier:ShippingCourier='
  if(locations.length)await db().batch(locations.map(l=>db().prepare("INSERT INTO shipping_locations(id,payload,expires_at) VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET payload=excluded.payload,expires_at=excluded.expires_at").bind(l.id,JSON.stringify(l),Date.now()+7*86400000)));
  return locations;
 }
-export async function shippingQuotes(destinationId:unknown,grams:unknown,courier:ShippingCourier='jnt'){
+export async function shippingQuotes(destinationId:unknown,grams:unknown,courier:ShippingCourier='jnt',protection?:{declaredValue:number;policyVersion:number}){
  if(typeof destinationId!=="number"||!Number.isSafeInteger(destinationId)||destinationId<=0||typeof grams!=="number"||!Number.isSafeInteger(grams)||grams<100||grams>30000)throw new AppError(400,"Pilih tujuan dan isi berat paket 0,1–30 kg.");
  const row=await db().prepare("SELECT payload FROM shipping_locations WHERE id=? AND expires_at>?").bind(destinationId,Date.now()).first<{payload:string}>();
  if(!row)throw new AppError(409,"Cari dan pilih ulang tujuan pengiriman.");
  const location=JSON.parse(row.payload) as ShippingLocation;
  if(courier==='jne'&&location.provider==='kiriminaja')throw new AppError(409,'Cari dan pilih ulang tujuan pengiriman.');
- const data=courier==='jnt'&&await kiriminRatesReady()?await kiriminQuoteData(location,grams):await provider<{destination:string;weight:number;source?:string;services:{amount:number;service:string;description?:string;etd:string}[]}>({action:"rates",destinationId,grams,courier});
+ const data=courier==='jnt'&&await kiriminRatesReady()?await kiriminQuoteData(location,grams,protection?.declaredValue):await provider<{destination:string;weight:number;source?:string;services:{amount:number;service:string;description?:string;etd:string}[]}>({action:"rates",destinationId,grams,courier});
  if(data.destination!==location.label||Math.round(data.weight*1000)!==grams||!Array.isArray(data.services))throw new AppError(503,"Pilihan layanan pengiriman belum dapat dikonfirmasi. Coba lagi.");
  const checkedAt=Date.now(),seen=new Set<string>();
- const quotes:ShippingQuote[]=data.services.flatMap(row=>{if(!row||!Number.isSafeInteger(row.amount)||row.amount<=0||row.amount>10000000||typeof row.service!=="string"||!/^[A-Za-z0-9][A-Za-z0-9 _&+./()-]{0,39}$/.test(row.service))return [];const code=row.service.toUpperCase();if((courier==='jne'&&code!=='REG')||seen.has(code))return [];seen.add(code);const quote:ShippingQuote={id:random(),destination:location,amount:row.amount,grams,service:row.service,courier,etd:typeof row.etd==="string"?row.etd.slice(0,80):"",source:data.source||"RajaOngkir/Komerce",checkedAt,expiresAt:checkedAt+45*60000};quote.serviceName=courier==='jnt'?jntServiceName(row.service,typeof row.description==='string'?row.description.slice(0,100):undefined):quoteServiceName(quote);return [quote];});
+ const quotes:ShippingQuote[]=data.services.flatMap(row=>{if(!row||!Number.isSafeInteger(row.amount)||row.amount<=0||row.amount>10000000||typeof row.service!=="string"||!/^[A-Za-z0-9][A-Za-z0-9 _&+./()-]{0,39}$/.test(row.service))return [];const code=row.service.toUpperCase();if((courier==='jne'&&code!=='REG')||seen.has(code))return [];seen.add(code);const quote:ShippingQuote={id:random(),destination:location,amount:row.amount,grams,service:row.service,courier,etd:typeof row.etd==="string"?row.etd.slice(0,80):"",source:data.source||"RajaOngkir/Komerce",checkedAt,expiresAt:checkedAt+45*60000};if(protection&&data.source==='KiriminAja'){const premium=Number('insurance' in row?row.insurance:0);if(!Number.isSafeInteger(premium)||premium<=0)return [];quote.protection={fee:premium,declaredValue:protection.declaredValue,source:'kiriminaja',policyVersion:protection.policyVersion,quotedAt:checkedAt};}quote.serviceName=courier==='jnt'?jntServiceName(row.service,typeof row.description==='string'?row.description.slice(0,100):undefined):quoteServiceName(quote);return [quote];});
  if(!quotes.length)throw new AppError(503,"Layanan pengiriman belum tersedia untuk tujuan dan berat paket ini.");
  quotes.sort((a,b)=>Number(regularJnt(b.service))-Number(regularJnt(a.service))||a.amount-b.amount);
  await db().batch([...quotes.map(q=>db().prepare("INSERT INTO shipping_quotes(id,payload,expires_at) VALUES(?,?,?)").bind(q.id,JSON.stringify(q),q.expiresAt)),db().prepare("DELETE FROM shipping_quotes WHERE expires_at<?").bind(checkedAt)]);
@@ -56,8 +56,8 @@ export async function loadQuote(id:unknown,postcode:string,paymentMode:unknown=u
  if(paymentMode==='collect'&&quote.courier==='jne')throw new AppError(409,'Bayar ongkir di tempat hanya tersedia untuk pengiriman J&T. Cek ulang ongkir.');
  return paymentMode===undefined?quote:{...quote,paymentMode};
 }
-export async function kiriminQuoteData(location:ShippingLocation,grams:number){
+export async function kiriminQuoteData(location:ShippingLocation,grams:number,insuredValue?:number){
  const {config}=await kiriminSettings();if(!validKiriminOrigin(config.origin))throw new AppError(409,"Wilayah asal KiriminAja belum tersedia.");
- const client=await kiriminClient(),destination=await client.destination(location),services=(await client.rates(config.origin,destination,grams,0,false,config)).map(r=>({amount:r.gross,service:r.service,description:r.description,etd:r.etd}));
+ const client=await kiriminClient(),destination=await client.destination(location),services=(await client.rates(config.origin,destination,grams,insuredValue??0,insuredValue!=null,config)).map(r=>({amount:r.gross,service:r.service,description:r.description,etd:r.etd,insurance:r.insurance}));
  return {destination:location.label,weight:grams/1000,source:"KiriminAja",services};
 }
