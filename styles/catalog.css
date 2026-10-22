@@ -427,3 +427,6 @@ h3{font-size:1rem;font-weight:600}
 .admin-delete-product{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding-top:16px;border-top:1px solid var(--line,#deded8);font-size:13px}
 
 .support-number{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 8px 6px;font-size:.75rem;color:#657483}.support-number>span{user-select:text}.support-copy{border:0;background:transparent;color:var(--navy);font:inherit;white-space:nowrap;text-decoration:underline;cursor:pointer;padding:8px 2px;min-height:40px}.support-copy:focus-visible{outline:3px solid #a8becd;outline-offset:2px}.support-panel>.support-copy-status{margin:0 8px 8px;font-size:.75rem;line-height:1.5}
+
+/* Admin previews use bounded images; originals are opened explicitly. */
+.admin-photo-preview{display:block;position:relative;width:100%;padding:0;border:0;background:transparent;border-radius:7px;overflow:hidden;cursor:zoom-in}.admin-photo-preview img{display:block}.admin-photo-preview:focus-visible{outline:2px solid #40566c;outline-offset:3px}.admin-photo-preview-medium>span{position:absolute;right:10px;bottom:10px;padding:7px 10px;border-radius:5px;background:#071f3ae8;color:#fff;font-size:.75rem}

@@ -1,3 +1,4 @@
+import {publicPhotoUrl} from './photo-url';
 import {availableGroups,displayPrice,FITS,isSold,isReserved,productPhotos,type Product} from './catalog-types';
 export const PRODUCT_SHARE_ORIGIN='https://elitevtg.com';
 export function productShareUrl(product:Product,story=false){
@@ -27,6 +28,6 @@ export async function performProductShare(product:Product,adapter:ShareAdapter,c
 }
 export function productShareMetadata(product:Product){
  const url=productShareUrl(product),title=product.name+' | ELITE.VTG',description=productShareSummary(product)+' · Curated by ELITE.VTG',photo=productPhotos(product)[0];
- const images=photo?[{url:new URL('/api/photos/'+encodeURIComponent(photo)+'?size=card',PRODUCT_SHARE_ORIGIN).href,alt:product.name}]:[];
+ const images=photo?[{url:new URL(publicPhotoUrl(photo,'card'),PRODUCT_SHARE_ORIGIN).href,alt:product.name}]:[];
  return {title:{absolute:title},description,alternates:{canonical:new URL('/produk/'+encodeURIComponent(product.id),PRODUCT_SHARE_ORIGIN).href},openGraph:{type:'website' as const,title,description,url,siteName:'ELITE.VTG',images},twitter:{card:photo?'summary_large_image' as const:'summary' as const,title,description,images:images.map(i=>i.url)}};
 }
