@@ -58,7 +58,7 @@ export default function Catalog({productId,initialProduct,initialColor,archive=f
  async function load(){
   const sequence=++loadSequence.current;
   try{
-   const path=productId?selectionPath(selectionIds(productId,key=>sessionStorage.getItem(key))):listingPath({...listingRef.current,archive,ids:selectionIds('',key=>sessionStorage.getItem(key))});
+   const path=productId?selectionPath(selectionIds(productId,key=>sessionStorage.getItem(key)),productId):listingPath({...listingRef.current,archive,ids:selectionIds('',key=>sessionStorage.getItem(key))});
    const data=await read(path);if(sequence!==loadSequence.current)return;
    setProducts([...new Map([...(data.products??[]),...(data.featured??[]),...(data.selected??[]),...(data.recentlySold??[])].map((p:Product)=>[p.id,p])).values()] as Product[]);setCatalogLoaded(true);if(data.taxonomy)setTaxonomy(data.taxonomy);setUpdated(data.asOf);
    if(data.listing){setListing(data);if(data.listing.page!==listingRef.current.page)setPage(data.listing.page);}

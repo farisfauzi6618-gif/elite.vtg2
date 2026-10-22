@@ -8,4 +8,4 @@ export function selectionIds(productId:string,read:(key:string)=>string|null){
 export function parseSelectionIds(value:string|null){
  const ids=value?.split(',')??[];if(!ids.length||ids.length>MAX_SELECTION_PRODUCTS||ids.some(id=>!ID.test(id)))throw new Error('Pilihan produk tidak valid.');return [...new Set(ids)].sort();
 }
-export function selectionPath(ids:string[]){return '/api/catalog/selection?ids='+encodeURIComponent(ids.join(','));}
+export function selectionPath(ids:string[],detailId?:string){return '/api/catalog/selection?ids='+encodeURIComponent(ids.join(','))+(detailId?'&detail='+encodeURIComponent(detailId):'');}
