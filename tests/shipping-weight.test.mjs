@@ -9,6 +9,9 @@ const esbuild=require('esbuild');
 globalThis.__weightCalls=[];
 globalThis.__weightLinked={lines:[{quantity:3},{quantity:1}]};
 const result=await esbuild.build({stdin:{contents:"export {POST} from './app/api/shipping/route';export {orderShippingGrams} from './modules/order/order-items';",resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'esm',platform:'node',write:false,plugins:[{name:'shipping-fixtures',setup(b){
+ b.onResolve({filter:/modules\/order\/shipping-protection$/},()=>({path:'protection',namespace:'weight-policy'}));
+ b.onResolve({filter:/modules\/order\/rewards-server$/},()=>({path:'rewards',namespace:'weight-policy'}));
+ b.onLoad({filter:/.*/,namespace:'weight-policy'},args=>({contents:args.path==='protection'?'export async function checkoutProtectionConfig(){return {enabled:false}}export async function protectShippingQuotes(quotes){return quotes}':'export async function previewRewards(){return {net:1000}}'}));
  b.onResolve({filter:/modules\/analytics\/errors$/},()=>({path:'observer',namespace:'analytics-fixture'}));
  b.onLoad({filter:/.*/,namespace:'analytics-fixture'},()=>({contents:'export const watch=(r,code,action)=>action();'}));
  b.onResolve({filter:/modules\/order\/order-server$/},()=>({path:'server',namespace:'fixture'}));

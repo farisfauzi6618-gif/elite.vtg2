@@ -380,10 +380,10 @@
       "exportSha256": "925c4bac83b69ffc2304378fbdc1bc5aed1456cdc41b864a3ab8f69d7106403c"
     },
     {
-      "source": "monolith-2026-10-11-customer-directory",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
       "path": "components/admin-navigation.tsx",
-      "sha256": "b4ddc3004aa06edcaf11e2e8621a84c222552bbbb47d0919dbc5e1f1e6f005bc",
-      "exportSha256": "b4ddc3004aa06edcaf11e2e8621a84c222552bbbb47d0919dbc5e1f1e6f005bc"
+      "sha256": "b2c9693dbf48090b2ad23b9089a88d59379716bbedcabc02139ba6c585ed3672",
+      "exportSha256": "b2c9693dbf48090b2ad23b9089a88d59379716bbedcabc02139ba6c585ed3672"
     },
     {
       "source": "monolith-2026-10-09",
@@ -812,10 +812,10 @@
       "exportSha256": "1a8467fda0a3b0d85d24cf67d2ea511ee0a758e44b7bdc16f73a3f03ca7db248"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
       "path": "db/schema.ts",
-      "sha256": "4dc3ec549f69fd2ad516ffb06e55c4bb0a7e8c01f026c90ef8679183eb5fde6a",
-      "exportSha256": "4dc3ec549f69fd2ad516ffb06e55c4bb0a7e8c01f026c90ef8679183eb5fde6a"
+      "sha256": "d34f9ca5e9911134131e696457b4cdcc030e35448a07399cee25dd1de3492fe5",
+      "exportSha256": "d34f9ca5e9911134131e696457b4cdcc030e35448a07399cee25dd1de3492fe5"
     },
     {
       "source": "monolith-2026-10-15-sale-prices",
@@ -1502,10 +1502,10 @@
       "exportSha256": "d7cac0d38c248a74bd2b49e59105e68dab106da852a4f2bd88af8677cb2c5f9a"
     },
     {
-      "source": "monolith-2026-10-10-website-analytics-v1",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
       "path": "tests/shipping-weight.test.mjs",
-      "sha256": "3321ff6e9cb09b66b8629ac1900750f15f2882badd7748439fdd541a2bac18de",
-      "exportSha256": "3321ff6e9cb09b66b8629ac1900750f15f2882badd7748439fdd541a2bac18de"
+      "sha256": "6968ce7e8e0099f004285a971fff68047fb7ac37c4b88c207ec9f05c86729c6d",
+      "exportSha256": "6968ce7e8e0099f004285a971fff68047fb7ac37c4b88c207ec9f05c86729c6d"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4352,10 +4352,10 @@
       "exportSha256": "f8703fe193c1c014946379d9916cdd2d884277d1ed39cccedcc9c04dcf43a6c5"
     },
     {
-      "source": "monolith-2026-10-19-flow-simplification",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
       "path": "tests/efficiency-server.test.mjs",
-      "sha256": "15455b1048f5cc345a2e9527550b514d7960eb4f9eae87bdc52b65e498fe1b4d",
-      "exportSha256": "15455b1048f5cc345a2e9527550b514d7960eb4f9eae87bdc52b65e498fe1b4d"
+      "sha256": "0df900f73e71a574fc85517ac0fa5d9b280314b3cac7b7cad2a0835e8227e989",
+      "exportSha256": "0df900f73e71a574fc85517ac0fa5d9b280314b3cac7b7cad2a0835e8227e989"
     },
     {
       "source": "monolith-2026-10-11-resource-efficiency",
@@ -5172,6 +5172,114 @@
       "source": "monolith-2026-10-24-light-shopping-tools",
       "sha256": "a0d67afb8eb940d68b4573560cc601090a0a827fc94a01270f9d3112a8c775b3",
       "exportSha256": "a0d67afb8eb940d68b4573560cc601090a0a827fc94a01270f9d3112a8c775b3"
+    },
+    {
+      "path": "db/schema/sales.ts",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "f620a82e5874a37d3e71341fbaef859a326f559280e8fe1856990af5a30b7ff7",
+      "exportSha256": "f620a82e5874a37d3e71341fbaef859a326f559280e8fe1856990af5a30b7ff7"
+    },
+    {
+      "path": "migrations/release_0018_sales_intelligence.sql",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "159f80f109771322a17bda735724706e01fa446c3c09d8e1b6d178b368c353bb",
+      "exportSha256": "159f80f109771322a17bda735724706e01fa446c3c09d8e1b6d178b368c353bb"
+    },
+    {
+      "path": "app/api/admin/sales/route.ts",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "1424e702817560995778d94e758c6518bacd5aac78b193e2004e8e610cdf48af",
+      "exportSha256": "1424e702817560995778d94e758c6518bacd5aac78b193e2004e8e610cdf48af"
+    },
+    {
+      "path": "app/admin/sales/page.tsx",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "d881f50cfd5948d625161612a8007da187a7deeffa2673d23619c4d0c0a63670",
+      "exportSha256": "d881f50cfd5948d625161612a8007da187a7deeffa2673d23619c4d0c0a63670"
+    },
+    {
+      "path": "app/admin/sales/ui.tsx",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "d9f6094144f716a073d84f689c8ca759ef7f34ba98566941fcee22628647c21f",
+      "exportSha256": "d9f6094144f716a073d84f689c8ca759ef7f34ba98566941fcee22628647c21f"
+    },
+    {
+      "path": "app/admin/sales/sales.css",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "ebe62b8f2998869af411cf7c9411d2cddf1133d9c0962dc84f7d7755219ca830",
+      "exportSha256": "ebe62b8f2998869af411cf7c9411d2cddf1133d9c0962dc84f7d7755219ca830"
+    },
+    {
+      "path": "tests/sales-leads.test.mjs",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "ebe48069a48c27e12b8f119c3ddae15d7465de816be8f57eb6e0c2ac2ac99e03",
+      "exportSha256": "ebe48069a48c27e12b8f119c3ddae15d7465de816be8f57eb6e0c2ac2ac99e03"
+    },
+    {
+      "path": "tests/sales-matching.test.mjs",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "3841980e09e1cff27af975be532027b873c76867fd361667e333f9417ad7bec8",
+      "exportSha256": "3841980e09e1cff27af975be532027b873c76867fd361667e333f9417ad7bec8"
+    },
+    {
+      "path": "tests/sales-push.test.mjs",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "2452cb027942889e8231ec19f470c553ca1455c73f56db79030438a0f721e2a6",
+      "exportSha256": "2452cb027942889e8231ec19f470c553ca1455c73f56db79030438a0f721e2a6"
+    },
+    {
+      "path": "tests/sales-integration.test.mjs",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "5b2a28a5169449e734278a5f66f933667be7f62ea08fa02ffaaa811d153fdc5a",
+      "exportSha256": "5b2a28a5169449e734278a5f66f933667be7f62ea08fa02ffaaa811d153fdc5a"
+    },
+    {
+      "path": "modules/sales/inventory.ts",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "1b810f0343f4747399e82a53e3b3be04f811f446b71daf23d59ab2fc0b92ceb6",
+      "exportSha256": "1b810f0343f4747399e82a53e3b3be04f811f446b71daf23d59ab2fc0b92ceb6"
+    },
+    {
+      "path": "modules/sales/leads.ts",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "c9251a4fcd28514f2bb52f0c4d76a1b8767364b062adac5453eec2b4a3bd5c8d",
+      "exportSha256": "c9251a4fcd28514f2bb52f0c4d76a1b8767364b062adac5453eec2b4a3bd5c8d"
+    },
+    {
+      "path": "modules/sales/matching.ts",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "e34c5375d020405b2c9bb0593b8f9fc4316517156318591b82fed4c12d1fc717",
+      "exportSha256": "e34c5375d020405b2c9bb0593b8f9fc4316517156318591b82fed4c12d1fc717"
+    },
+    {
+      "path": "modules/sales/outreach.ts",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "7367b97cef0bae0850299863b6f01e4a2e414aea7104618252be50981bd8a1be",
+      "exportSha256": "7367b97cef0bae0850299863b6f01e4a2e414aea7104618252be50981bd8a1be"
+    },
+    {
+      "path": "modules/sales/push.ts",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "0764f48275228827ab52243f75b40edeb4867293727f2d1e7ea4ce65eba04305",
+      "exportSha256": "0764f48275228827ab52243f75b40edeb4867293727f2d1e7ea4ce65eba04305"
+    },
+    {
+      "path": "modules/sales/report.ts",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "0ae97581005de0e9e7074c51c965f2ddc3439d61a8615cd9a5098dc106652d00",
+      "exportSha256": "0ae97581005de0e9e7074c51c965f2ddc3439d61a8615cd9a5098dc106652d00"
+    },
+    {
+      "path": "modules/sales/types.ts",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "4500469097a97fd7f71406b395d1d0bc9ba6df15c650c55d7372578886d18669",
+      "exportSha256": "4500469097a97fd7f71406b395d1d0bc9ba6df15c650c55d7372578886d18669"
+    },
+    {
+      "path": "modules/sales/validation.ts",
+      "source": "monolith-2026-10-24-sales-intelligence-v1",
+      "sha256": "f17beeb08d3faf48c49aa9a6f73f806ec6f534a55973662c38083d1a5546f032",
+      "exportSha256": "f17beeb08d3faf48c49aa9a6f73f806ec6f534a55973662c38083d1a5546f032"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
