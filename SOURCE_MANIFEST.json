@@ -14,10 +14,10 @@
   "excluded": "Runtime secrets, local environment, databases, customer data, uploaded photos, private proofs, production payment assets, generated builds and old Git histories.",
   "files": [
     {
-      "source": "monolith-2026-10-22-material-v1",
+      "source": "monolith-2026-10-24-light-shopping-tools",
       "path": "app/catalog.tsx",
-      "sha256": "18d7fac8a04c05e5c4b4ec29d0f4079b2a79ab7fff5572f3532b8ea84b6d5a20",
-      "exportSha256": "18d7fac8a04c05e5c4b4ec29d0f4079b2a79ab7fff5572f3532b8ea84b6d5a20"
+      "sha256": "509931de6f52333b36eedf2f69d47bfab69b836e130478612269ba41f3acbc1a",
+      "exportSha256": "509931de6f52333b36eedf2f69d47bfab69b836e130478612269ba41f3acbc1a"
     },
     {
       "source": "monolith-2026-10-19-flow-simplification",
@@ -422,16 +422,16 @@
       "exportSha256": "6746f63d5f38c2c90bca32c167324c2879d6af6f93b3eff5d8d32b8523c1b460"
     },
     {
-      "source": "monolith-2026-10-19-media-efficiency",
+      "source": "monolith-2026-10-24-light-shopping-tools",
       "path": "components/product-card.tsx",
-      "sha256": "c95b30b903bc4ebe9562cf017b496aaf61bd5879474964076037ff171628d00f",
-      "exportSha256": "c95b30b903bc4ebe9562cf017b496aaf61bd5879474964076037ff171628d00f"
+      "sha256": "59d60a27261a38b4fef39c01bcbca1fa49e02d140d8e4b6f91f4be8519f80f05",
+      "exportSha256": "59d60a27261a38b4fef39c01bcbca1fa49e02d140d8e4b6f91f4be8519f80f05"
     },
     {
-      "source": "monolith-2026-10-22-material-v1",
+      "source": "monolith-2026-10-24-light-shopping-tools",
       "path": "components/product-detail.tsx",
-      "sha256": "a479fc0a17e4e79c5613c5f1f202a4c55dd53947d8a17a5c76afa021a85de91e",
-      "exportSha256": "a479fc0a17e4e79c5613c5f1f202a4c55dd53947d8a17a5c76afa021a85de91e"
+      "sha256": "11ba66e1c20d091a1a2b77299a9acaeba4894227d2af8f9d53a909132cc64bda",
+      "exportSha256": "11ba66e1c20d091a1a2b77299a9acaeba4894227d2af8f9d53a909132cc64bda"
     },
     {
       "source": "monolith-2026-10-19-flow-simplification",
@@ -5142,6 +5142,36 @@
       "source": "monolith-2026-10-22-material-v1",
       "sha256": "8416145eb76556448a60fd7453578b9081945db7be275ff71c8094a54896ad73",
       "exportSha256": "8416145eb76556448a60fd7453578b9081945db7be275ff71c8094a54896ad73"
+    },
+    {
+      "path": "components/wishlist.tsx",
+      "source": "monolith-2026-10-24-light-shopping-tools",
+      "sha256": "f686c9b798e0544652709aab7fdbd8d7a82abea958789215dd3069dd7637694d",
+      "exportSha256": "f686c9b798e0544652709aab7fdbd8d7a82abea958789215dd3069dd7637694d"
+    },
+    {
+      "path": "components/shopping-help.tsx",
+      "source": "monolith-2026-10-24-light-shopping-tools",
+      "sha256": "1f706a4a3648165b502fe499c3cdec498c78dbaef35fc169e0579157c070e3ea",
+      "exportSha256": "1f706a4a3648165b502fe499c3cdec498c78dbaef35fc169e0579157c070e3ea"
+    },
+    {
+      "path": "modules/catalog/wishlist.ts",
+      "source": "monolith-2026-10-24-light-shopping-tools",
+      "sha256": "975afbb58baf37a972c1d3a0ffc1c3b82c6322f313983dbd14607463a81c818b",
+      "exportSha256": "975afbb58baf37a972c1d3a0ffc1c3b82c6322f313983dbd14607463a81c818b"
+    },
+    {
+      "path": "styles/shopping-tools.css",
+      "source": "monolith-2026-10-24-light-shopping-tools",
+      "sha256": "15bf1a90cfa041509ac9bd6f50c00b770123eb5823658df31363952281c2a62d",
+      "exportSha256": "15bf1a90cfa041509ac9bd6f50c00b770123eb5823658df31363952281c2a62d"
+    },
+    {
+      "path": "tests/wishlist.test.mjs",
+      "source": "monolith-2026-10-24-light-shopping-tools",
+      "sha256": "a0d67afb8eb940d68b4573560cc601090a0a827fc94a01270f9d3112a8c775b3",
+      "exportSha256": "a0d67afb8eb940d68b4573560cc601090a0a827fc94a01270f9d3112a8c775b3"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
