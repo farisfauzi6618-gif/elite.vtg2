@@ -9,6 +9,21 @@ export type CatalogSelection = {
 
 type CheckoutRequest = <T>(path: string, init?: RequestInit) => Promise<T>;
 
+export function invoiceResumeInput(search:string,hash:string){
+ const token=hash.replace(/^#/,''),params=new URLSearchParams(search),invoice=params.get('invoice');
+ if(!/^[a-f0-9]{64}$/.test(token)||invoice!==null&&(!/^EV-\d{6}-[A-F0-9]{8}$/.test(invoice)||params.getAll('invoice').length!==1))throw Error('Tautan pembayaran tidak lengkap. Buka kembali tautan yang Anda simpan.');
+ const next=new URLSearchParams();
+ if(invoice===null)for(const name of ['catalog','basket']){const value=params.get(name);if(value&&/^[a-f0-9-]{36,64}$/.test(value))next.set(name,value)}
+ return {body:invoice===null?{token}:{token,invoice},fallback:'/order'+(next.size?'?'+next:'')};
+}
+
+export function invoiceResumeDestination(value:unknown,fallback:string){
+ const url=value&&typeof value==='object'&&'url' in value?(value as {url:unknown}).url:undefined;
+ if(url===undefined)return fallback;
+ if(url==='/order'||typeof url==='string'&&/^\/lacak#[a-f0-9]{64}$/.test(url))return url;
+ throw Error('Tujuan pembayaran tidak valid. Buka kembali tautan pembayaran Anda.');
+}
+
 export function resumeMemberInvoice(invoice:string,request:CheckoutRequest){
  return request<Order>('/api/customer/orders/resume',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invoice})});
 }

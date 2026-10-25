@@ -1,4 +1,4 @@
-import {quoteCheckout,applyCheckoutSale} from '@/modules/catalog/checkout';
+import {quoteCheckout,applyCheckoutSale,refreshInvoiceCheckout} from '@/modules/catalog/checkout';
 import {db as catalogDb,AppError as CatalogError} from '@/modules/catalog/server';
 import { env } from '@/lib/env';
 import { db,AppError,settings,decrypt,telegram } from '@/modules/order/order-server';
@@ -16,6 +16,11 @@ async function bridge<T>(data:Record<string,unknown>):Promise<T>{
 }
 export async function catalogHealth(){try{await bridge({op:'ping'});return true}catch{return false}}
 export async function catalogQuote(token:unknown){if(typeof token!=='string'||!/^[a-f0-9]{64}$/.test(token))throw new AppError(400,'Tautan barang katalog tidak valid.');return bridge<CatalogQuote>({op:'quote',token})}
+export async function refreshCatalogInvoice(o:Order){
+ if(!o.catalog_checkout_id)return;
+ if(!o.catalog_token||!o.session_hash)throw new AppError(409,'Pilihan barang perlu diperbarui. Pilih kembali di katalog.');
+ try{return await refreshInvoiceCheckout(o.id,o.session_hash)}catch(e){if(e instanceof CatalogError)throw new AppError(e.status,e.message);throw e}
+}
 export function catalogItems(q:CatalogQuote){const items=q.lines.flatMap(l=>Array.from({length:l.quantity},()=>`${l.name} · ${l.label}`));return {items,quantity:items.length,item:items.length===1?items[0]:items.map((x,i)=>`${i+1}. ${x}`).join('\n'),itemAmount:q.amount}}
 export async function synchronizeCatalogStock(id:string){
  const o=await db().prepare('SELECT * FROM orders WHERE id=?').bind(id).first<Order>();if(!o)throw new AppError(404,'Pesanan tidak ditemukan.');if(!o.catalog_checkout_id)return {state:'unlinked'};if(o.payment_state!=='payment_confirmed')throw new AppError(409,'Konfirmasi pembayaran melalui Telegram dahulu.');if(o.stock_sync_state==='applied')return {state:'applied',duplicate:true};

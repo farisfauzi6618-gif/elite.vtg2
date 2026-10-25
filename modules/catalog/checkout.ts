@@ -3,6 +3,7 @@ import {activeColorSql} from './color-variants';
 import {reservedQuantitySql} from './reserve-inventory';
 import {sellableQuantity} from './catalog-types';
 import {minimumReserveDeposit} from '@/modules/order/reserve-types';
+import {PAYMENT_SESSION_LIFETIME} from '@/modules/order/customer-orders';
 import {orderingLocked,scheduleLabel} from './product-schedule';
 import { choiceLabel } from '@/modules/catalog/catalog-types';
 import { AppError,db,readProduct,textValue } from '@/modules/catalog/server';
@@ -28,6 +29,26 @@ export async function createCheckout(input:any,customerId:string|null=null,onCre
 export async function quoteCheckout(token:unknown){
  if(typeof token!=='string'||!/^[a-f0-9]{64}$/.test(token))throw new AppError(400,'Tautan pilihan barang tidak valid.');
  const c=await db().prepare('SELECT * FROM catalog_checkouts WHERE token_hash=?').bind(await digest(token)).first<Checkout>();if(!c||c.expires_at<Date.now())throw new AppError(410,'Tautan pilihan barang telah berakhir. Pilih kembali di katalog.');
+ return checkedQuote(c);
+}
+// Only an already-authorized invoice session may refresh its saved selection.
+// Unattached catalog links still expire after 24 hours; no price/stock checks are skipped.
+export async function refreshInvoiceCheckout(invoiceId:string,sessionHash:string){
+ const now=Date.now(),c=await db().prepare(`SELECT c.*,o.created_at AS invoice_created_at,o.catalog_token AS invoice_token
+  FROM catalog_checkouts c JOIN orders o ON o.catalog_checkout_id=c.id
+  WHERE o.id=? AND o.session_hash=? AND COALESCE(o.order_type,'normal')='normal'
+  AND COALESCE(c.order_type,'normal')='normal' AND o.status='awaiting_proof' AND o.proof_key IS NULL AND o.created_at>?`)
+  .bind(invoiceId,sessionHash,now-PAYMENT_SESSION_LIFETIME).first<Checkout&{invoice_created_at:number;invoice_token:string|null}>();
+ if(!c||!c.invoice_token||await digest(c.invoice_token)!==c.token_hash)throw new AppError(409,'Invoice berubah atau tidak dapat dilanjutkan. Buka kembali pesanan Anda.');
+ const quote=await checkedQuote(c),deadline=c.invoice_created_at+PAYMENT_SESSION_LIFETIME;
+ const renewed=await db().prepare(`UPDATE catalog_checkouts SET expires_at=MAX(expires_at,?) WHERE id=? AND token_hash=?
+  AND EXISTS (SELECT 1 FROM orders o WHERE o.id=? AND o.session_hash=? AND o.catalog_checkout_id=catalog_checkouts.id
+   AND o.catalog_token=? AND COALESCE(o.order_type,'normal')='normal' AND o.status='awaiting_proof' AND o.proof_key IS NULL AND o.created_at>?) RETURNING expires_at`)
+  .bind(deadline,c.id,c.token_hash,invoiceId,sessionHash,c.invoice_token,Date.now()-PAYMENT_SESSION_LIFETIME).first<{expires_at:number}>();
+ if(!renewed)throw new AppError(409,'Pesanan berubah. Buka kembali pesanan sebelum melanjutkan pembayaran.');
+ return {...quote,expiresAt:renewed.expires_at};
+}
+async function checkedQuote(c:Checkout){
  const used=await db().prepare('SELECT order_id FROM catalog_sales WHERE checkout_id=?').bind(c.id).first();if(used)throw new AppError(409,'Pilihan barang ini sudah dikonfirmasi. Buat pilihan baru di katalog.');
  const lines=JSON.parse(c.lines_json) as CheckoutLine[];
  for(const line of lines){const p=await readProduct(line.productId),g=p.groups.find(g=>g.id===line.groupId);if(p.status!=='published'||!g||g.colorActive===false||g.qty==null||(sellableQuantity(g)??0)<line.quantity)throw new AppError(409,'Barang pilihan sudah tidak tersedia. Pilih kembali di katalog.');if(orderingLocked(p))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(p.orderableAt!)+'.');if((transactionPrice(p,g))!==line.unitPrice)throw new AppError(409,'Harga barang berubah. Pilih kembali di katalog untuk melihat harga terbaru.')}

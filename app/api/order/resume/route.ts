@@ -1,4 +1,6 @@
 import { api, AppError, body, db, hash, json, originCheck, rate } from '@/modules/order/order-server';
+import {guestPaymentInvoice,restorePaymentSession} from '@/modules/order/payment-recovery';
+import {trackingAccess} from '@/modules/order/customer-tracking';
 
 // The existing invoice's random bearer cookie is transferred by the old site.
 // Never accept an invoice ID or customer details as proof of ownership.
@@ -6,6 +8,13 @@ export const POST = (request: Request) => api(async () => {
   originCheck(request);
   await rate(request, 'invoice-resume', 30);
   const input = await body(request);
+  if(Object.hasOwn(input,'invoice')){
+    if(Object.keys(input).length!==2||!Object.hasOwn(input,'token'))throw new AppError(400,'Tautan pembayaran tidak valid.');
+    const existing=await guestPaymentInvoice(input.invoice,input.token);
+    if(existing.proof_key)return json({ok:true,url:'/lacak#'+(await trackingAccess(existing)).token});
+    const {cookie}=await restorePaymentSession(request,existing);
+    return json({ok:true,url:'/order'},200,{'Set-Cookie':cookie});
+  }
   if (Object.keys(input).length !== 1 || typeof input.token !== 'string' || !/^[a-f0-9]{64}$/.test(input.token)) {
     throw new AppError(400, 'Tautan invoice belum valid. Buka kembali invoice di situs lama.');
   }
