@@ -1,19 +1,48 @@
 'use client';
 
 import {Ruler,ChevronDown} from 'lucide-react';
+import {useId,useState} from 'react';
 import {Dialog,DialogContent,DialogTitle,DialogDescription,DialogTrigger} from './ui/dialog';
 import {WHATSAPP_URL} from '@/modules/catalog/customer-support';
 import {RESERVE_HOURS} from '@/modules/order/reserve-types';
 
 export function SizeGuideContent(){
-  return <div className="size-guide-content"><p className="shopping-help-kicker">FIND YOUR FIT</p><h3>Bandingkan dengan pakaian favorit Anda.</h3><p>Letakkan pakaian yang pas di permukaan rata, tanpa ditarik. Ukur dalam sentimeter, lalu bandingkan dengan detail ukuran produk.</p>
-    <ol><li><strong>Lebar</strong><span>Untuk atasan, ukur lurus dari ketiak ke ketiak. Angka ini adalah lebar saat dibentangkan, bukan lingkar dada.</span></li><li><strong>Panjang</strong><span>Untuk atasan, ukur dari titik bahu teratas di dekat kerah sampai ujung bawah pakaian.</span></li><li><strong>Cocokkan ukuran aktual</strong><span>Size on tag adalah ukuran pada label. Size fit to adalah acuan fit dari ELITE.VTG. Utamakan ukuran aktual karena potongan tiap brand bisa berbeda.</span></li></ol>
-    <p className="shopping-help-note">Panduan di atas untuk atasan. Untuk celana, topi, atau aksesori, ikuti ukuran yang tercantum pada produk. Jika belum lengkap, tanyakan kepada kami sebelum membeli.</p>
+  const id='size-guide-'+useId().replace(/[^a-zA-Z0-9_-]/g,''),[dimension,setDimension]=useState<'width'|'length'>('width');
+  return <div className="size-guide-content size-guide-visual">
+    <div className="size-guide-brand" aria-hidden="true">elite.vtg</div>
+    <p className="shopping-help-kicker">Panduan ukuran · Atasan</p>
+    <h3>Temukan ukuran yang pas.</h3>
+    <p className="size-guide-intro">Bandingkan dengan baju yang nyaman Anda pakai. Ukur bajunya, bukan tubuh Anda.</p>
+    <p className="size-guide-step"><span>01</span> Bentangkan di permukaan rata</p>
+    <p className="size-guide-flat-note">Rapikan baju tanpa ditarik.</p>
+    <svg className={'size-guide-drawing focus-'+dimension} viewBox="40 18 320 267" role="img" aria-label="Baju dibentangkan: A adalah lebar dari ketiak ke ketiak; B adalah panjang dari bahu dekat kerah ke ujung bawah.">
+      <defs><marker id={id+'-arrow'} markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse"><path d="M5 3 1 1 1 5Z" fill="currentColor"/></marker></defs>
+      <path className="size-guide-cloth" d="M148 43 113 58 67 104 96 137 115 119 115 265Q184 278 253 265L253 119 272 137 301 104 255 58 220 43Q184 71 148 43Z"/>
+      <path className="size-guide-seam" d="M148 43Q156 85 184 85Q212 85 220 43M149 48 170 67 184 62 198 67 219 48M184 65V117M177 115H191M72 106 99 131M296 106 269 131M119 258Q184 270 249 258"/>
+      <g className="size-guide-measure size-guide-width"><path d="M118 137H250" markerStart={'url(#'+id+'-arrow)'} markerEnd={'url(#'+id+'-arrow)'}/><path d="M89 137H111" className="size-guide-reference"/><circle cx="73" cy="137" r="13" className="size-guide-letter-circle"/><text x="73" y="137" className="size-guide-letter">A</text></g>
+      <g className="size-guide-measure size-guide-length"><path d="M220 43H324M253 267H324" className="size-guide-reference"/><path d="M316 46V264" markerStart={'url(#'+id+'-arrow)'} markerEnd={'url(#'+id+'-arrow)'}/><circle cx="338" cy="155" r="13" className="size-guide-letter-circle"/><text x="338" y="155" className="size-guide-letter">B</text></g>
+    </svg>
+    <p className="size-guide-step"><span>02</span> Ukur dalam sentimeter</p>
+    <div className="size-guide-measure-buttons" role="group" aria-label="Bagian baju yang diukur">
+      <button type="button" aria-pressed={dimension==='width'} aria-controls={id+'-tip'} onClick={()=>setDimension('width')}><span>A</span> Lebar</button>
+      <button type="button" aria-pressed={dimension==='length'} aria-controls={id+'-tip'} onClick={()=>setDimension('length')}><span>B</span> Panjang</button>
+    </div>
+    <div className="size-guide-tip" id={id+'-tip'} aria-live="polite" aria-atomic="true">
+      <strong>{dimension==='width'?'Dari ketiak ke ketiak.':'Dari bahu dekat kerah ke ujung bawah.'}</strong>
+      <p>{dimension==='width'?'Ukur lurus dari sisi kiri ke kanan. Ini lebar baju saat dibentangkan, bukan lingkar dada.':'Mulai dari titik bahu teratas di dekat kerah. Ukur lurus sampai ujung bawah baju.'}</p>
+    </div>
+    <section className="size-guide-compare" aria-label="Membandingkan ukuran">
+      <p className="size-guide-step"><span>03</span> Cocokkan</p>
+      <p>Bandingkan hasilnya dengan <span className="size-guide-details-label">Details size</span> pada produk.</p>
+      <dl className="size-guide-definitions"><div><dt>Size on tag</dt><dd>Ukuran pada label baju.</dd></div><div><dt>Size fit to</dt><dd>Acuan fit dari ELITE.VTG.</dd></div></dl>
+      <p className="size-guide-actual">Utamakan ukuran aktual, bukan label. Potongan setiap brand bisa berbeda.</p>
+    </section>
+    <p className="shopping-help-note">Untuk celana, topi, dan aksesori, ikuti ukuran pada detail produk. Jika belum lengkap, tanyakan kepada kami sebelum membeli.</p>
   </div>;
 }
 
 export function SizeGuide({compact=false}:{compact?:boolean}){
-  return <Dialog><DialogTrigger asChild><button type="button" className={'shopping-help-link'+(compact?' size-guide-inline':'')}><Ruler size={16} strokeWidth={1.5} aria-hidden="true"/>Panduan ukuran</button></DialogTrigger><DialogContent className="shopping-help-dialog"><DialogTitle>Panduan ukuran</DialogTitle><DialogDescription className="sr-only">Cara membandingkan ukuran pakaian dengan ukuran aktual produk ELITE.VTG.</DialogDescription><SizeGuideContent/><a className="shopping-help-contact" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Tanya ukuran lewat WhatsApp</a></DialogContent></Dialog>;
+  return <Dialog><DialogTrigger asChild><button type="button" className={'shopping-help-link'+(compact?' size-guide-inline':'')}><Ruler size={16} strokeWidth={1.5} aria-hidden="true"/>Panduan ukuran</button></DialogTrigger><DialogContent className="shopping-help-dialog size-guide-dialog"><DialogTitle className="sr-only">Panduan ukuran</DialogTitle><DialogDescription className="sr-only">Cara membandingkan ukuran pakaian dengan ukuran aktual produk ELITE.VTG.</DialogDescription><SizeGuideContent/><a className="shopping-help-contact" href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">Tanya ukuran lewat WhatsApp</a></DialogContent></Dialog>;
 }
 
 export const SHOPPING_FAQ=[

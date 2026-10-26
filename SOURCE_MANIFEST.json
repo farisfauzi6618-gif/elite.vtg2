@@ -5151,9 +5151,9 @@
     },
     {
       "path": "components/shopping-help.tsx",
-      "source": "monolith-2026-10-24-light-shopping-tools",
-      "sha256": "1f706a4a3648165b502fe499c3cdec498c78dbaef35fc169e0579157c070e3ea",
-      "exportSha256": "1f706a4a3648165b502fe499c3cdec498c78dbaef35fc169e0579157c070e3ea"
+      "source": "monolith-2026-10-26-visual-size-guide",
+      "sha256": "5eb1d10e5f6363aa0d6292b02fc206fdfa63292d3c7c91b3921b24b47779a757",
+      "exportSha256": "5eb1d10e5f6363aa0d6292b02fc206fdfa63292d3c7c91b3921b24b47779a757"
     },
     {
       "path": "modules/catalog/wishlist.ts",
@@ -5163,15 +5163,15 @@
     },
     {
       "path": "styles/shopping-tools.css",
-      "source": "monolith-2026-10-24-light-shopping-tools",
-      "sha256": "15bf1a90cfa041509ac9bd6f50c00b770123eb5823658df31363952281c2a62d",
-      "exportSha256": "15bf1a90cfa041509ac9bd6f50c00b770123eb5823658df31363952281c2a62d"
+      "source": "monolith-2026-10-26-visual-size-guide",
+      "sha256": "d02dbe3452c4a2645ddd6a6a2c0d6780cf0d39a0bc2721d0d816cf06d045dd9d",
+      "exportSha256": "d02dbe3452c4a2645ddd6a6a2c0d6780cf0d39a0bc2721d0d816cf06d045dd9d"
     },
     {
       "path": "tests/wishlist.test.mjs",
-      "source": "monolith-2026-10-24-light-shopping-tools",
-      "sha256": "a0d67afb8eb940d68b4573560cc601090a0a827fc94a01270f9d3112a8c775b3",
-      "exportSha256": "a0d67afb8eb940d68b4573560cc601090a0a827fc94a01270f9d3112a8c775b3"
+      "source": "monolith-2026-10-26-visual-size-guide",
+      "sha256": "3a88d5a47453ef52c1429e6f0b9c6ba2f1070452ce679e2a31e16310e5845a1d",
+      "exportSha256": "3a88d5a47453ef52c1429e6f0b9c6ba2f1070452ce679e2a31e16310e5845a1d"
     },
     {
       "path": "db/schema/sales.ts",

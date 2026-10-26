@@ -9,7 +9,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 
 await mkdir('.test-runtime/tests',{recursive:true});
 const file=path.resolve('.test-runtime/tests/wishlist.mjs');
-await build({stdin:{contents:"export * from './modules/catalog/wishlist';export {selectionPath,parseSelectionIds} from './modules/catalog/catalog-selection';export {FaqContent,SizeGuideContent} from './components/shopping-help';",resolveDir:process.cwd(),loader:'tsx'},bundle:true,platform:'node',format:'esm',packages:'external',jsx:'automatic',outfile:file});
+await build({stdin:{contents:"export * from './modules/catalog/wishlist';export {selectionPath,parseSelectionIds} from './modules/catalog/catalog-selection';export {FaqContent,SizeGuideContent,SizeGuide} from './components/shopping-help';",resolveDir:process.cwd(),loader:'tsx'},bundle:true,platform:'node',format:'esm',packages:'external',jsx:'automatic',outfile:file});
 const m=await import(pathToFileURL(file));after(()=>rm(file,{force:true}));
 
 test('malformed or oversized device storage cannot break catalog browsing',()=>{
@@ -37,4 +37,10 @@ test('size help and FAQ render text without image downloads or invented returns 
   const size=renderToStaticMarkup(React.createElement(m.SizeGuideContent)),faq=renderToStaticMarkup(React.createElement(m.FaqContent));
   assert.match(size,/Size on tag/);assert.match(size,/Size fit to/);assert.match(size,/bukan lingkar dada/);assert.match(size,/Untuk celana, topi/);
   assert.match(faq,/tanpa akun/);assert.match(faq,/tidak tersinkron/);assert.match(faq,/48 jam setelah DP dikonfirmasi/);assert.match(faq,/ongkir di tempat/);assert.doesNotMatch(size+faq,/<img|<iframe|<video|<script|retur gratis|refund/i);
+});
+test('guide markers stay unique across multiple dialogs and the closed guide omits the tutorial',()=>{
+  const html=renderToStaticMarkup(React.createElement(React.Fragment,null,React.createElement(m.SizeGuideContent),React.createElement(m.SizeGuideContent)));
+  const ids=[...html.matchAll(/<marker id="([^"]+)"/g)].map(match=>match[1]);assert.equal(ids.length,2);assert.equal(new Set(ids).size,2);for(const id of ids)assert.ok(html.includes('url(#'+id+')'));
+  assert.match(html,/aria-pressed="true"/);assert.match(html,/aria-controls="size-guide-[^"]+-tip"/);assert.match(html,/aria-live="polite"/);
+  const closed=renderToStaticMarkup(React.createElement(m.SizeGuide));assert.match(closed,/Panduan ukuran/);assert.doesNotMatch(closed,/size-guide-drawing|<marker|Dari ketiak/);
 });
