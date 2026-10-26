@@ -34,7 +34,8 @@ export function customerBirthday(value: unknown) {
 function derive(password: string, salt: string) {
   return new Promise<Buffer>((resolve, reject) => scrypt(password, salt, 32, KDF, (error, key) => error ? reject(error) : resolve(key)));
 }
-async function hashPassword(password: string) {
+export async function hashCustomerPassword(value: unknown) {
+  const password=passwordValue(value,true);
   const salt = hex(crypto.getRandomValues(new Uint8Array(16)));
   return `scrypt$16384$8$5$${salt}$${(await derive(password, salt)).toString('hex')}`;
 }
@@ -57,7 +58,7 @@ export async function currentCustomer(cookie: string | null): Promise<Customer |
 }
 async function startSession(customer: Customer, previousCookie: string | null) {
   const token = randomToken(), now = Date.now(), previous = cookieToken(previousCookie);
-  const statements = [db().prepare('INSERT INTO customer_sessions(hash,customer_id,created_at,expires_at) SELECT ?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM customer_trash WHERE customer_id=?)').bind(await digest(token), customer.id, now, now + SESSION_MS,customer.id)];
+  const statements = [db().prepare('INSERT INTO customer_sessions(hash,customer_id,created_at,expires_at) SELECT ?,?,?,? FROM customers c WHERE c.id=? AND c.password_hash=? AND NOT EXISTS (SELECT 1 FROM customer_trash WHERE customer_id=c.id)').bind(await digest(token), customer.id, now, now + SESSION_MS,customer.id,customer.password_hash)];
   if (previous) statements.push(db().prepare('DELETE FROM customer_sessions WHERE hash=?').bind(await digest(previous)));
   statements.push(db().prepare('DELETE FROM customer_sessions WHERE expires_at<?').bind(now));
   const saved=await db().batch(statements);
@@ -68,7 +69,7 @@ export async function registerCustomer(input: Record<string, unknown>, cookie: s
   if (typeof input.name !== 'string' || input.name.trim().length < 2 || input.name.trim().length > 120 || /[\x00-\x1f]/.test(input.name)) throw new AppError(400, 'Nama lengkap harus 2–120 karakter.');
   const identity = customerIdentity(input.identity), password = passwordValue(input.password, true), birthday = customerBirthday(input.birthday);
   if (input.consent !== true) throw new AppError(400, 'Setujui penyimpanan data akun terlebih dahulu.');
-  const customer: Customer = { id: crypto.randomUUID(), name: input.name.trim(), ...identity, birthday, password_hash: await hashPassword(password) };
+  const customer: Customer = { id: crypto.randomUUID(), name: input.name.trim(), ...identity, birthday, password_hash: await hashCustomerPassword(password) };
   // The unique identity index also handles simultaneous registrations safely.
   const inserted = await db().prepare('INSERT INTO customers(id,name,identity,email,phone,birthday,password_hash,created_at) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(identity) DO NOTHING RETURNING id').bind(customer.id, customer.name, customer.identity, customer.email, customer.phone, birthday, customer.password_hash, Date.now()).first();
   if (!inserted) throw new AppError(409, 'Email atau nomor HP ini sudah terdaftar. Silakan masuk.');

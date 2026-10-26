@@ -93,6 +93,7 @@ export async function manageCustomer(input:Record<string,unknown>,actor:string){
   else await tx.execute({sql:'DELETE FROM customer_trash WHERE customer_id=?',args:[id]});
   // Restore requires a fresh login too; revoked tokens never become valid again.
   await tx.execute({sql:'DELETE FROM customer_sessions WHERE customer_id=?',args:[id]});
+  await tx.execute({sql:'DELETE FROM customer_password_resets WHERE customer_id=?',args:[id]});
   await tx.commit();return {customerId:id,deletedAt};
  }catch(error){await tx.rollback();throw mutationError(error)}finally{tx.close()}
 }

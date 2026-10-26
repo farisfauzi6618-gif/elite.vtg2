@@ -392,10 +392,10 @@
       "exportSha256": "a72a90505002e2248576622924a4383ffae52fc867047aae9b5665caf9358677"
     },
     {
-      "source": "monolith-2026-10-20-customer-tracking",
+      "source": "monolith-2026-10-27-customer-password-recovery",
       "path": "components/customer-account.tsx",
-      "sha256": "7b825a34f6eff5be4bc106c92e9f0101946cce233f0bcf968bd5a7176bc357db",
-      "exportSha256": "7b825a34f6eff5be4bc106c92e9f0101946cce233f0bcf968bd5a7176bc357db"
+      "sha256": "de50cf29a98fb8a61e5a2092987a764e040424b3b255fb49e48743e113f53105",
+      "exportSha256": "de50cf29a98fb8a61e5a2092987a764e040424b3b255fb49e48743e113f53105"
     },
     {
       "source": "monolith-2026-10-20-whatsapp-support",
@@ -1088,10 +1088,10 @@
       "exportSha256": "15a998d8c295588c79691e0fdaecf4eb310352dc8448980a33d9606003841a7a"
     },
     {
-      "source": "monolith-2026-10-19-flow-simplification",
+      "source": "monolith-2026-10-27-customer-password-recovery",
       "path": "modules/catalog/customers.ts",
-      "sha256": "e068321a6a30bbc34c988719cf23bb9a8f76a5da2e6b92e4e59bd79b883ab7a9",
-      "exportSha256": "e068321a6a30bbc34c988719cf23bb9a8f76a5da2e6b92e4e59bd79b883ab7a9"
+      "sha256": "6ecc0692792d294e8fd6a7f820ecb82548ea8e4b27f2330fe0a0acb1ab0333ca",
+      "exportSha256": "6ecc0692792d294e8fd6a7f820ecb82548ea8e4b27f2330fe0a0acb1ab0333ca"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1526,10 +1526,10 @@
       "exportSha256": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-27-customer-password-recovery",
       "path": ".env.example",
-      "sha256": "f7026e79658fc0f8c1042cb9b2144bc7c4fe0067883001cb8b35eb32b7867a54",
-      "exportSha256": "f7026e79658fc0f8c1042cb9b2144bc7c4fe0067883001cb8b35eb32b7867a54"
+      "sha256": "a024a5f9c362cf65289778b62e932e39af0fe6c3dd67d66a91d9c4b57ba81c3a",
+      "exportSha256": "a024a5f9c362cf65289778b62e932e39af0fe6c3dd67d66a91d9c4b57ba81c3a"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4370,10 +4370,10 @@
       "exportSha256": "ace0740c3aa6a01df8b74064574c35f6b432a8bb4f957f494ad1b7ee35e92be4"
     },
     {
-      "source": "monolith-2026-10-11-customer-simplification",
+      "source": "monolith-2026-10-27-customer-password-recovery",
       "path": "modules/catalog/customer-directory.ts",
-      "sha256": "de82a0778c0de55d712d6cd9471cade9fb96ea9b2f51c4cfb8fee1619b0d12fc",
-      "exportSha256": "de82a0778c0de55d712d6cd9471cade9fb96ea9b2f51c4cfb8fee1619b0d12fc"
+      "sha256": "c4f3ab96ac1d4dd2d77b5d1a1dbd0ab86c2aa7e8babd3ad4265a08c4adda9305",
+      "exportSha256": "c4f3ab96ac1d4dd2d77b5d1a1dbd0ab86c2aa7e8babd3ad4265a08c4adda9305"
     },
     {
       "source": "monolith-2026-10-11-customer-directory",
@@ -4394,10 +4394,10 @@
       "exportSha256": "94efa36deea9dcfa33ca2271106c9436df1b8acadf0706a4fab3ffe10b4e073a"
     },
     {
-      "source": "monolith-2026-10-11-loyalty-card",
+      "source": "monolith-2026-10-27-customer-password-recovery",
       "path": "app/admin/customers/ui.tsx",
-      "sha256": "bed3a1aa35d9baa2e538fb8abaef64f3e7092e1a20acd5942c912b73c9f14153",
-      "exportSha256": "bed3a1aa35d9baa2e538fb8abaef64f3e7092e1a20acd5942c912b73c9f14153"
+      "sha256": "d6ffa121848172b9388f16d18af7b536b4c041a6ba7af0313a45e5b39b44ff9b",
+      "exportSha256": "d6ffa121848172b9388f16d18af7b536b4c041a6ba7af0313a45e5b39b44ff9b"
     },
     {
       "source": "monolith-2026-10-11-customer-simplification",
@@ -5346,6 +5346,90 @@
       "source": "monolith-2026-10-27-admin-search-featured",
       "sha256": "8ea5c6669c418aa72f256f10f0ca2917b42fedfb676925f614cfba9dad92162d",
       "exportSha256": "8ea5c6669c418aa72f256f10f0ca2917b42fedfb676925f614cfba9dad92162d"
+    },
+    {
+      "path": "modules/catalog/customer-recovery.ts",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "94a2ccbc29d83e754bc2ed046ec4b51049b44718f11d68acc4da1ed610571c5d",
+      "exportSha256": "94a2ccbc29d83e754bc2ed046ec4b51049b44718f11d68acc4da1ed610571c5d"
+    },
+    {
+      "path": "modules/catalog/customer-recovery-email.ts",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "6727e7a4aa69bcbfabe4b0886da50b6296e8d0db1765438083a3fd1f2e8906ff",
+      "exportSha256": "6727e7a4aa69bcbfabe4b0886da50b6296e8d0db1765438083a3fd1f2e8906ff"
+    },
+    {
+      "path": "modules/catalog/customer-recovery-types.ts",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "087e3a40655ee29a90ee532b9bc03e8a3a911cb0ca721005b125cbdc174059e9",
+      "exportSha256": "087e3a40655ee29a90ee532b9bc03e8a3a911cb0ca721005b125cbdc174059e9"
+    },
+    {
+      "path": "migrations/release_0020_customer_password_recovery.sql",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "9ec3ef549aad4bc0077d4a97e0c4c2520b0cba0073fece8a3210d7ce4bbc5961",
+      "exportSha256": "9ec3ef549aad4bc0077d4a97e0c4c2520b0cba0073fece8a3210d7ce4bbc5961"
+    },
+    {
+      "path": "components/customer-password-recovery.tsx",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "b4d42485286ec58ffdc53139701d5d9687d4b7f503f748975ec902b33653613c",
+      "exportSha256": "b4d42485286ec58ffdc53139701d5d9687d4b7f503f748975ec902b33653613c"
+    },
+    {
+      "path": "components/customer-password-reset.tsx",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "ab8e559310d5323a2453d4ce9c817e612af74d594d9f47d38187ebe19512c7c5",
+      "exportSha256": "ab8e559310d5323a2453d4ce9c817e612af74d594d9f47d38187ebe19512c7c5"
+    },
+    {
+      "path": "components/customer-recovery.css",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "82387dfc932a5dc3b12af1998aebf03ab589f5bee41b825a25c7bd5d80d552e3",
+      "exportSha256": "82387dfc932a5dc3b12af1998aebf03ab589f5bee41b825a25c7bd5d80d552e3"
+    },
+    {
+      "path": "components/admin-customer-recovery.tsx",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "949e594a55139637f1260e1b600a939acc9d91cf71e752394a3aabe41cb2792d",
+      "exportSha256": "949e594a55139637f1260e1b600a939acc9d91cf71e752394a3aabe41cb2792d"
+    },
+    {
+      "path": "app/api/customer/password-reset/route.ts",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "0e7b333fd2d5e0a85c7374e9f3b79cf5fbb58df911254d9d39900ef98867cd5f",
+      "exportSha256": "0e7b333fd2d5e0a85c7374e9f3b79cf5fbb58df911254d9d39900ef98867cd5f"
+    },
+    {
+      "path": "app/api/admin/customers/recovery/route.ts",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "1c0f996f5ccce17b4e5f820e5b618e58ffdd4b8a42a6b9c69650720283e8f421",
+      "exportSha256": "1c0f996f5ccce17b4e5f820e5b618e58ffdd4b8a42a6b9c69650720283e8f421"
+    },
+    {
+      "path": "app/akun/lupa-kata-sandi/page.tsx",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "011d23995a27a90035d9d7d08691963cbe5071f7ac790d5170393959976d8c9a",
+      "exportSha256": "011d23995a27a90035d9d7d08691963cbe5071f7ac790d5170393959976d8c9a"
+    },
+    {
+      "path": "app/akun/reset-kata-sandi/page.tsx",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "f8eaeffc3940c648800876c2dcb3d81debabe8461cde0e7304ea277b3bfc4e83",
+      "exportSha256": "f8eaeffc3940c648800876c2dcb3d81debabe8461cde0e7304ea277b3bfc4e83"
+    },
+    {
+      "path": "CUSTOMER_PASSWORD_RECOVERY.md",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "88ec42123279d7e7f16c82e73a6b9f96c3f951e154b62f0391d9993bf00bdf69",
+      "exportSha256": "88ec42123279d7e7f16c82e73a6b9f96c3f951e154b62f0391d9993bf00bdf69"
+    },
+    {
+      "path": "tests/customer-recovery.test.mjs",
+      "source": "monolith-2026-10-27-customer-password-recovery",
+      "sha256": "9ae4e12cda36bd4bbcf0cec1a6e8f3f7a5388001495dd625b5a1f7ba4881f2db",
+      "exportSha256": "9ae4e12cda36bd4bbcf0cec1a6e8f3f7a5388001495dd625b5a1f7ba4881f2db"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
