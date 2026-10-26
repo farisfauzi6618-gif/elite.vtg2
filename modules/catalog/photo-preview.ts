@@ -3,7 +3,7 @@ import {bucket} from './server';
 
 export const PHOTO_PREVIEW_EDGES={thumb:240,cardSmall:480,card:800,detail:1600} as const;
 export type PhotoPreviewSize=keyof typeof PHOTO_PREVIEW_EDGES;
-type PhotoBytes={body:Uint8Array;contentType:string};
+export type PhotoBytes={body:Uint8Array;contentType:string;transformed?:boolean};
 type Entry<T>={value:T;expires:number;bytes:number};
 class ByteCache<T>{
  private entries=new Map<string,Entry<T>>();private total=0;
@@ -18,7 +18,7 @@ export async function renderPhotoPreview(source:PhotoBytes,size:PhotoPreviewSize
   const image=sharp(source.body,{limitInputPixels:64_000_000}),metadata=await image.metadata();
   if((metadata.pages??1)>1)return source;
   const edge=PHOTO_PREVIEW_EDGES[size],output=await image.rotate().resize({width:edge,height:edge,fit:'inside',withoutEnlargement:true}).webp({quality:88,effort:3}).toBuffer();
-  return output.length<source.body.byteLength?{body:new Uint8Array(output),contentType:'image/webp'}:source;
+  return output.length<source.body.byteLength?{body:new Uint8Array(output),contentType:'image/webp',transformed:true}:source;
  }catch{return source} // A decoder failure must not break an existing product photo.
 }
 // Every HTTP request still checks publication/owner access before this cache.

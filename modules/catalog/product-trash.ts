@@ -1,9 +1,12 @@
 import {getSqlClient} from '@/lib/database';
 import {AppError,integerValue,textValue} from './server';
+import {publicProductPhotoKeys,withdrawPublicProductMedia} from './public-product-media';
+import {readProduct} from './server';
 
 export async function trashProduct(input:any,actor:string){
  const id=textValue(input.id,100),version=integerValue(input.version,'Versi',1e9,false);
  if(input.confirmed!==true)throw new AppError(400,'Konfirmasi penghapusan barang terlebih dahulu.');
+ const existing=await readProduct(id).catch(error=>{if(error instanceof AppError&&error.status===404)return null;throw error}),photoKeys=existing?publicProductPhotoKeys(existing):[];
  const tx=await getSqlClient().transaction('write');
  try{
   const current=(await tx.execute({sql:'SELECT id,version,deleted_at FROM products WHERE id=?',args:[id]})).rows[0];
@@ -19,7 +22,7 @@ export async function trashProduct(input:any,actor:string){
   if(pending||held)throw new AppError(409,'Barang masih terkait pesanan atau DP berjalan. Selesaikan atau batalkan pesanan tersebut sebelum menghapus barang.',{activeOrder:true});
   const now=new Date().toISOString();
   await tx.execute({sql:"UPDATE products SET deleted_at=?,deleted_by=?,status='draft',reviewed=0,is_featured=0,featured_position=NULL,version=version+1,updated_at=?,last_mutation=? WHERE id=? AND version=? AND deleted_at IS NULL",args:[now,actor,now,crypto.randomUUID(),id,version]});
-  await tx.commit();return {id,deletedAt:now};
+  await tx.commit();await withdrawPublicProductMedia(photoKeys).catch(()=>{});return {id,deletedAt:now};
  }catch(error){await tx.rollback();throw error}finally{tx.close()}
 }
 

@@ -182,10 +182,10 @@
       "exportSha256": "b078e92dafa88055d6b8634fb00287250b4d9efb99150b048629026bf8062750"
     },
     {
-      "source": "monolith-2026-10-20-product-trash",
+      "source": "monolith-2026-10-26-public-product-cdn",
       "path": "app/api/admin/katalog/route.ts",
-      "sha256": "135d65a8c2c81ea2aa6123dde99cb7962318087affc9d76ebae95513316458cd",
-      "exportSha256": "135d65a8c2c81ea2aa6123dde99cb7962318087affc9d76ebae95513316458cd"
+      "sha256": "3cad9acb2c2a24dd2d97f722d8aac9b2668c8db4a3df022636376bbc17b1b253",
+      "exportSha256": "3cad9acb2c2a24dd2d97f722d8aac9b2668c8db4a3df022636376bbc17b1b253"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1064,10 +1064,10 @@
       "exportSha256": "3acb3609b40a512c116b911ffe7bbf22e8af4dd285ade2a8cb8da71b6878a087"
     },
     {
-      "source": "monolith-2026-10-22-material-v1",
+      "source": "monolith-2026-10-26-public-product-cdn",
       "path": "modules/catalog/catalog-service.ts",
-      "sha256": "7b87560969f8bcc56e2d085caa96682185094173e3a03b12365f061f90cb779c",
-      "exportSha256": "7b87560969f8bcc56e2d085caa96682185094173e3a03b12365f061f90cb779c"
+      "sha256": "6c3036b261fbef93b50b7d6f863a64d1521e02639600c53e8027bbb0d1fdeb47",
+      "exportSha256": "6c3036b261fbef93b50b7d6f863a64d1521e02639600c53e8027bbb0d1fdeb47"
     },
     {
       "source": "monolith-2026-10-22-material-v1",
@@ -1472,10 +1472,10 @@
       "exportSha256": "dfeece4e54959f715aded4b1fff3ffa4a046ed066481c882d5370ddaa8f4f7aa"
     },
     {
-      "source": "monolith-2026-10-14-reserve",
+      "source": "monolith-2026-10-26-public-product-cdn",
       "path": "tests/monolith.test.mjs",
-      "sha256": "c1184341ff39a85f1803911495421616b4ad71ce957752ba2303343a8b687274",
-      "exportSha256": "c1184341ff39a85f1803911495421616b4ad71ce957752ba2303343a8b687274"
+      "sha256": "21ae94c0b38001d3077b15f23d3804e108c4bb5870ad5e7021958cc31e6a7794",
+      "exportSha256": "21ae94c0b38001d3077b15f23d3804e108c4bb5870ad5e7021958cc31e6a7794"
     },
     {
       "source": "monolith-2026-10-09",
@@ -4532,10 +4532,10 @@
       "exportSha256": "8be228260ea1e6ca583622f95b4bf166ca08c0405aac63a930f7bb39037828a2"
     },
     {
-      "source": "monolith-2026-10-12-budget-efficiency",
+      "source": "monolith-2026-10-26-public-product-cdn",
       "path": "modules/catalog/photo-preview.ts",
-      "sha256": "6dd6a58a5c070dd705ac733b0c25ed501d0832c78ad133d42aab8e5e44b38c9d",
-      "exportSha256": "6dd6a58a5c070dd705ac733b0c25ed501d0832c78ad133d42aab8e5e44b38c9d"
+      "sha256": "0b253d738ba82e6462721a79bcf690f72e3b3c0735a3129f286836f12bcb442b",
+      "exportSha256": "0b253d738ba82e6462721a79bcf690f72e3b3c0735a3129f286836f12bcb442b"
     },
     {
       "source": "monolith-2026-10-14-flow-efficiency",
@@ -4959,15 +4959,15 @@
     },
     {
       "path": "modules/catalog/photo-publication.ts",
-      "source": "monolith-2026-10-19-media-efficiency",
-      "sha256": "719b1681e9e3bb6f3b5dda336bc6e9e05f1007626bd5cdb1f1e6e97ffd56f749",
-      "exportSha256": "719b1681e9e3bb6f3b5dda336bc6e9e05f1007626bd5cdb1f1e6e97ffd56f749"
+      "source": "monolith-2026-10-26-public-product-cdn",
+      "sha256": "ca79b25e9a90280c4667fe44ddb144fe6cf893a08d880eb4eccc8697bc3f1bcc",
+      "exportSha256": "ca79b25e9a90280c4667fe44ddb144fe6cf893a08d880eb4eccc8697bc3f1bcc"
     },
     {
       "path": "app/api/product-images/[key]/route.ts",
-      "source": "monolith-2026-10-19-media-efficiency",
-      "sha256": "4916ddaef935cd67b8109e2b329fbd8a7bec9cb2c3b5bf51e49688122fcc13f4",
-      "exportSha256": "4916ddaef935cd67b8109e2b329fbd8a7bec9cb2c3b5bf51e49688122fcc13f4"
+      "source": "monolith-2026-10-26-public-product-cdn",
+      "sha256": "a5686881fae2e1512f8140a6fdce1b0e352710fb16976d31d243aee4c665efe4",
+      "exportSha256": "a5686881fae2e1512f8140a6fdce1b0e352710fb16976d31d243aee4c665efe4"
     },
     {
       "path": "modules/catalog/direct-photo-upload.ts",
@@ -4995,9 +4995,9 @@
     },
     {
       "path": "modules/catalog/product-trash.ts",
-      "source": "monolith-2026-10-20-product-trash",
-      "sha256": "47a1ecc55dd26e2edeaf16d572f4e52f7694e4e1ab08071257d2153c53019108",
-      "exportSha256": "47a1ecc55dd26e2edeaf16d572f4e52f7694e4e1ab08071257d2153c53019108"
+      "source": "monolith-2026-10-26-public-product-cdn",
+      "sha256": "6ca99d098071b7138a9445257e362763257f989290db6157cbf2b1715ddcf9a8",
+      "exportSha256": "6ca99d098071b7138a9445257e362763257f989290db6157cbf2b1715ddcf9a8"
     },
     {
       "path": "migrations/release_0015_product_trash.sql",
@@ -5310,6 +5310,30 @@
       "source": "monolith-2026-10-25-payment-recovery",
       "sha256": "25feee4786c1cbb0e4aa3333ef6cd54ad2a24e6b734b0d7688964949476ebea0",
       "exportSha256": "25feee4786c1cbb0e4aa3333ef6cd54ad2a24e6b734b0d7688964949476ebea0"
+    },
+    {
+      "path": "modules/catalog/public-product-media.ts",
+      "source": "monolith-2026-10-26-public-product-cdn",
+      "sha256": "02ee4a3d1e1cbbdab4cbd58aafbc566cf95b7c7e3250b619bf473b235842e17a",
+      "exportSha256": "02ee4a3d1e1cbbdab4cbd58aafbc566cf95b7c7e3250b619bf473b235842e17a"
+    },
+    {
+      "path": "migrations/release_0019_public_product_media.sql",
+      "source": "monolith-2026-10-26-public-product-cdn",
+      "sha256": "95530731603e59bcdde0af07159d1ada6a3d5bcdcf869f1b17fdc560410c8cf5",
+      "exportSha256": "95530731603e59bcdde0af07159d1ada6a3d5bcdcf869f1b17fdc560410c8cf5"
+    },
+    {
+      "path": "tests/public-product-media.test.mjs",
+      "source": "monolith-2026-10-26-public-product-cdn",
+      "sha256": "537d2fde2a49bf915548d55cea123dc71f03bc36369d7917b239bec426fddab1",
+      "exportSha256": "537d2fde2a49bf915548d55cea123dc71f03bc36369d7917b239bec426fddab1"
+    },
+    {
+      "path": "PUBLIC_PRODUCT_MEDIA.md",
+      "source": "monolith-2026-10-26-public-product-cdn",
+      "sha256": "3284e84e567e054be529ff355a52fb2374f49ea9a330a02be486b146ac9f5134",
+      "exportSha256": "3284e84e567e054be529ff355a52fb2374f49ea9a330a02be486b146ac9f5134"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",

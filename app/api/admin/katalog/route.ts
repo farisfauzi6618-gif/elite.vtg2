@@ -1,4 +1,6 @@
 import {trashProduct,restoreProduct} from '@/modules/catalog/product-trash';
+import {after} from 'next/server.js';
+import {publicMediaEnabled,retryWithdrawnProductMedia} from '@/modules/catalog/public-product-media';
 import {setFeatured} from '@/modules/catalog/featured-server';
 import {readTaxonomy} from '@/modules/catalog/taxonomy-service';
 import { boundary, requireAdmin, requireOwner, readJson, response, readProducts, readProduct, readHistory, db, AppError, textValue } from '@/modules/catalog/server';
@@ -16,7 +18,7 @@ export async function GET(request:Request){return boundary(async()=>{await requi
  if(q.get('view')==='connection'){await requireOwner(request);const last=await db().prepare('SELECT source,caption_status,photo_status,parse_status,message,instagram_url,created_at FROM import_attempts ORDER BY rowid DESC LIMIT 10').all();return response({config:instagramConfig(),attempts:last.results})}
  return conditionalResponse(request,{products:await readProducts(true),taxonomy:await readTaxonomy()});
 })}
-export async function POST(request:Request){return boundary(async()=>{const user=await requireAdmin(request);const data=await readJson(request);if(!data||typeof data!=='object')throw new AppError(400,'Data formulir tidak valid.');switch(data.op){
+export async function POST(request:Request){return boundary(async()=>{const user=await requireAdmin(request);if(publicMediaEnabled())after(retryWithdrawnProductMedia);const data=await readJson(request);if(!data||typeof data!=='object')throw new AppError(400,'Data formulir tidak valid.');switch(data.op){
  case 'trash':return response(await trashProduct(data,user.userId));
  case 'restore':return response(await restoreProduct(data));
  case 'create':return response(await createManualDraft(data));

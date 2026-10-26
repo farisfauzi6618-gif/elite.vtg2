@@ -1,4 +1,5 @@
 import {validateMaterial} from './material';
+import {publicProductPhotoKeys,withdrawPublicProductMedia} from './public-product-media';
 import {salePriceIssue} from './sale-price';
 import {validateColors} from './color-validation';
 import {resolveColorGroups} from './color-variants';
@@ -68,7 +69,7 @@ export async function saveProduct(input:any,actor:string){
   statements.push(d.prepare('INSERT INTO size_groups (id,product_id,color_variant_id,label,tag_size,fits,length_cm,width_cm,qty,price,sale_price,discount_title,condition,defects,revision,sort_order) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,? WHERE EXISTS (SELECT 1 FROM products WHERE id=? AND last_mutation=?)').bind(g.id,id,g.colorVariantId??null,g.label,g.tagSize,JSON.stringify(g.fits),g.lengthCm,g.widthCm,g.qty,g.price,g.salePrice??null,g.discountTitle??null,g.condition,g.defects,g.sortOrder,id,marker));
   if(g.qty!=null)statements.push(d.prepare('INSERT INTO stock_history (id,group_id,product_id,before_qty,after_qty,before_revision,after_revision,reason,actor,created_at) SELECT ?,?,?,NULL,?,-1,0,?,?,? WHERE EXISTS (SELECT 1 FROM products WHERE id=? AND last_mutation=?)').bind(crypto.randomUUID(),g.id,id,g.qty,'Stok awal dari admin',actor,now,id,marker));
  }}
- const result=await d.batch(statements);if(result[0].meta.changes===0)throw new AppError(409,'Data berubah dari perangkat lain. Muat ulang barang sebelum menyimpan.');return readProduct(id);
+ const result=await d.batch(statements);if(result[0].meta.changes===0)throw new AppError(409,'Data berubah dari perangkat lain. Muat ulang barang sebelum menyimpan.');const saved=await readProduct(id),nextKeys=new Set(publicProductPhotoKeys(saved));await withdrawPublicProductMedia(publicProductPhotoKeys(current).filter(key=>!nextKeys.has(key))).catch(()=>{});return saved;
 }
 export async function changeStock(input:any,actor:string){
  const id=textValue(input.groupId,100);const d=db();const r=await d.prepare('SELECT g.*,p.status FROM size_groups g JOIN products p ON p.id=g.product_id WHERE g.id=?').bind(id).first<any>();if(!r)throw new AppError(404,'Kelompok ukuran tidak ditemukan.');const revision=integerValue(input.revision,'Versi stok',1e9,false);if(r.revision!==revision)throw new AppError(409,'Stok berubah di perangkat lain. Muat ulang sebelum mencoba lagi.');

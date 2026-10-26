@@ -1,7 +1,9 @@
 import {boundary,AppError} from '@/modules/catalog/server';
 import {publishedPhoto} from '@/modules/catalog/photo-publication';
 import {photoPreview,PHOTO_PREVIEW_EDGES,type PhotoPreviewSize} from '@/modules/catalog/photo-preview';
+import {publicProductMediaUrl} from '@/modules/catalog/public-product-media';
 export const runtime='nodejs';
+export const maxDuration=60;
 export const dynamic='force-dynamic';
 export const GET=(request:Request,{params}:{params:Promise<{key:string}>})=>boundary(async()=>{
  const {key}=await params,size=new URL(request.url).searchParams.get('size');
@@ -18,6 +20,8 @@ export const GET=(request:Request,{params}:{params:Promise<{key:string}>})=>boun
  });
  const etag=headers.get('ETag')!;
  if(request.headers.get('if-none-match')?.split(',').some(value=>value.trim()==='*'||value.trim().replace(/^W\//,'')===etag.replace(/^W\//,'')))return new Response(null,{status:304,headers});
+ const direct=await publicProductMediaUrl(key,size as PhotoPreviewSize,photoPreview);
+ if(direct){headers.set('Location',direct);headers.set('Cache-Control','private, max-age=60');return new Response(null,{status:307,headers})}
  const image=await photoPreview(key,size as PhotoPreviewSize,true);
  if(!image)throw new AppError(404,'Foto tidak ditemukan.');
  headers.set('Content-Type',image.contentType);
