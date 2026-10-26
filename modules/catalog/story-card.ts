@@ -28,6 +28,9 @@ export function drawStoryCard(ctx:CanvasRenderingContext2D,image:CanvasImageSour
 }
 function loadImage(src:string){return new Promise<HTMLImageElement>((resolve,reject)=>{
  const image=new Image(),timer=setTimeout(()=>{image.src='';reject(new Error('Foto belum dapat dimuat. Coba lagi.'));},20000);
+ // The same-origin URL can redirect to public Blob. Request an anonymous CORS
+ // image before assigning src so drawing it keeps the Story canvas exportable.
+ image.crossOrigin='anonymous';
  image.onload=()=>{clearTimeout(timer);resolve(image)};image.onerror=()=>{clearTimeout(timer);reject(new Error('Foto belum dapat dimuat. Coba lagi.'))};image.src=src;
 });}
 // Loaded only after Instagram Story is chosen. No server rendering or new uploads.

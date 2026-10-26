@@ -4712,16 +4712,16 @@
       "exportSha256": "4c253ed7721ddcfec4912a0c5392ebf6ae8cf770e6d9e74a169daac602f38ba8"
     },
     {
-      "source": "monolith-2026-10-19-media-efficiency",
+      "source": "monolith-2026-10-26-story-cdn-cors",
       "path": "modules/catalog/story-card.ts",
-      "sha256": "00e3c519284bfe09f18a51f68cb6104be7a6b9db11dfa6140347b26ad0438a3c",
-      "exportSha256": "00e3c519284bfe09f18a51f68cb6104be7a6b9db11dfa6140347b26ad0438a3c"
+      "sha256": "4afbcf5d4853665968591baf5212cb4d3e58a6e771ec48d88ac3a7e7a640ea01",
+      "exportSha256": "4afbcf5d4853665968591baf5212cb4d3e58a6e771ec48d88ac3a7e7a640ea01"
     },
     {
-      "source": "monolith-2026-10-14-share-upgrade",
+      "source": "monolith-2026-10-26-story-cdn-cors",
       "path": "tests/story-card.test.mjs",
-      "sha256": "7036ec2ec857f7689a0317bc133fd3c5bed611f89f156f2eaa8e354048ff0fb0",
-      "exportSha256": "7036ec2ec857f7689a0317bc133fd3c5bed611f89f156f2eaa8e354048ff0fb0"
+      "sha256": "84d19099d1bfd4877c7939d6f6b6bfb43fc0c5ec747ca286652a8b2ba06ca54b",
+      "exportSha256": "84d19099d1bfd4877c7939d6f6b6bfb43fc0c5ec747ca286652a8b2ba06ca54b"
     },
     {
       "source": "monolith-2026-10-14-reserve",
