@@ -30,7 +30,7 @@ export function configuredJntProtection(value:number,config:ProtectionConfig):Pr
  // J&T EZ public tariff: 0.2% of declared goods value. The central database
  // configuration records the rate; integer rupiah round up to avoid underpayment.
  const fee=Math.ceil(value*config.rateBps/(10000*config.roundingUnit))*config.roundingUnit;
- return {fee,declaredValue:value,source:'jnt_counter',policyVersion:config.version,quotedAt:Date.now()};
+ return {fee,declaredValue:value,source:'jnt_counter',policyVersion:config.version,quotedAt:Date.now(),valueBasis:'before_voucher'};
 }
 
 export async function protectShippingQuotes(quotes:ShippingQuote[],value:number,config:ProtectionConfig){
@@ -39,15 +39,17 @@ export async function protectShippingQuotes(quotes:ShippingQuote[],value:number,
  const first=quotes[0];if(!first||first.courier==='jne')throw new AppError(409,'Shipping Protection memerlukan layanan J&T yang didukung.');
  let protectedQuotes:ShippingQuote[];
  if(await kiriminRatesReady()){
-  if(quotes.every(q=>q.protection?.source==='kiriminaja'&&q.protection.declaredValue===value&&q.protection.policyVersion===config.version&&q.protection.fee>0))return quotes;
+  if(quotes.every(q=>q.protection?.source==='kiriminaja'&&q.protection.declaredValue===value&&q.protection.policyVersion===config.version&&q.protection.fee>0))protectedQuotes=quotes.map(q=>({...q,protection:{...q.protection!,valueBasis:'before_voucher' as const}}));
+  else {
   const {config:sender}=await kiriminSettings();if(!validKiriminOrigin(sender.origin))throw new AppError(409,'Wilayah asal untuk Shipping Protection belum tersedia.');
   const client=await kiriminClient(),destination=await client.destination(first.destination);
   let rates;try{rates=await client.rates(sender.origin,destination,first.grams,value,true,sender)}catch{throw new AppError(503,'Total pengiriman terlindungi belum dapat dihitung. Coba lagi.');}
   protectedQuotes=quotes.map(q=>{
    const rate=selectedKiriminRate(rates,q.service);
    if(!Number.isSafeInteger(rate.insurance)||rate.insurance<=0)throw new AppError(503,'Shipping Protection belum tersedia dari kurir. Coba lagi atau hubungi ELITE.VTG.');
-   return {...q,protection:{fee:rate.insurance,declaredValue:value,source:'kiriminaja' as const,policyVersion:config.version,quotedAt:Date.now()}};
+   return {...q,protection:{fee:rate.insurance,declaredValue:value,source:'kiriminaja' as const,policyVersion:config.version,quotedAt:Date.now(),valueBasis:'before_voucher' as const}};
   });
+  }
  }else{
   if(config.mode!=='jnt_counter')throw new AppError(503,'Layanan Shipping Protection belum terhubung. Coba lagi atau hubungi ELITE.VTG.');
   const protection=configuredJntProtection(value,config);

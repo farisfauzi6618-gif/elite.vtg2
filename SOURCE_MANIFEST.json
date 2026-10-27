@@ -62,10 +62,10 @@
       "exportSha256": "854d3ca33e0a1c7cf8131f4ab43e9df4ed173edc7d52cb11dea0961d03e3cf11"
     },
     {
-      "source": "monolith-2026-10-21-shipping-protection",
+      "source": "monolith-2026-10-27-payment-flow-fixes",
       "path": "app/(orders)/admin/order/shipping-ui.tsx",
-      "sha256": "7498a1a29008ade61cc280ef80f517e568d428fb090befdd54beb3faa3b51c9a",
-      "exportSha256": "7498a1a29008ade61cc280ef80f517e568d428fb090befdd54beb3faa3b51c9a"
+      "sha256": "4cfae7a3b37f0d9be2820409ca85f3f00f6ea33ab692a5751958ec32b7bf5a97",
+      "exportSha256": "4cfae7a3b37f0d9be2820409ca85f3f00f6ea33ab692a5751958ec32b7bf5a97"
     },
     {
       "source": "monolith-2026-10-21-shipping-protection",
@@ -92,10 +92,10 @@
       "exportSha256": "bd42ccba0524df42529268c79ce8964b796a5c2e355a13d918ddacfbb4c0a0f1"
     },
     {
-      "source": "monolith-2026-10-25-payment-recovery",
+      "source": "monolith-2026-10-27-payment-flow-fixes",
       "path": "app/(orders)/order/order-form.tsx",
-      "sha256": "4bdd468de6c701b434d5aabe6479c89cad9fec6703eae96d3a40bcbb36eef53a",
-      "exportSha256": "4bdd468de6c701b434d5aabe6479c89cad9fec6703eae96d3a40bcbb36eef53a"
+      "sha256": "790ecbca411034d3be53ecc6273e186203e71d87221da748f3ed6885505ac4e2",
+      "exportSha256": "790ecbca411034d3be53ecc6273e186203e71d87221da748f3ed6885505ac4e2"
     },
     {
       "source": "monolith-2026-10-09",
@@ -206,10 +206,10 @@
       "exportSha256": "ce4092ea9d5bf09fdc36ccf337d8707b02575825b4e1eecdfb61ffa582ffad05"
     },
     {
-      "source": "monolith-2026-10-09",
+      "source": "monolith-2026-10-27-payment-flow-fixes",
       "path": "app/api/admin/order/orders/[id]/route.ts",
-      "sha256": "147ce8189c762561740e1a06dcaaf440a477bbc351206cd25cf0204f0fb66fb8",
-      "exportSha256": "147ce8189c762561740e1a06dcaaf440a477bbc351206cd25cf0204f0fb66fb8"
+      "sha256": "dcb8d921b302759dee7f12e2a1b72a3b0f28144691490956f179cbc4ec08bcea",
+      "exportSha256": "dcb8d921b302759dee7f12e2a1b72a3b0f28144691490956f179cbc4ec08bcea"
     },
     {
       "source": "monolith-2026-10-09",
@@ -344,10 +344,10 @@
       "exportSha256": "5d57ed87179d9b7c8437e191ebf37fb902886f9ef31b5dc1a645db88401f55c3"
     },
     {
-      "source": "monolith-2026-10-21-shipping-protection",
+      "source": "monolith-2026-10-27-payment-flow-fixes",
       "path": "app/api/shipping/route.ts",
-      "sha256": "28689907bada98e05f2b7e379a97503e80dc45bcb2b008a68bfbdfd510e247d6",
-      "exportSha256": "28689907bada98e05f2b7e379a97503e80dc45bcb2b008a68bfbdfd510e247d6"
+      "sha256": "7bebe5b29b5420bc4e7468a6e601cd778e58e4ea5e73193b663b24fd44207f01",
+      "exportSha256": "7bebe5b29b5420bc4e7468a6e601cd778e58e4ea5e73193b663b24fd44207f01"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1178,16 +1178,16 @@
       "exportSha256": "aca4225a089826cf438c84d8eeb8ab8a015b904ee65082f522c2449eadb9530b"
     },
     {
-      "source": "monolith-2026-10-21-shipping-protection",
+      "source": "monolith-2026-10-27-payment-flow-fixes",
       "path": "modules/order/fulfilment.ts",
-      "sha256": "0b6b51fd63a3944ed9dc6e8d2cd2392d1342db79c15749830b47ef327cb49b7f",
-      "exportSha256": "0b6b51fd63a3944ed9dc6e8d2cd2392d1342db79c15749830b47ef327cb49b7f"
+      "sha256": "10108ba615b5f6b1f30bf1636f53b37744d15b514d27bbbaecd36b3db7bb6dcd",
+      "exportSha256": "10108ba615b5f6b1f30bf1636f53b37744d15b514d27bbbaecd36b3db7bb6dcd"
     },
     {
-      "source": "monolith-2026-10-15-jne-checkout",
+      "source": "monolith-2026-10-27-payment-flow-fixes",
       "path": "modules/order/kirimin-fulfilment.ts",
-      "sha256": "ca64a32b6a5859f9401ee114477b4cfa366a141c7e8b42f3a4df9df9c7e81735",
-      "exportSha256": "ca64a32b6a5859f9401ee114477b4cfa366a141c7e8b42f3a4df9df9c7e81735"
+      "sha256": "361507761086e95f44110edbd4722e721746134a5fa1967b0a2df64855342a4d",
+      "exportSha256": "361507761086e95f44110edbd4722e721746134a5fa1967b0a2df64855342a4d"
     },
     {
       "source": "monolith-2026-10-09",
@@ -1466,10 +1466,10 @@
       "exportSha256": "5d53b6fba87ff6ef03969f3ed9531ba96b2d65c0045a46b1af4e81d5bc26f3c3"
     },
     {
-      "source": "monolith-2026-10-15-jnt-collect",
+      "source": "monolith-2026-10-27-payment-flow-fixes",
       "path": "tests/fulfilment.test.mjs",
-      "sha256": "dfeece4e54959f715aded4b1fff3ffa4a046ed066481c882d5370ddaa8f4f7aa",
-      "exportSha256": "dfeece4e54959f715aded4b1fff3ffa4a046ed066481c882d5370ddaa8f4f7aa"
+      "sha256": "36984690b809b7cb1262a33a34ab5106e27b70cd83bf79fb58bd1f52b5840b00",
+      "exportSha256": "36984690b809b7cb1262a33a34ab5106e27b70cd83bf79fb58bd1f52b5840b00"
     },
     {
       "source": "monolith-2026-10-26-public-product-cdn",
@@ -4082,10 +4082,10 @@
       "exportSha256": "93a98db700ad36b58b6d6c7c71083fbd2cfd93bf9c2f3d806b374344d2754af8"
     },
     {
-      "source": "monolith-2026-10-21-shipping-protection",
+      "source": "monolith-2026-10-27-payment-flow-fixes",
       "path": "modules/order/first-purchase-server.ts",
-      "sha256": "e8e2e0d887d0fba9508ba85149ab394ee3bc405194580c02ad89bd3d6f2207d7",
-      "exportSha256": "e8e2e0d887d0fba9508ba85149ab394ee3bc405194580c02ad89bd3d6f2207d7"
+      "sha256": "1dda64c1d2013a4435d0a71f19177135723382a1b2b4bef26c0562904d1872e7",
+      "exportSha256": "1dda64c1d2013a4435d0a71f19177135723382a1b2b4bef26c0562904d1872e7"
     },
     {
       "source": "monolith-2026-10-11-resource-efficiency",
@@ -4923,9 +4923,9 @@
     },
     {
       "path": "components/admin-order-list.tsx",
-      "source": "monolith-2026-10-21-shipping-protection",
-      "sha256": "a367cdbcbb2c36f580e00fd1e104d8c86e7427e59c3a073cce4655ad3ea15004",
-      "exportSha256": "a367cdbcbb2c36f580e00fd1e104d8c86e7427e59c3a073cce4655ad3ea15004"
+      "source": "monolith-2026-10-27-payment-flow-fixes",
+      "sha256": "f173bdc79e7e82f4df9d1a03289accc2c31978796c49fc6541981b2f9fb4e316",
+      "exportSha256": "f173bdc79e7e82f4df9d1a03289accc2c31978796c49fc6541981b2f9fb4e316"
     },
     {
       "path": "modules/catalog/catalog-listing-page.ts",
@@ -5067,15 +5067,15 @@
     },
     {
       "path": "modules/order/shipping-protection-types.ts",
-      "source": "monolith-2026-10-21-shipping-protection",
-      "sha256": "e3fb41e44236ba6811ac25de0eefabfaa5c974bcc112dbeca6ea6bc45f388b4c",
-      "exportSha256": "e3fb41e44236ba6811ac25de0eefabfaa5c974bcc112dbeca6ea6bc45f388b4c"
+      "source": "monolith-2026-10-27-payment-flow-fixes",
+      "sha256": "2370a551fb31e554532516107a36fa7baa234dbe8739efa004aaed5367f8399a",
+      "exportSha256": "2370a551fb31e554532516107a36fa7baa234dbe8739efa004aaed5367f8399a"
     },
     {
       "path": "modules/order/shipping-protection.ts",
-      "source": "monolith-2026-10-21-shipping-protection",
-      "sha256": "2cda3d0cb56471ec491e9be6cc0a91f0ee5dd10043c4b851c9840072028d4b2e",
-      "exportSha256": "2cda3d0cb56471ec491e9be6cc0a91f0ee5dd10043c4b851c9840072028d4b2e"
+      "source": "monolith-2026-10-27-payment-flow-fixes",
+      "sha256": "0f50395be14480076e9ec0c909667dd4a64a97b9859fc4bb6241565f8d96b567",
+      "exportSha256": "0f50395be14480076e9ec0c909667dd4a64a97b9859fc4bb6241565f8d96b567"
     },
     {
       "path": "app/api/admin/order/protection/route.ts",
@@ -5097,9 +5097,9 @@
     },
     {
       "path": "tests/shipping-protection.test.mjs",
-      "source": "monolith-2026-10-21-shipping-protection",
-      "sha256": "3fc90874c487c48b4b2a98ee131c938b3b82f501e7d6038fa3659c853ca3f47e",
-      "exportSha256": "3fc90874c487c48b4b2a98ee131c938b3b82f501e7d6038fa3659c853ca3f47e"
+      "source": "monolith-2026-10-27-payment-flow-fixes",
+      "sha256": "cd4fbbd96bf39bb286b2086a89c60048b7d880ed72771f3fbc2af985ba6903ee",
+      "exportSha256": "cd4fbbd96bf39bb286b2086a89c60048b7d880ed72771f3fbc2af985ba6903ee"
     },
     {
       "path": "components/admin-photo-preview.tsx",
@@ -5430,6 +5430,18 @@
       "source": "monolith-2026-10-27-customer-password-recovery",
       "sha256": "9ae4e12cda36bd4bbcf0cec1a6e8f3f7a5388001495dd625b5a1f7ba4881f2db",
       "exportSha256": "9ae4e12cda36bd4bbcf0cec1a6e8f3f7a5388001495dd625b5a1f7ba4881f2db"
+    },
+    {
+      "path": "migrations/release_0021_protection_voucher_basis.sql",
+      "source": "monolith-2026-10-27-payment-flow-fixes",
+      "sha256": "29ac80ac8a937b9f22dbeafe4cfd053a86e5806db2f949d75c52b11bce171f19",
+      "exportSha256": "29ac80ac8a937b9f22dbeafe4cfd053a86e5806db2f949d75c52b11bce171f19"
+    },
+    {
+      "path": "PAYMENT_FLOW_FIXES.md",
+      "source": "monolith-2026-10-27-payment-flow-fixes",
+      "sha256": "2f12d54ddf07edd18862dc2f7bd4fb2e05c205094228a69a9415a2e9c6f199b7",
+      "exportSha256": "2f12d54ddf07edd18862dc2f7bd4fb2e05c205094228a69a9415a2e9c6f199b7"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",

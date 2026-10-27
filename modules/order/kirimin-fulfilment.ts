@@ -1,3 +1,4 @@
+import {insuredOrderValue} from "./shipping-protection-types";
 import { db,settings,encrypt,decrypt,AppError,bucket } from "@/modules/order/order-server";
 import { orderQuote,rupiah,type Order } from "@/modules/order/order-types";
 import { kiriminClient,kiriminPin,kiriminSettings,validCoordinatePair } from "@/modules/order/shipping-settings";
@@ -14,14 +15,15 @@ async function loadOrder(id:string){const o=await db().prepare("SELECT * FROM or
 
 export function kiriminPayload(o:Order,c:ShippingConfig,d:KiriminLocation,grams:number,r:KiriminRate,schedule:{date:string;time:string}){
  assertJntBookingQuote(o);
- if(!validKiriminOrigin(c.origin)||!o.item_amount||!Number.isSafeInteger(o.item_amount)||o.item_amount<=0||r.insurance<=0||r.insurancePercent<=0)throw new AppError(409,"Asuransi wajib belum tersedia untuk nilai barang yang sebenarnya. Booking ditahan; periksa layanan ini dengan KiriminAja.");
+ const value=insuredOrderValue(o);
+ if(!validKiriminOrigin(c.origin)||!Number.isSafeInteger(value)||value<=0||r.insurance<=0||r.insurancePercent<=0)throw new AppError(409,"Asuransi wajib belum tersedia untuk nilai barang yang sebenarnya. Booking ditahan; periksa layanan ini dengan KiriminAja.");
  if(r.useGeolocation&&(!validCoordinatePair(c.senderLatitude,c.senderLongitude)||!validCoordinatePair(d.latitude,d.longitude)))throw new AppError(409,"Layanan ini mewajibkan titik lokasi. Lengkapi koordinat pengirim dan penerima pada pengaturan pesanan.");
  const address=o.address+", "+d.label,items=orderItems(o),itemName=items.join("; ");
  if(o.name.length>40||address.length>250)throw new AppError(409,"Nama atau alamat melebihi batas KiriminAja (40/250 karakter). Periksa data pesanan sebelum booking; aplikasi tidak memotong alamat.");
  const dimensions={length:Math.ceil(c.length),width:Math.ceil(c.width),height:Math.ceil(c.height)},name=itemName.length<=60?itemName:`Paket ${items.length} pakaian ELITE.VTG`;
  // Zero means unavailable, never an invented map coordinate. Geolocation-required
  // services are blocked above. Validate this sentinel during account UAT.
- return {address:c.senderAddress+", "+c.senderPostcode,phone:phone(c.senderPhone),name:c.senderName,zipcode:c.senderPostcode,kecamatan_id:c.origin.districtId,kelurahan_id:c.origin.id,latitude:c.senderLatitude??0,longitude:c.senderLongitude??0,platform_name:"ELITE.VTG",schedule:schedule.date+" "+schedule.time,packages:[{order_id:o.id,destination_name:o.name,destination_phone:phone(o.phone),destination_address:address,destination_kecamatan_id:d.districtId,destination_kelurahan_id:d.id,destination_zipcode:o.postcode,destination_latitude:d.latitude??0,destination_longitude:d.longitude??0,weight:grams,...dimensions,qty:1,item_value:o.item_amount,shipping_cost:r.gross,service:"jnt",service_type:r.service,insurance_amount:r.insurance,cod:0,package_type_id:7,item_name:name,drop:false,note:`Invoice ${o.id}; ${items.length} barang: ${itemName}`,items:[{name,price:o.item_amount,weight:grams,...dimensions,qty:1,metadata:{sku:o.id,variant_label:itemName}}]}]};
+ return {address:c.senderAddress+", "+c.senderPostcode,phone:phone(c.senderPhone),name:c.senderName,zipcode:c.senderPostcode,kecamatan_id:c.origin.districtId,kelurahan_id:c.origin.id,latitude:c.senderLatitude??0,longitude:c.senderLongitude??0,platform_name:"ELITE.VTG",schedule:schedule.date+" "+schedule.time,packages:[{order_id:o.id,destination_name:o.name,destination_phone:phone(o.phone),destination_address:address,destination_kecamatan_id:d.districtId,destination_kelurahan_id:d.id,destination_zipcode:o.postcode,destination_latitude:d.latitude??0,destination_longitude:d.longitude??0,weight:grams,...dimensions,qty:1,item_value:value,shipping_cost:r.gross,service:"jnt",service_type:r.service,insurance_amount:r.insurance,cod:0,package_type_id:7,item_name:name,drop:false,note:`Invoice ${o.id}; ${items.length} barang: ${itemName}`,items:[{name,price:value,weight:grams,...dimensions,qty:1,metadata:{sku:o.id,variant_label:itemName}}]}]};
 }
 
 export function matchesKiriminBooking(value:unknown,o:Order,p:Record<string,unknown>,expectedPremium:number){
@@ -45,17 +47,17 @@ export async function processKiriminShipment(id:string,allowCreate=true){
   if(!s.provider_no){
    if(!allowCreate)throw new AppError(409,"Callback hanya dapat melanjutkan booking yang sudah diajukan pemilik.");
    if(!validKiriminOrigin(c.origin)||![c.length,c.width,c.height].every(n=>n>=1))throw new AppError(409,"Lengkapi wilayah asal dan ukuran paket KiriminAja.");
-   const q=orderQuote(o);if(!q||!o.item_amount)throw new AppError(409,"Pesanan ini belum memiliki wilayah dan berat yang terverifikasi.");
+   const q=orderQuote(o),value=insuredOrderValue(o);if(!q||!value)throw new AppError(409,"Pesanan ini belum memiliki wilayah dan berat yang terverifikasi.");
    const grams=s.weight_grams||q.grams||c.defaultGrams;if(!Number.isSafeInteger(grams)||grams<100||grams>30000)throw new AppError(409,"Berat paket belum valid.");
    const d=s.destination_json?JSON.parse(s.destination_json) as KiriminLocation:await client.destination(q.destination);
    const match=(await client.search(o.postcode,true)).find(x=>x.id===d.id&&x.districtId===d.districtId);
    if(!match||match.postcode!==o.postcode||normalize(match.district)!==normalize(q.destination.district)||normalize(match.city)!==normalize(q.destination.city)||normalize(match.village)!==normalize(q.destination.village))throw new AppError(409,"Wilayah KiriminAja tidak sesuai alamat invoice.");
-   const destination={...match,latitude:d.latitude,longitude:d.longitude},r=selectedKiriminRate(await client.rates(c.origin,destination,grams,o.item_amount,true,c),q.service),cap=s.max_cost??((o.shipping_amount||0)+r.insurance);
+   const destination={...match,latitude:d.latitude,longitude:d.longitude},r=selectedKiriminRate(await client.rates(c.origin,destination,grams,value,true,c),q.service),cap=s.max_cost??((o.shipping_amount||0)+r.insurance);
    // Enforce the cap before discounts: eligibility/settlement may change at the provider.
    if(r.gross+r.insurance>cap)throw new AppError(409,`Ongkir dan asuransi KiriminAja ${rupiah(r.gross+r.insurance)} melebihi batas biaya ${rupiah(cap)}. Perbarui batas pesanan sebelum mencoba ulang.`);
    const planned=pickupSchedule(c),payload=kiriminPayload(o,c,destination,grams,r,planned),pin=await kiriminPin();
    await client.validatePin(pin);if(await client.balance()<r.gross+r.insurance)throw new AppError(409,"Saldo KA Credit belum cukup untuk ongkir dan asuransi. Isi saldo pada dashboard KiriminAja lalu coba ulang.");
-   await update(id,"provider='kiriminaja',state='booking_processing',environment=?,config_json=?,weight_grams=?,destination_json=?,request_json=?,pickup_json=?,insurance_state='requested',insured_value=?,insurance_fee=?,last_error=NULL",c.environment,await encrypt(JSON.stringify(c)),grams,JSON.stringify(destination),await encrypt(JSON.stringify(payload)),JSON.stringify(planned),o.item_amount,r.insurance);
+   await update(id,"provider='kiriminaja',state='booking_processing',environment=?,config_json=?,weight_grams=?,destination_json=?,request_json=?,pickup_json=?,insurance_state='requested',insured_value=?,insurance_fee=?,last_error=NULL",c.environment,await encrypt(JSON.stringify(c)),grams,JSON.stringify(destination),await encrypt(JSON.stringify(payload)),JSON.stringify(planned),value,r.insurance);
    await update(id,"create_sent_at=?",Date.now());
    try{
     const result=await client.create(payload,pin);
