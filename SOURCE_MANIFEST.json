@@ -1142,10 +1142,10 @@
       "exportSha256": "0eb6b847e46541b5e6704d5d8a91e8d8874619440371d1b385ab14fb0a0a155c"
     },
     {
-      "source": "monolith-2026-10-25-payment-recovery",
+      "source": "monolith-2026-10-28-telegram-sold-details",
       "path": "modules/order/catalog-bridge.ts",
-      "sha256": "3844314568f6564baf01d4ba896a38473110ded07c7ce699048e21a6c583ecb6",
-      "exportSha256": "3844314568f6564baf01d4ba896a38473110ded07c7ce699048e21a6c583ecb6"
+      "sha256": "47f19e4394039be4b5d8c748eb812824ae516c783734a1713054e0f6ef8b2674",
+      "exportSha256": "47f19e4394039be4b5d8c748eb812824ae516c783734a1713054e0f6ef8b2674"
     },
     {
       "source": "monolith-2026-10-25-payment-recovery",
@@ -5442,6 +5442,24 @@
       "source": "monolith-2026-10-27-payment-flow-fixes",
       "sha256": "2f12d54ddf07edd18862dc2f7bd4fb2e05c205094228a69a9415a2e9c6f199b7",
       "exportSha256": "2f12d54ddf07edd18862dc2f7bd4fb2e05c205094228a69a9415a2e9c6f199b7"
+    },
+    {
+      "path": "modules/order/catalog-sold-notification.ts",
+      "source": "monolith-2026-10-28-telegram-sold-details",
+      "sha256": "69a2eaf330ab2a5ddf4c95e574a104950b75ab060342160770cbe9e1dd5c2d59",
+      "exportSha256": "69a2eaf330ab2a5ddf4c95e574a104950b75ab060342160770cbe9e1dd5c2d59"
+    },
+    {
+      "path": "tests/catalog-sold-notification.test.mjs",
+      "source": "monolith-2026-10-28-telegram-sold-details",
+      "sha256": "33b8fb95cd382bd7d2e05c2192fa60b503aacef8751210bdcbdbebe1140eec83",
+      "exportSha256": "33b8fb95cd382bd7d2e05c2192fa60b503aacef8751210bdcbdbebe1140eec83"
+    },
+    {
+      "path": "TELEGRAM_SOLD_NOTIFICATIONS.md",
+      "source": "monolith-2026-10-28-telegram-sold-details",
+      "sha256": "54ec5553588611bb83a9e9b1114f7850dfd5eadb743fdab9747f9ead04298139",
+      "exportSha256": "54ec5553588611bb83a9e9b1114f7850dfd5eadb743fdab9747f9ead04298139"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",
