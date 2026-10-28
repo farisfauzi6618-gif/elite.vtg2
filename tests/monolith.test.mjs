@@ -212,7 +212,7 @@ test('catalog checkout carries the customer and server prices directly to /order
   assert.equal(target.origin,process.env.SITE_ORIGIN); assert.equal(target.pathname,'/order'); assert.equal(target.searchParams.get('basket'),basket);
   checkoutToken = target.searchParams.get('catalog');
   const quoted = await m.catalogQuote(checkoutToken); checkoutId=quoted.id;
-  assert.equal(quoted.amount,1200000); assert.equal(quoted.customer.name,'PEMBELI SIMULASI');
+  assert.equal(quoted.amount,1200000); assert.equal(quoted.customer,undefined,'Shared catalog links must not expose account recipient data');
   assert.equal(forbiddenHttp,0);
 });
 test('checkout gets the real provider rate at 2 kg for four catalog units, ignoring forged weight', async () => {

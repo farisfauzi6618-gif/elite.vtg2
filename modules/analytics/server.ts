@@ -28,6 +28,7 @@ export async function event(s:Session|null,name:string,key:string,v:Detail={},pr
  const id=crypto.randomUUID(),d=db();await d.batch([d.prepare('INSERT OR IGNORE INTO analytics_events(id,dedupe_key,event_name,timestamp,session_id,visitor_id,user_id,product_id,order_id,search_query,result_count,traffic_source,utm_source,utm_medium,utm_campaign,utm_content,error_code,share_method) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(id,key,name,Date.now(),s?.id,s?.visitor_id,v.userId??s?.user_id,v.productId,v.orderId,v.query,v.resultCount,s?.traffic_source??'Other',s?.utm_source,s?.utm_medium,s?.utm_campaign,s?.utm_content,v.errorCode,v.shareMethod??null),...products.map(p=>d.prepare('INSERT OR IGNORE INTO analytics_event_products(event_id,product_id) SELECT id,? FROM analytics_events WHERE dedupe_key=?').bind(p,key))]);
 }
 export async function collect(r:Request,v:Record<string,unknown>){
+ if(v.event==='checkout_progress'){await (await import('./checkout-flow')).checkoutProgress(r,v);return;}
  const s=await analyticsSession(r);if(!s)return;
  await db().prepare('UPDATE analytics_sessions SET last_seen_at=? WHERE id=?').bind(Date.now(),s.id).run();
  const customer=await currentCustomer(r.headers.get('cookie'));if(customer)s.user_id=customer.id;

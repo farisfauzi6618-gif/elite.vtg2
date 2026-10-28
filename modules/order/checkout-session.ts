@@ -1,6 +1,8 @@
 import type { Order } from '@/modules/order/order-types';
 
 export type CatalogSelection = {
+  id?:string;
+  preview?:import('./checkout-ux').CheckoutPreview[];
   orderType?: string;
   lines: { name: string; label: string; quantity: number }[];
   amount: number;

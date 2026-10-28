@@ -4,19 +4,21 @@ import {BCA_DISPLAY_NAME} from '@/modules/order/payment-types';
 import { useState } from "react";
 import { Check, Copy, Download, Maximize2, X } from "lucide-react";
 import { Dialog } from "radix-ui";
+import {PaymentMethodChoice} from '@/components/payment-method-choice';
 import { Button } from "@/components/ui/button";
 import { copyText } from "@/modules/order/clipboard";
 import { rupiah, type Order } from "@/modules/order/order-types";
 import { storedPaymentMethod, type PaymentConfig, type PaymentMethod } from "@/modules/order/payment-types";
 
-export function PaymentPanel({ order, payment, busy, onSelect, onAssetError }: {
-  order: Order; payment?: PaymentConfig; busy: boolean;
+export function PaymentPanel({ order, payment, busy, onSelect, onAssetError, compact=false }: {
+  order: Order; payment?: PaymentConfig; busy: boolean; compact?:boolean;
   onSelect: (method: PaymentMethod) => Promise<void>; onAssetError: () => void;
 }) {
   const method = storedPaymentMethod(order.payment_method);
   const [copied, setCopied] = useState<"account" | "amount" | null>(null);
   const [error, setError] = useState("");
   const [qrisFailed, setQrisFailed] = useState(false);
+  const [changing,setChanging]=useState(false);
   const bank = payment?.bca, qris = payment?.qris;
   async function copy(value: string, kind: "account" | "amount") {
     setError(""); setCopied(null);
@@ -25,17 +27,8 @@ export function PaymentPanel({ order, payment, busy, onSelect, onAssetError }: {
   }
   function failedAsset() { setQrisFailed(true); onAssetError(); }
   return <>
-    <fieldset className="payment-methods" disabled={busy}>
-      <legend>Metode pembayaran</legend>
-      <label className={method === "bca_transfer" ? "payment-choice selected" : "payment-choice"}>
-        <input type="radio" name="paymentMethod" value="bca_transfer" checked={method === "bca_transfer"} disabled={!bank} onChange={() => void onSelect("bca_transfer")} />
-        <span><b>{BCA_DISPLAY_NAME}</b><small>{bank ? "Direkomendasikan" : "Sedang tidak tersedia"}</small></span>
-      </label>
-      <label className={method === "qris_dana" ? "payment-choice selected" : "payment-choice"}>
-        <input type="radio" name="paymentMethod" value="qris_dana" checked={method === "qris_dana"} disabled={!qris || qrisFailed} onChange={() => void onSelect("qris_dana")} />
-        <span><b>QRIS DANA</b><small>{qris && !qrisFailed ? "Alternatif pembayaran" : "Sedang tidak tersedia"}</small></span>
-      </label>
-    </fieldset>
+    {compact&&<div className="payment-selected"><span>{method==='bca_transfer'?BCA_DISPLAY_NAME:'QRIS DANA'}</span><button type="button" className="text-button" aria-expanded={changing} onClick={()=>setChanging(v=>!v)} disabled={busy}>Ganti metode</button></div>}
+    {(!compact||changing||method==='bca_transfer'&&!bank||method==='qris_dana'&&(!qris||qrisFailed))&&<PaymentMethodChoice method={method} payment={payment} disabled={busy} qrisFailed={qrisFailed} onSelect={value=>void onSelect(value)}/>}
     {method === "bca_transfer" ? bank ? <>
       <div className="bank-panel">
         <span className="eyebrow">{BCA_DISPLAY_NAME}</span>

@@ -1,3 +1,5 @@
+import {colorPhoto} from './color-variants';
+import type {CheckoutPreview} from '@/modules/order/checkout-ux';
 import {transactionPrice,groupPricing} from './sale-price';
 import {activeColorSql} from './color-variants';
 import {reservedQuantitySql} from './reserve-inventory';
@@ -50,10 +52,11 @@ export async function refreshInvoiceCheckout(invoiceId:string,sessionHash:string
 }
 async function checkedQuote(c:Checkout){
  const used=await db().prepare('SELECT order_id FROM catalog_sales WHERE checkout_id=?').bind(c.id).first();if(used)throw new AppError(409,'Pilihan barang ini sudah dikonfirmasi. Buat pilihan baru di katalog.');
- const lines=JSON.parse(c.lines_json) as CheckoutLine[];
- for(const line of lines){const p=await readProduct(line.productId),g=p.groups.find(g=>g.id===line.groupId);if(p.status!=='published'||!g||g.colorActive===false||g.qty==null||(sellableQuantity(g)??0)<line.quantity)throw new AppError(409,'Barang pilihan sudah tidak tersedia. Pilih kembali di katalog.');if(orderingLocked(p))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(p.orderableAt!)+'.');if((transactionPrice(p,g))!==line.unitPrice)throw new AppError(409,'Harga barang berubah. Pilih kembali di katalog untuk melihat harga terbaru.')}
- const customer=c.customer_id?await db().prepare('SELECT name,phone FROM customers WHERE id=?').bind(c.customer_id).first<{name:string;phone:string|null}>():null;
- return {id:c.id,lines,amount:c.amount,orderType:c.order_type??'normal',expiresAt:c.expires_at,...(customer?{customer}: {})};
+ const lines=JSON.parse(c.lines_json) as CheckoutLine[],preview:CheckoutPreview[]=[];
+ for(const line of lines){const p=await readProduct(line.productId),g=p.groups.find(g=>g.id===line.groupId);if(p.status!=='published'||!g||g.colorActive===false||g.qty==null||(sellableQuantity(g)??0)<line.quantity)throw new AppError(409,'Barang pilihan sudah tidak tersedia. Pilih kembali di katalog.');if(orderingLocked(p))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(p.orderableAt!)+'.');if((transactionPrice(p,g))!==line.unitPrice)throw new AppError(409,'Harga barang berubah. Pilih kembali di katalog untuk melihat harga terbaru.');preview.push({productId:line.productId,groupId:line.groupId,name:line.name,brand:p.brand,label:line.label,quantity:line.quantity,unitPrice:line.unitPrice,photoKey:colorPhoto(p,g)})}
+ // Selection links may be shared. Recipient defaults are served only by the
+ // authenticated /api/customer/checkout endpoint, never by a catalog capability.
+ return {id:c.id,lines,preview,amount:c.amount,orderType:c.order_type??'normal',expiresAt:c.expires_at};
 }
 export async function applyCheckoutSale(input:any){
  const orderId=textValue(input?.orderId,40),checkoutId=textValue(input?.checkoutId,100);if(!/^EV-\d{6}-[A-F0-9]{8}$/.test(orderId)||!checkoutId)throw new AppError(400,'Identitas pesanan tidak valid.');
