@@ -1,4 +1,16 @@
-# Checkout UX V1 — 28 October 2026
+# Checkout UX — 28 October 2026
+
+## Inline checkout update (approved 13:20 WIB)
+
+The visible 01/02/03 navigation is removed. One persistent page keeps the product summary above recipient/shipping, payment selection, fees, consent and confirmation. Saving a validated order collapses the recipient fields to an editable card and expands payment instructions directly below the retained confirmation button. Proof submission replaces only that payment section with the verification status. Invoice/download/tracking are optional disclosure/actions. Internal phase state still gates financial actions and existing analytics; it no longer represents three replacement screens.
+
+No success handler scrolls to the top. Focus moves to the payment/status section with preventScroll and a nearest-section reveal. Refresh restores saved orders; unfinished edits in the existing actor-scoped 30-minute draft restore to editing with instructions hidden, consent unchecked and a fresh server quote required. Editing clears selected proof and rotates the request key; only explicit reconfirmation updates the existing order. No keystroke creates an order. Storage remains optional; clearing/blocking it can lose unsaved edits.
+
+Reserve embeds the existing panel in this page. The first guest DP uses the existing session-based `/api/reserve` path, because the invoice-link route requires proof that a first deposit does not yet have. `reserveRequestPath` keeps member/bearer and post-proof invoice access unchanged; server authorization rules are not modified. Regression verifies authorized guest proof succeeds, anonymous access fails, and proof alone neither locks inventory nor confirms DP.
+
+No new migration, endpoint, service, dependency, polling interval or financial logic is introduced. Bank/QRIS configuration, Telegram triggers/content, stock hold/Reserve expiry, discounts/loyalty/protection, idempotency and analytics definitions remain as released in V1. Tests use disposable local transactions and mock external delivery only. Native iPhone/Instagram/Android behavior is not asserted from viewport simulation.
+
+The following sections document the earlier V1 release; its screen navigation is superseded by the inline UI above.
 
 ## Before and after
 

@@ -4,4 +4,7 @@ export type ReservePayment={id:string;amount:number;paymentMethod:'bca_transfer'
 export type ReserveSummary={id:string;status:ReserveStatus;itemCount:number;orderValue:number;total:number;shippingAmount:number;shippingPayment?:'prepaid'|'collect';shippingEstimate?:number;depositMinimum:number;depositPaid:number;totalPaid:number;remaining:number;startedAt:number|null;deadline:number|null;payments:ReservePayment[];policy:string};
 export function minimumReserveDeposit(value:number){if(!Number.isSafeInteger(value)||value<50000||value>10000000)throw new Error('Reserve tersedia untuk nilai barang Rp50.000 sampai Rp10.000.000.');return Math.max(50000,Math.ceil(value/4));}
 export function validReserveDeposit(value:number,amount:number){return Number.isSafeInteger(amount)&&amount>=minimumReserveDeposit(value)&&amount<=value;}
+// A guest's first deposit uses the existing order session. Invoice-link access
+// deliberately requires submitted proof; member/bearer recovery keeps that path.
+export function reserveRequestPath(order:{id:string;status:string;proof_received_at?:number|null},authorization='',member=false){return '/api/reserve'+(!authorization&&!member&&order.status==='awaiting_proof'&&!order.proof_received_at?'':'?invoice='+encodeURIComponent(order.id));}
 export const reserveLabels:Record<ReserveStatus,string>={AWAITING_DEPOSIT:'Menunggu konfirmasi DP',RESERVED:'Di-reserve',PARTIALLY_PAID:'Dibayar sebagian',PAID:'Lunas',EXPIRED:'Reserve berakhir',CANCELLED:'Reserve dibatalkan'};
