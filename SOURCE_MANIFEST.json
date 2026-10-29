@@ -254,10 +254,10 @@
       "exportSha256": "12a63ab683818b96871bdb467893a9ac658f4083d4cb29993d902fc8f508a5a9"
     },
     {
-      "source": "monolith-2026-10-19-flow-simplification",
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
       "path": "app/api/catalog/route.ts",
-      "sha256": "5609855f2058f8a8bf72c1388b7c6679fc30446f62f13c32fd570ff6bca767bf",
-      "exportSha256": "5609855f2058f8a8bf72c1388b7c6679fc30446f62f13c32fd570ff6bca767bf"
+      "sha256": "c19a5e661368d77bbe8c26036ff211df7b5204d75c58d4ef418f990d87f4ee64",
+      "exportSha256": "c19a5e661368d77bbe8c26036ff211df7b5204d75c58d4ef418f990d87f4ee64"
     },
     {
       "source": "monolith-2026-10-10-website-analytics-v1",
@@ -326,10 +326,10 @@
       "exportSha256": "73b51f62cadfaf86824a7284154227bfc2793008846e2ba6a6aefb60b1e0f0f0"
     },
     {
-      "source": "monolith-2026-10-14-variant-photo-fix",
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
       "path": "app/api/photos/[key]/route.ts",
-      "sha256": "73ddf411f18c49c1829a372d480f1a14cdc797337e4cdcfc2dfa859977189cb7",
-      "exportSha256": "73ddf411f18c49c1829a372d480f1a14cdc797337e4cdcfc2dfa859977189cb7"
+      "sha256": "d9818cff2e542b6bea33c425cdf37fceaf04c9df8afd9e7e0865eaa802581c4d",
+      "exportSha256": "d9818cff2e542b6bea33c425cdf37fceaf04c9df8afd9e7e0865eaa802581c4d"
     },
     {
       "source": "monolith-2026-10-22-material-v1",
@@ -4131,9 +4131,9 @@
     },
     {
       "path": "tests/sold-lifecycle.test.mjs",
-      "source": "monolith-2026-10-14-color-variants",
-      "sha256": "b085943a1f3e668e6602399029b69c2fc1dc99353d1b917469cb425efe424d5c",
-      "exportSha256": "b085943a1f3e668e6602399029b69c2fc1dc99353d1b917469cb425efe424d5c"
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
+      "sha256": "22b57705cc335268a11081bc66e88aa6e85af8755fe7d3f06130209380471e6b",
+      "exportSha256": "22b57705cc335268a11081bc66e88aa6e85af8755fe7d3f06130209380471e6b"
     },
     {
       "path": "migrations/release_0002_sold_admin_visibility.sql",
@@ -4959,9 +4959,9 @@
     },
     {
       "path": "modules/catalog/photo-publication.ts",
-      "source": "monolith-2026-10-26-public-product-cdn",
-      "sha256": "ca79b25e9a90280c4667fe44ddb144fe6cf893a08d880eb4eccc8697bc3f1bcc",
-      "exportSha256": "ca79b25e9a90280c4667fe44ddb144fe6cf893a08d880eb4eccc8697bc3f1bcc"
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
+      "sha256": "a0155be87267b82dcee677eb972122bbdfbcb98ae907273a391697c759102267",
+      "exportSha256": "a0155be87267b82dcee677eb972122bbdfbcb98ae907273a391697c759102267"
     },
     {
       "path": "app/api/product-images/[key]/route.ts",
@@ -5313,9 +5313,9 @@
     },
     {
       "path": "modules/catalog/public-product-media.ts",
-      "source": "monolith-2026-10-29-db-read-efficiency",
-      "sha256": "3a07afaf63473db088537c53ca3193273fbdab4fa06ac34ba4b3c8adaba3a974",
-      "exportSha256": "3a07afaf63473db088537c53ca3193273fbdab4fa06ac34ba4b3c8adaba3a974"
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
+      "sha256": "61aa270970417ee5bfbca94261fe57ad3725971dcd81bfd4d899cc9771bfc3b8",
+      "exportSha256": "61aa270970417ee5bfbca94261fe57ad3725971dcd81bfd4d899cc9771bfc3b8"
     },
     {
       "path": "migrations/release_0019_public_product_media.sql",
@@ -5325,9 +5325,9 @@
     },
     {
       "path": "tests/public-product-media.test.mjs",
-      "source": "monolith-2026-10-29-db-read-efficiency",
-      "sha256": "05550382b23e96d79161df65941b127049e3d32e710865b2b6af03057a900efb",
-      "exportSha256": "05550382b23e96d79161df65941b127049e3d32e710865b2b6af03057a900efb"
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
+      "sha256": "7cefd63a2167eab5856154ae23ffbbe5b03d8b64873e745398069e345e3e6889",
+      "exportSha256": "7cefd63a2167eab5856154ae23ffbbe5b03d8b64873e745398069e345e3e6889"
     },
     {
       "path": "PUBLIC_PRODUCT_MEDIA.md",
@@ -5526,6 +5526,36 @@
       "source": "monolith-2026-10-29-db-read-efficiency",
       "sha256": "edd0bfb99e4cf3c377e5b80480365608d9fbf91eccb17511be1d9586c6a24e05",
       "exportSha256": "edd0bfb99e4cf3c377e5b80480365608d9fbf91eccb17511be1d9586c6a24e05"
+    },
+    {
+      "path": "migrations/release_0023_indexed_photo_references.sql",
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
+      "sha256": "660367ae3aae983c8e93ed059afb643b83fc5cf44bb79333532979478e7bc25a",
+      "exportSha256": "660367ae3aae983c8e93ed059afb643b83fc5cf44bb79333532979478e7bc25a"
+    },
+    {
+      "path": "migrations/release_0024_catalog_revision.sql",
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
+      "sha256": "2aa10d6d8c7281d3e2814869f04a21a439cfa468eef021968195146e936972ef",
+      "exportSha256": "2aa10d6d8c7281d3e2814869f04a21a439cfa468eef021968195146e936972ef"
+    },
+    {
+      "path": "modules/catalog/catalog-read-snapshot.ts",
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
+      "sha256": "5b74a15f3b2172e3bbaf8c3e7fa90e6dba8e7d2d5f5cfa6383a48308da4e3ba1",
+      "exportSha256": "5b74a15f3b2172e3bbaf8c3e7fa90e6dba8e7d2d5f5cfa6383a48308da4e3ba1"
+    },
+    {
+      "path": "tests/photo-reference-index.test.mjs",
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
+      "sha256": "65a019d45c9074998063961920d592de5b4dfd7ff7b5e958b0d41b5c31b5df2a",
+      "exportSha256": "65a019d45c9074998063961920d592de5b4dfd7ff7b5e958b0d41b5c31b5df2a"
+    },
+    {
+      "path": "tests/catalog-revision.test.mjs",
+      "source": "monolith-2026-10-30-indexed-photo-catalog-revision",
+      "sha256": "026a6124d35ace5617a5d64712cdfdea624ee074c4c092f414586ec770011f69",
+      "exportSha256": "026a6124d35ace5617a5d64712cdfdea624ee074c4c092f414586ec770011f69"
     }
   ],
   "runtimeCheckedDate": "2026-10-10",

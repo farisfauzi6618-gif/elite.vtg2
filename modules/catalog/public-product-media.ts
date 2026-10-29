@@ -39,7 +39,7 @@ async function claim(key:string,size:PhotoPreviewSize){
   // Expired builders retain a cleanup row; their unique path cannot overwrite a
   // newer generation, and their post-write lease check will remove that asset.
   if(existing){await tx.execute({sql:"UPDATE photo_public_derivatives SET state='revoked' WHERE photo_key=? AND preset=? AND pipeline=?",args:args(key,size)});await tx.commit();await erase({...existing,state:'revoked'});return null}
-  const total=Number((await tx.execute({sql:"SELECT COALESCE(SUM(CASE WHEN state!='ready' THEN ? ELSE byte_size END),0) AS bytes FROM photo_public_derivatives",args:[PUBLIC_MEDIA_FILE_LIMIT]})).rows[0].bytes);
+  const total=Number((await tx.execute({sql:'SELECT bytes FROM photo_public_budget WHERE id=1',args:[]})).rows[0].bytes);
   if(total+PUBLIC_MEDIA_FILE_LIMIT>PUBLIC_MEDIA_TOTAL_LIMIT){await tx.commit();return null}
   const lease=crypto.randomUUID(),pathname=`products/${PUBLIC_MEDIA_PIPELINE}/${key}/${size}-${lease}.webp`,now=Date.now();
   await tx.execute({sql:"INSERT INTO photo_public_derivatives(photo_key,preset,pipeline,state,lease_id,pathname,byte_size,updated_at) VALUES(?,?,?,'building',?,?,0,?)",args:[...args(key,size),lease,pathname,now]});

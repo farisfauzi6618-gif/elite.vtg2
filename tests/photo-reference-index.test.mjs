@@ -1,0 +1,41 @@
+import test,{after} from 'node:test';
+import assert from 'node:assert/strict';
+import {createClient} from '@libsql/client';
+import {mkdtemp,readdir,copyFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {migrate} from '../scripts/migration-core.mjs';
+const dir=await mkdtemp(path.join(tmpdir(),'elite-index-migration-')),client=createClient({url:'file::memory:'}),migration='release_0023_indexed_photo_references.sql';
+for(const file of await readdir(new URL('../migrations/',import.meta.url)))if(file.endsWith('.sql')&&file<migration)await copyFile(new URL('../migrations/'+file,import.meta.url),path.join(dir,file));
+await migrate(client,pathToFileURL(dir+path.sep));
+const ids=Array.from({length:100},()=>crypto.randomUUID()),keys=Array.from({length:100},()=>Array.from({length:17},()=>crypto.randomUUID()));
+await client.batch(ids.map((id,i)=>({sql:"INSERT INTO products(id,shortcode,instagram_url,name,brand,category,color,photo_key,photo_keys,caption,warnings,reviewed,status,created_at,updated_at) VALUES(?,?,'','Fixture','Brand','Polo','Blue',?,?,'','[]',1,'published','2026-10-01','2026-10-01')",args:[id,id,keys[i][0],JSON.stringify(keys[i])]})),'write');
+const before=JSON.stringify((await client.execute('SELECT * FROM products ORDER BY id')).rows);
+await migrate(client,new URL('../migrations/',import.meta.url));
+const lookup=key=>client.execute({sql:"SELECT r.product_id FROM photo_public_references r JOIN products p ON p.id=r.product_id WHERE r.photo_key=? AND p.status='published' AND p.deleted_at IS NULL LIMIT 1",args:[key]});
+after(async()=>{client.close();assert.ok(path.resolve(dir).startsWith(path.resolve(tmpdir())+path.sep));await rm(dir,{recursive:true,force:true})});
+test('additive migration backfills every existing gallery without changing business rows; lookup uses photo key index',async()=>{
+ assert.equal(JSON.stringify((await client.execute('SELECT * FROM products ORDER BY id')).rows),before);
+ assert.equal(Number((await client.execute('SELECT COUNT(*) AS n FROM photo_public_references')).rows[0].n),1700);
+ assert.equal((await lookup(keys[99][16])).rows[0].product_id,ids[99]);
+ const plan=(await client.execute({sql:"EXPLAIN QUERY PLAN SELECT r.product_id FROM photo_public_references r JOIN products p ON p.id=r.product_id WHERE r.photo_key=? AND p.status='published' AND p.deleted_at IS NULL LIMIT 1",args:[keys[99][16]]})).rows.map(r=>r.detail).join('\n');
+ assert.match(plan,/SEARCH r USING PRIMARY KEY/);assert.match(plan,/SEARCH p USING INDEX/);assert.doesNotMatch(plan,/json_each|SCAN p|SCAN r/);
+});
+test('triggers atomically revoke galleries, colors, unpublish, trash and deletion while preserving shared references',async()=>{
+ const key=crypto.randomUUID(),color={id:'color',active:true,photoKey:key,photoKeys:[key],swatchImage:key};
+ await client.execute({sql:'UPDATE products SET color_variants=? WHERE id=?',args:[JSON.stringify([color]),ids[0]]});assert.equal((await lookup(key)).rows.length,1);
+ await client.execute({sql:'UPDATE products SET color_variants=? WHERE id=?',args:[JSON.stringify([{...color,active:false}]),ids[0]]});assert.equal((await lookup(key)).rows.length,0);
+ await client.execute({sql:'UPDATE products SET photo_keys=? WHERE id IN (?,?)',args:[JSON.stringify([key]),ids[0],ids[1]]});
+ await client.execute({sql:"UPDATE products SET status='draft' WHERE id=?",args:[ids[0]]});assert.equal((await lookup(key)).rows[0].product_id,ids[1]);
+ await client.execute({sql:"UPDATE products SET deleted_at='2026-10-30' WHERE id=?",args:[ids[1]]});assert.equal((await lookup(key)).rows.length,0);
+ await client.execute({sql:'UPDATE products SET deleted_at=NULL WHERE id=?',args:[ids[1]]});assert.equal((await lookup(key)).rows.length,1);
+ await client.execute({sql:'UPDATE products SET photo_keys=\'[]\' WHERE id=?',args:[ids[1]]});assert.equal((await lookup(key)).rows.length,0);
+});
+test('media budget counter matches lease reservation and actual ready bytes on updates and deletes',async()=>{
+ const key=crypto.randomUUID(),read=async()=>Number((await client.execute('SELECT bytes FROM photo_public_budget WHERE id=1')).rows[0].bytes);
+ await client.execute({sql:"INSERT INTO photo_public_derivatives VALUES(?,'thumb','preview-v1','building','lease','fixture.webp',NULL,0,1)",args:[key]});assert.equal(await read(),524288);
+ await client.execute({sql:"UPDATE photo_public_derivatives SET state='ready',byte_size=12345 WHERE photo_key=?",args:[key]});assert.equal(await read(),12345);
+ await client.execute({sql:"UPDATE photo_public_derivatives SET state='revoked' WHERE photo_key=?",args:[key]});assert.equal(await read(),524288);
+ await client.execute('DELETE FROM photo_public_derivatives');assert.equal(await read(),0);
+});

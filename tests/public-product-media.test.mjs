@@ -30,7 +30,7 @@ test('public route redirects small metadata-stripped rendition; repeat requests 
 });
 async function publicationReads(work){
  const execute=client.execute;let reads=0;
- client.execute=function(statement,...rest){const sql=typeof statement==='string'?statement:statement.sql;if(sql.startsWith('SELECT id FROM products WHERE status=')&&sql.includes('json_each'))reads++;return execute.call(this,statement,...rest)};
+ client.execute=function(statement,...rest){const sql=typeof statement==='string'?statement:statement.sql;if(sql.startsWith('SELECT r.product_id FROM photo_public_references'))reads++;return execute.call(this,statement,...rest)};
  try{return {value:await work(),reads}}finally{client.execute=execute}
 }
 test('ready CDN delivery checks publication once per origin request, including conditional requests',async()=>{
