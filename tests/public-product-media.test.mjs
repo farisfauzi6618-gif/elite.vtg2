@@ -28,6 +28,33 @@ test('public route redirects small metadata-stripped rendition; repeat requests 
  assert.equal(m.calls.filter(c=>c.operation==='put').length,1);
  const row=(await client.execute('SELECT * FROM photo_public_derivatives')).rows[0];assert.equal(row.state,'ready');assert.equal(row.byte_size,upload.bytes.length);
 });
+async function publicationReads(work){
+ const execute=client.execute;let reads=0;
+ client.execute=function(statement,...rest){const sql=typeof statement==='string'?statement:statement.sql;if(sql.startsWith('SELECT id FROM products WHERE status=')&&sql.includes('json_each'))reads++;return execute.call(this,statement,...rest)};
+ try{return {value:await work(),reads}}finally{client.execute=execute}
+}
+test('ready CDN delivery checks publication once per origin request, including conditional requests',async()=>{
+ const context={params:Promise.resolve({key})},url='https://elite.test/api/product-images/'+key+'?size=thumb',first=await m.publicImage(new Request(url),context);assert.equal(first.status,307);
+ for(let i=0;i<3;i++){
+  const result=await publicationReads(()=>m.publicImage(new Request(url),context));assert.equal(result.value.status,307);assert.equal(result.value.headers.get('Location'),first.headers.get('Location'));assert.equal(result.reads,1);
+ }
+ const conditional=await publicationReads(()=>m.publicImage(new Request(url,{headers:{'If-None-Match':first.headers.get('ETag')}}),context));assert.equal(conditional.value.status,304);assert.equal(conditional.reads,1);assert.equal(conditional.value.headers.get('Vercel-CDN-Cache-Control'),'public, s-maxage=60, must-revalidate');assert.equal(m.calls.filter(call=>call.operation==='put').length,1);
+});
+test('ready URLs and old validators cannot bypass fresh draft, deletion or inactive-color checks',async()=>{
+ const context={params:Promise.resolve({key})},url='https://elite.test/api/product-images/'+key+'?size=thumb',first=await m.publicImage(new Request(url),context);assert.equal(first.status,307);
+ const headers={'If-None-Match':first.headers.get('ETag'),'X-Published-Photo':'true','X-Skip-Publication':'true',Cookie:'elite_admin=forged'};
+ for(const sql of ["UPDATE products SET status='draft' WHERE id=?","UPDATE products SET deleted_at='2026-10-29' WHERE id=?"]){
+  await client.execute({sql:"UPDATE products SET status='published',deleted_at=NULL WHERE id=?",args:[id]});await client.execute({sql,args:[id]});const result=await publicationReads(()=>m.publicImage(new Request(url+'&published=1&skipPublication=1',{headers}),context));assert.equal(result.value.status,404);assert.equal(result.reads,1);assert.equal(result.value.headers.get('Location'),null);assert.equal(result.value.headers.get('Vercel-CDN-Cache-Control'),null);assert.equal(await m.publicProductMediaUrl(key,'thumb'),null);
+ }
+ const color=await seed('draft'),parent=await seed(),variant={id:crypto.randomUUID(),name:'Cream',active:true,photoKey:color.key,photoKeys:[color.key],swatchImage:color.key};await client.execute({sql:'UPDATE products SET color_variants=? WHERE id=?',args:[JSON.stringify([variant]),parent.id]});
+ const colorUrl='https://elite.test/api/product-images/'+color.key+'?size=thumb',colorContext={params:Promise.resolve({key:color.key})},active=await m.publicImage(new Request(colorUrl),colorContext);assert.equal(active.status,307);
+ await client.execute({sql:'UPDATE products SET color_variants=? WHERE id=?',args:[JSON.stringify([{...variant,active:false}]),parent.id]});const inactive=await publicationReads(()=>m.publicImage(new Request(colorUrl,{headers:{'If-None-Match':active.headers.get('ETag')}}),colorContext));assert.equal(inactive.value.status,404);assert.equal(inactive.reads,1);assert.equal(inactive.value.headers.get('Location'),null);
+});
+test('server preview fallback still checks publication once and keeps its original cache policy',async()=>{
+ process.env.PRODUCT_MEDIA_READ_WRITE_TOKEN='';const context={params:Promise.resolve({key})},url='https://elite.test/api/product-images/'+key+'?size=cardSmall';
+ const result=await publicationReads(()=>m.publicImage(new Request(url),context));assert.equal(result.value.status,200);assert.equal(result.reads,1);assert.equal(result.value.headers.get('Cache-Control'),'private, max-age=86400, immutable');assert.equal(result.value.headers.get('Vercel-CDN-Cache-Control'),'public, s-maxage=60, must-revalidate');assert.equal(result.value.headers.get('Content-Type'),'image/webp');assert.equal(m.calls.length,0);
+ await client.execute({sql:"UPDATE products SET status='draft' WHERE id=?",args:[id]});const hidden=await publicationReads(()=>m.publicImage(new Request(url,{headers:{'If-None-Match':result.value.headers.get('ETag')}}),context));assert.equal(hidden.value.status,404);assert.equal(hidden.reads,1);
+});
 test('draft, unattached proof, inactive colors and deleted products never upload even with public token',async()=>{
  const draft=await seed('draft'),proof=crypto.randomUUID(),inactive=crypto.randomUUID();await client.execute({sql:'UPDATE products SET color_variants=? WHERE id=?',args:[JSON.stringify([{id:'color',name:'Cream',active:false,photoKey:inactive,photoKeys:[inactive],swatchImage:inactive}]),id]});
  for(const value of [draft.key,proof,inactive])assert.equal(await m.publicProductMediaUrl(value,'thumb'),null);

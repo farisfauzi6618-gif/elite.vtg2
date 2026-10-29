@@ -1,6 +1,7 @@
 import {put,del} from '@vercel/blob';
 import {getSqlClient} from '@/lib/database';
 import {publishedPhoto} from './photo-publication';
+import {AppError} from './server';
 import type {PhotoBytes,PhotoPreviewSize} from './photo-preview';
 import type {Product} from './catalog-types';
 
@@ -11,6 +12,7 @@ export const PUBLIC_MEDIA_PIPELINE='preview-v1';
 export const PUBLIC_MEDIA_FILE_LIMIT=512*1024;
 export const PUBLIC_MEDIA_TOTAL_LIMIT=128*1024*1024;
 const LEASE_MS=120_000;
+const publicPresets=new Set(['thumb','cardSmall','card','detail']);
 type Row={photo_key:string;preset:PhotoPreviewSize;pipeline:string;state:string;lease_id:string;pathname:string;public_url:string|null;byte_size:number;updated_at:number};
 export function publicMediaEnabled(){return !!token()&&process.env.PRODUCT_MEDIA_DISABLED!=='1'&&process.env.VERCEL_ENV!=='preview'}
 function validUrl(url:string,pathname:string){try{const value=new URL(url);return value.protocol==='https:'&&!value.username&&!value.password&&!value.port&&/^[a-z0-9-]+\.public\.blob\.vercel-storage\.com$/.test(value.hostname)&&value.pathname==='/'+pathname&&!value.search&&!value.hash}catch{return false}}
@@ -54,7 +56,16 @@ export async function publicProductMediaUrl(key:string,size:PhotoPreviewSize,loa
  if(!publicMediaEnabled())return null;
  try{
   // Defense in depth: callers cannot publish arbitrary private storage keys.
-  if(!/^[a-f0-9-]{36}$/.test(key)||!['thumb','cardSmall','card','detail'].includes(size)||!await publishedPhoto(key))return null;
+  if(!/^[a-f0-9-]{36}$/.test(key)||!publicPresets.has(size)||!await publishedPhoto(key))return null;
+  return await resolvePublishedMediaUrl(key,size,loadPreview);
+ }catch{return null}
+}
+
+// This is deliberately module-private. Both exported entry points verify fresh
+// publication before calling it; callers cannot supply a trusted/public flag.
+async function resolvePublishedMediaUrl(key:string,size:PhotoPreviewSize,loadPreview:(key:string,size:PhotoPreviewSize)=>Promise<PhotoBytes|null>):Promise<string|null>{
+ if(!publicMediaEnabled())return null;
+ try{
   const result=await claim(key,size);if(!result)return null;
   if(result.ready)return result.ready.public_url&&validUrl(result.ready.public_url,result.ready.pathname)?result.ready.public_url:null;
   const row=result.building!;
@@ -74,6 +85,31 @@ export async function publicProductMediaUrl(key:string,size:PhotoPreviewSize,loa
    return uploaded.url;
   }catch{await retire(row).catch(()=>{});return null}
  }catch{return null} // A cache/storage outage must not break product images.
+}
+
+// Keep authorization and response resolution together so one origin request
+// needs only one initial publication query, including on ready CDN redirects.
+// Generation-time rechecks above still protect unpublish/color-removal races.
+export async function publicProductImageResponse(request:Request,key:string,loadPreview:(key:string,size:PhotoPreviewSize)=>Promise<PhotoBytes|null>){
+ const size=new URL(request.url).searchParams.get('size');
+ if(!/^[a-f0-9-]{36}$/.test(key))throw new AppError(404,'Foto tidak ditemukan.');
+ if(!size||!publicPresets.has(size))throw new AppError(400,'Ukuran foto tidak didukung.');
+ if(!await publishedPhoto(key))throw new AppError(404,'Foto tidak ditemukan.');
+ const headers=new Headers({
+  'Cache-Control':'private, max-age=86400, immutable',
+  'Vercel-CDN-Cache-Control':'public, s-maxage=60, must-revalidate',
+  'X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'",
+  'Cross-Origin-Resource-Policy':'same-origin',
+  'ETag':`W/"public-photo-${key}-v1-${size}"`,
+ });
+ const etag=headers.get('ETag')!;
+ if(request.headers.get('if-none-match')?.split(',').some(value=>value.trim()==='*'||value.trim().replace(/^W\//,'')===etag.replace(/^W\//,'')))return new Response(null,{status:304,headers});
+ const direct=await resolvePublishedMediaUrl(key,size as PhotoPreviewSize,loadPreview);
+ if(direct){headers.set('Location',direct);headers.set('Cache-Control','private, max-age=60');return new Response(null,{status:307,headers})}
+ const image=await loadPreview(key,size as PhotoPreviewSize);
+ if(!image)throw new AppError(404,'Foto tidak ditemukan.');
+ headers.set('Content-Type',image.contentType);
+ return new Response(image.body as BodyInit,{headers});
 }
 
 export function publicProductPhotoKeys(product:Product){
