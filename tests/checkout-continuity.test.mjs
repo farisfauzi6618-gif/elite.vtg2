@@ -15,6 +15,29 @@ test('a valid new catalog basket releases only the old browser session after the
 test('an expired or unavailable new selection preserves the prior invoice session',async()=>{
  const calls=[];await assert.rejects(()=>m.resumeCatalogSelection('expired',old,async(p,i)=>{calls.push(i?.method||'GET');throw Error('Expired')}));assert.deepEqual(calls,['GET']);
 });
+test('selection preview starts before bootstrap finishes and is reused before cookie release',async()=>{
+ const calls=[];let resolve;const pending=new Promise(r=>{resolve=r});
+ const request=async(p,i)=>{calls.push(i?.method||'GET');return i?.method==='DELETE'?{}:pending};
+ const preview=m.prefetchCatalogSelection('new-token',request);
+ assert.deepEqual(calls,['GET']); // Configuration and invoice may still be in flight.
+ const resumed=m.resumeCatalogSelection('new-token',old,request,preview);
+ await Promise.resolve();assert.deepEqual(calls,['GET']);resolve(selection);
+ assert.equal(await resumed,selection);assert.deepEqual(calls,['GET','DELETE']);
+});
+test('failed speculative selection is captured, never clears a cookie and can be ignored for an existing invoice',async()=>{
+ const failure=Error('Expired'),calls=[];
+ const preview=m.prefetchCatalogSelection('expired',async()=>{throw failure});
+ const captured=await preview;assert.equal(captured.error,failure);
+ await assert.rejects(()=>m.resumeCatalogSelection('expired',old,async()=>{calls.push('DELETE')},preview),/Expired/);
+ assert.deepEqual(calls,[]);
+});
+test('selection previews are isolated by request and forward cancellation',async()=>{
+ const controller=new AbortController(),calls=[];
+ const request=async(p,i)=>{calls.push([p,i.signal]);return {...selection,amount:p.endsWith('member')?200:100}};
+ const a=m.prefetchCatalogSelection('guest',request,controller.signal),b=m.prefetchCatalogSelection('member',request);
+ assert.equal((await a).value.amount,100);assert.equal((await b).value.amount,200);
+ assert.equal(calls[0][1],controller.signal);assert.equal(calls[1][1],undefined);
+});
 test('a pending order or the same completed selection does not clear its cookie',async()=>{
  for(const existing of [null,{...old,status:'awaiting_proof'}, {...old,catalog_token:'new-token'}]){const calls=[];await m.resumeCatalogSelection('new-token',existing,async(p,i)=>{calls.push(i?.method||'GET');return selection});assert.deepEqual(calls,['GET']);}
 });

@@ -36,3 +36,18 @@ test('Reserve deadline changes the catalog clock without waiting for a database 
  const stamp=await m.catalogStamp();now+=5001;assert.notEqual(await m.catalogStamp(),stamp);
  const changed=await m.catalogStamp();await client.execute({sql:'UPDATE orders SET reservation_deadline=? WHERE id=?',args:[now+10000,id]});assert.notEqual(await m.catalogStamp(),changed);await client.execute({sql:'DELETE FROM orders WHERE id=?',args:[id]});
 });
+test('notification and recipient metadata preserve warm catalog while Reserve status and deadline invalidate it',async()=>{
+ now=originalNow();const product=await seed(),id=crypto.randomUUID();
+ await client.execute({sql:"INSERT INTO orders(id,session_hash,created_at,name,phone,address,postcode,item,total,order_type,reservation_status,reservation_deadline) VALUES(?,?,?,'SIMULATION','08000000000','SIMULATION','00000','Fixture',100,'reserve','RESERVED',?)",args:[id,id,now,now+600000]});
+ await client.execute({sql:"INSERT INTO reserve_items(order_id,group_id,product_id,quantity,state) VALUES(?,?,?,1,'active')",args:[id,product.group,product.id]});
+ const first=await get(),etag=first.headers.get('ETag'),stamp=await m.catalogStamp();assert.equal((await first.json()).listing.availableCount,0);
+ await client.execute({sql:"UPDATE orders SET notify_status='sent',name='SIMULATION UPDATED' WHERE id=?",args:[id]});
+ assert.equal(await m.catalogStamp(),stamp);queries=[];
+ assert.equal((await get(url,etag)).status,304);assert.equal(queries.length,1);
+ await client.execute({sql:"UPDATE orders SET reservation_status='CANCELLED' WHERE id=?",args:[id]});
+ assert.notEqual(await m.catalogStamp(),stamp);const released=await get(url,etag);assert.equal(released.status,200);assert.equal((await released.json()).listing.availableCount,1);
+ const changed=await m.catalogStamp();await client.execute({sql:'UPDATE orders SET reservation_deadline=? WHERE id=?',args:[now+10000,id]});assert.notEqual(await m.catalogStamp(),changed);
+ const unchanged=await m.catalogStamp();await client.execute({sql:'UPDATE orders SET reservation_deadline=reservation_deadline,reservation_status=reservation_status WHERE id=?',args:[id]});assert.equal(await m.catalogStamp(),unchanged);
+ assert.equal(Number((await client.execute({sql:"SELECT at FROM catalog_time_events WHERE source=?",args:['o:'+id]})).rows[0].at),now+10000);
+ await client.execute({sql:'DELETE FROM reserve_items WHERE order_id=?',args:[id]});await client.execute({sql:'DELETE FROM orders WHERE id=?',args:[id]});assert.notEqual(await m.catalogStamp(),unchanged);
+});

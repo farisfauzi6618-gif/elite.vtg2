@@ -30,9 +30,20 @@ export function resumeMemberInvoice(invoice:string,request:CheckoutRequest){
  return request<Order>('/api/customer/orders/resume',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invoice})});
 }
 
-export async function resumeCatalogSelection(token: string, existing: Order | null, request: CheckoutRequest) {
+type SelectionPreview = Promise<{value:CatalogSelection;error?:never}|{error:unknown;value?:never}>;
+
+// Request-local only: do not share selections across accounts or mount lifetimes.
+// Capture failure immediately; an existing invoice may make this preview unnecessary.
+export function prefetchCatalogSelection(token:string,request:CheckoutRequest,signal?:AbortSignal):SelectionPreview {
+  return request<CatalogSelection>('/api/order/catalog?token='+encodeURIComponent(token),{signal})
+    .then(value=>({value}),error=>({error}));
+}
+
+export async function resumeCatalogSelection(token: string, existing: Order | null, request: CheckoutRequest, preview?:SelectionPreview) {
   // Validate the new selection before releasing the previous invoice's cookie.
-  const selection = await request<CatalogSelection>('/api/order/catalog?token=' + encodeURIComponent(token));
+  const result = preview ? await preview : {value:await request<CatalogSelection>('/api/order/catalog?token=' + encodeURIComponent(token))};
+  if ('error' in result) throw result.error;
+  const selection = result.value;
   if (existing && (existing.status !== 'awaiting_proof'||existing.order_type==='reserve') && existing.catalog_token !== token) {
     // This endpoint expires only the browser cookie; the saved invoice remains.
     await request('/api/order', { method: 'DELETE' });

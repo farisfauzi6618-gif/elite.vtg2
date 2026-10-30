@@ -27,7 +27,7 @@ import { MAX_ORDER_ITEMS,normalizeOrderItems,orderItems,orderShippingGrams } fro
 import { PaymentPanel } from "./payment-panel";
 import { paymentMethodLabel,paymentStatusLabel,storedPaymentMethod,type PaymentConfig,type PaymentMethod } from "@/modules/order/payment-types";
 import { TrackingCard } from "../tracking-card";
-import { resumeCatalogSelection,catalogReturnHref,recoverSubmittedOrder,resumeMemberInvoice } from "@/modules/order/checkout-session";
+import { prefetchCatalogSelection,resumeCatalogSelection,catalogReturnHref,recoverSubmittedOrder,resumeMemberInvoice } from "@/modules/order/checkout-session";
 const blank={name:"",phone:"",address:"",postcode:"",item:"",itemAmount:""};
 async function request<T>(path:string,init?:RequestInit):Promise<T>{try{const r=await fetch(path,init);const v=await r.json() as {error?:string};if(!r.ok||v.error)throw new Error(v.error||"Permintaan belum berhasil.");return v as T}catch(error){throw new Error(checkoutMessage(error))}}
 const shipping=<T,>(body:Record<string,unknown>)=>request<T>("/api/shipping",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
@@ -59,14 +59,21 @@ export default function OrderForm(){
  const rewards=useRewardQuote(!!customer&&step===1&&!reserveMode&&!catalogLoading&&goods>0&&(linked||goods>=1000)?(linked&&catalogToken?{context:'checkout',catalogToken,choice:rewardChoice}:!linked?{context:'manual',itemAmount:goods,choice:rewardChoice}:null):null);
 
  useEffect(()=>{
-  let active=true;
+  let active=true;const selectionController=new AbortController();
   async function init(){
    const params=new URLSearchParams(window.location.search),token=params.get('catalog')||'',newManual=!token&&params.get('manual')==='baru';
    const requested=params.get('reward');if(requested&&/^[a-zA-Z0-9_-]{1,100}$/.test(requested))setRewardChoice(requested);
    if(token){setLinked(true);setCatalogLoading(true)}else setCheckoutId(crypto.randomUUID());
    try{
     const accountInvoice=params.get('invoice'),reserveInvoice=params.get('reserveInvoice'),reserveCap=/^[a-f0-9]{64}$/.test(window.location.hash.slice(1))?window.location.hash.slice(1):'';if(reserveCap)setReserveAuthorization(reserveCap);if(accountInvoice)setRequestedInvoice(accountInvoice);
-    const [c,o]=await Promise.all([request<{ready:boolean;shippingProtection?:boolean;payment:PaymentConfig;defaultGrams?:number}>("/api/config"),accountInvoice?resumeMemberInvoice(accountInvoice,request):fetch(reserveInvoice||reserveCap?'/api/reserve'+(reserveInvoice?'?invoice='+encodeURIComponent(reserveInvoice):''):'/api/order',{headers:reserveCap?{Authorization:'Bearer '+reserveCap}:{}}).then(r=>r.ok?r.json() as Promise<Order>:null)]);
+    // Start selection as soon as the existing invoice is known, without waiting for
+    // configuration. Never issue an extra quote when resuming the same invoice.
+    let selectionPreview:ReturnType<typeof prefetchCatalogSelection>|undefined;
+    const invoiceRequest=(accountInvoice?resumeMemberInvoice(accountInvoice,request):fetch(reserveInvoice||reserveCap?'/api/reserve'+(reserveInvoice?'?invoice='+encodeURIComponent(reserveInvoice):''):'/api/order',{headers:reserveCap?{Authorization:'Bearer '+reserveCap}:{}}).then(r=>r.ok?r.json() as Promise<Order>:null)).then(o=>{
+     if(active&&token&&(!o||o.catalog_token!==token)&&!accountInvoice&&!reserveInvoice&&!reserveCap)selectionPreview=prefetchCatalogSelection(token,request,selectionController.signal);
+     return o;
+    });
+    const [c,o]=await Promise.all([request<{ready:boolean;shippingProtection?:boolean;payment:PaymentConfig;defaultGrams?:number}>("/api/config"),invoiceRequest]);
     if(!active)return;setConfig(c);setPaymentChoice(c.payment.defaultMethod??'bca_transfer');if(accountInvoice)window.history.replaceState(null,"","/order");
     if(newManual){discardDraft.current=true;await request("/api/order",{method:"DELETE"});return;}
     if(o){
@@ -78,7 +85,7 @@ export default function OrderForm(){
      setPostStatus(progressStatus(o));setResumeReady(o.order_type==='reserve'||o.status!=='awaiting_proof');setConsent(true);setStep(o.status==='awaiting_proof'?2:3);
     }
     if(token&&(!o||o.catalog_token!==token)){
-     const q=await resumeCatalogSelection(token,o,request);
+     const q=await resumeCatalogSelection(token,o,request,selectionPreview);
      if(!active)return;
      setRewardChoice(requested&&/^[a-zA-Z0-9_-]{1,100}$/.test(requested)?requested:'auto');setOrder(null);setStep(1);setLinked(true);setCatalogToken(token);setConsent(false);setShippingPayment('prepaid');setQuote(null);setQuotes([]);setExpired(false);
      setCheckoutId(q.id??'');setPreviewItems(q.preview??[]);setReserveMode(q.orderType==='reserve');if(q.orderType==='reserve'){setDeposit(String(minimumReserveDeposit(q.amount)));setRewardChoice('none')}
@@ -88,7 +95,7 @@ export default function OrderForm(){
    }catch(e){if(active){setError((e as Error).message)}}
    finally{if(active){setCatalogLoading(false);setInitialized(true)}}
   }
-  void init();return()=>{active=false};
+  void init();return()=>{active=false;selectionController.abort()};
  },[]);
  useEffect(()=>{if(!file){setPreview("");return;}const u=URL.createObjectURL(file);setPreview(u);return()=>URL.revokeObjectURL(u);},[file]);
  useEffect(()=>()=>{proofSequence.current++;},[]);
