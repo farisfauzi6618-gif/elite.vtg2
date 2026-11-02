@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {verifyHandoverLedger,requireProductionMigrationTarget} from '../scripts/activate-admin-handover.mjs';
+const name='release_0026_admin_handover.sql';
+const manifest=new Map([...Array.from({length:49},(_,i)=>['old_'+i+'.sql','checksum_'+i]),[name,'new_checksum']]);
+const rows=()=>[...manifest].filter(([n])=>n!==name).map(([name,checksum])=>({name,checksum}));
+test('guard permits exactly release_0026 and permits a safe already-applied retry',()=>{assert.deepEqual(verifyHandoverLedger(manifest,rows()),[name]);assert.deepEqual(verifyHandoverLedger(manifest,[...rows(),{name,checksum:'new_checksum'}]),[]);});
+test('guard refuses any old missing migration or changed checksum',()=>{assert.throws(()=>verifyHandoverLedger(manifest,rows().slice(1)),/older migration/);const changed=rows();changed[0].checksum='changed';assert.throws(()=>verifyHandoverLedger(manifest,changed),/checksum mismatch/);});
+test('guard refuses unknown, duplicate, changed-new and expanded manifests',()=>{assert.throws(()=>verifyHandoverLedger(manifest,[...rows(),{name:'unknown.sql',checksum:'x'}]),/Unexpected/);assert.throws(()=>verifyHandoverLedger(manifest,[...rows(),rows()[0]]),/Unexpected/);assert.throws(()=>verifyHandoverLedger(manifest,[...rows(),{name,checksum:'changed'}]),/checksum/);assert.throws(()=>verifyHandoverLedger(new Map([...manifest,['future.sql','x']]),rows()),/50-file/);});
+const env=()=>({VERCEL:'1',VERCEL_ENV:'production',VERCEL_PROJECT_ID:'prj_4XLgFbyMk1CN0ZI8Y9wiPMOLBVM9',TURSO_DATABASE_URL:'libsql://elite-vtg2-production-fixture.example.turso.io',TURSO_AUTH_TOKEN:'SIMULATED_NOT_A_REAL_TOKEN'});
+test('apply accepts only the intended production environment and project',()=>{assert.doesNotThrow(()=>requireProductionMigrationTarget(env()));for(const patch of [{VERCEL:'0'},{VERCEL_ENV:'preview'},{VERCEL_PROJECT_ID:'wrong'}])assert.throws(()=>requireProductionMigrationTarget({...env(),...patch}));});
+test('apply rejects local, foreign, credential-bearing and missing-auth database targets',()=>{for(const value of ['file:local.db','https://other.turso.io','libsql://elite-vtg2-production-foreign.example.com','https://user:password@elite-vtg2-production-fixture.example.turso.io','https://elite-vtg2-production-fixture.example.turso.io?token=x'])assert.throws(()=>requireProductionMigrationTarget({...env(),TURSO_DATABASE_URL:value}));assert.throws(()=>requireProductionMigrationTarget({...env(),TURSO_AUTH_TOKEN:''}));});

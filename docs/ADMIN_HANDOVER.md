@@ -38,3 +38,7 @@ Tanda tangan yang tidak valid gagal tertutup; aplikasi tidak diam-diam mengganti
 `ADMIN_HANDOVER_ENABLED=0` menghentikan akses pengelola/undangan serta perubahan pembayaran baru. **Biarkan `PAYMENT_DESTINATION_OVERRIDE_ENABLED=1` setelah tujuan baru disimpan** agar checkout terus menggunakan tujuan yang aktif. Mematikan flag pembacaan tujuan atau mengembalikan kode lama akan menggunakan konfigurasi pembayaran environment lama; jangan lakukan rollback itu tanpa menyelaraskan tujuan pembayaran secara terverifikasi. Pemulihan paling aman menggunakan perbaikan maju, dengan akun utama tetap tersedia.
 
 Jangan menyalin secret produksi ke pengujian. Tidak ada akun/order/pembayaran/pesan Telegram produksi yang dibuat untuk validasi ini. Keberhasilan pengujian lokal tidak menyatakan akun undangan produksi sudah aktif atau migrasi produksi sudah diterapkan.
+
+## Pelaksanaan rilis tanpa menyalin token
+
+Untuk aktivasi pertama, `scripts/activate-admin-handover.mjs --apply` dijalankan sekali di build produksi Vercel sebelum build aplikasi. Script memeriksa target environment/database serta seluruh checksum, menolak migrasi lama yang hilang, dan memanggil runner resmi untuk release_0026. Token tetap berada di environment Vercel. Command build biasa tidak menjalankan migrasi. Script menerima retry bila ledger sudah 50/50 dengan checksum yang sama.
