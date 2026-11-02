@@ -1,6 +1,7 @@
 import { env } from '@/lib/env';
 import type { PaymentConfig, PaymentMethod } from "@/modules/order/payment-types";
 import { createQrisAvailabilityProbe } from './qris-availability';
+import { paymentOverride } from './payment-destination';
 
 const qrisAvailable=createQrisAvailabilityProbe();
 
@@ -17,12 +18,14 @@ export function trustedQris() {
   return key && /^qris\/[a-zA-Z0-9_-]+$/.test(key) && mime && supportedMimes.includes(mime) && merchant && sha256 && /^[a-f0-9]{64}$/.test(sha256)
     ? { key, mime, merchant, sha256 } : null;
 }
+export async function activeQris() { const destination=await paymentOverride();return destination?destination.qris:trustedQris(); }
 export async function paymentConfig(): Promise<PaymentConfig> {
+  const destination=await paymentOverride();
   const accountNumber = env.PAYMENT_BCA_ACCOUNT_NUMBER?.trim();
   const accountHolder = validName(env.PAYMENT_BCA_ACCOUNT_HOLDER);
-  const bca = accountNumber && /^\d{10}$/.test(accountNumber) && accountHolder
-    ? { bank: "BCA" as const, accountNumber, accountHolder } : null;
-  const asset = trustedQris();
+  const bca = destination?.bca ?? (accountNumber && /^\d{10}$/.test(accountNumber) && accountHolder
+    ? { bank: "BCA" as const, accountNumber, accountHolder } : null);
+  const asset = destination?destination.qris:trustedQris();
   let qris: PaymentConfig["qris"] = null;
   if (asset && env.BUCKET) {
     if(await qrisAvailable(env.BUCKET,asset))qris = { merchant: asset.merchant, imageUrl: "/api/qris" };

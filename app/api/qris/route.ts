@@ -1,7 +1,7 @@
 import { api,bucket,AppError } from "@/modules/order/order-server";
-import { trustedQris } from "@/modules/order/payment-config";
+import { activeQris } from "@/modules/order/payment-config";
 export const GET=()=>api(async()=>{
- const asset=trustedQris();if(!asset)throw new AppError(404,"QRIS belum tersedia.");
+ const asset=await activeQris();if(!asset)throw new AppError(404,"QRIS belum tersedia.");
  const f=await bucket().get(asset.key);if(!f||f.size<32||f.size>4*1024*1024)throw new AppError(404,"QRIS belum tersedia.");
  const bytes=await f.arrayBuffer(),b=new Uint8Array(bytes);
  const png=b[0]===137&&b[1]===80&&b[2]===78&&b[3]===71&&b[4]===13&&b[5]===10&&b[6]===26&&b[7]===10;
