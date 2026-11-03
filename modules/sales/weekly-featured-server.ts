@@ -1,4 +1,4 @@
-import type { InStatement, Transaction } from '@libsql/client';
+import type { InStatement, ResultSet } from '@libsql/client';
 import { getSqlClient } from '@/lib/database';
 import { AppError, groupFromRow, productFromRow } from '@/modules/catalog/server';
 import { FEATURED_LIMIT } from '@/modules/catalog/featured';
@@ -13,37 +13,58 @@ type Applied = Plan[number] & { position: number };
 type OwnedDiscount = Applied['discounts'][number] & { productId: string };
 type Run = { period: number; appliedAt: number; plan: Applied[]; retained: OwnedDiscount[] };
 
-async function latest(tx: Transaction): Promise<Run | null> {
-  const row = (await tx.execute('SELECT period, applied_at, plan FROM weekly_featured_runs ORDER BY period DESC LIMIT 1')).rows[0];
+const latestQuery = 'SELECT period, applied_at, plan FROM weekly_featured_runs ORDER BY period DESC LIMIT 1';
+
+function parseRun(result: ResultSet): Run | null {
+  const row = result.rows[0];
   if (!row) return null;
   return {period:Number(row.period), appliedAt:Number(row.applied_at), ...JSON.parse(String(row.plan)) as Pick<Run, 'plan' | 'retained'>};
 }
 
-async function prepare(tx: Transaction, previous: Run | null, now: number) {
-  const products = (await tx.execute(`
+function planQueries(now: number): InStatement[] {
+  return [
+    `
     SELECT p.*, a.dismissed_until, w.period AS weekly_featured_period
     FROM products p LEFT JOIN sales_product_actions a ON a.product_id=p.id
     LEFT JOIN weekly_featured_products w ON w.product_id=p.id
     WHERE p.deleted_at IS NULL AND (p.status='published' OR p.is_featured=1)
     ORDER BY p.id LIMIT 3001
-  `)).rows;
-  const groups = (await tx.execute(`
+  `,
+    `
     SELECT g.*, ${reservedQuantitySql('g')} AS reserved_qty
     FROM size_groups g JOIN products p ON p.id=g.product_id
     WHERE p.deleted_at IS NULL AND p.status='published' AND g.qty>0 LIMIT 12001
-  `)).rows;
-  if (products.length > 3000 || groups.length > 12000) {
-    throw new AppError(409,'Katalog melampaui batas pemrosesan promo mingguan.');
-  }
-  const actions = new Map(previous?.plan.map(item => [item.productId,item]));
-  const protectedGroups = new Set((await tx.execute({sql:`
+  `,
+    {sql:`
     SELECT DISTINCT json_extract(line.value,'$.groupId') AS group_id
     FROM orders o JOIN catalog_checkouts c ON c.id=o.catalog_checkout_id
     JOIN json_each(c.lines_json) line
     WHERE o.status='awaiting_proof' AND o.proof_key IS NULL
       AND COALESCE(o.order_type,'normal')='normal' AND COALESCE(c.order_type,'normal')='normal'
       AND o.created_at>?
-  `,args:[now-PAYMENT_SESSION_LIFETIME]})).rows.map(row => String(row.group_id)));
+  `,args:[now-PAYMENT_SESSION_LIFETIME]},
+    {sql:`
+    SELECT product_id, event_name, COUNT(DISTINCT session_id) AS sessions
+    FROM analytics_events
+    WHERE timestamp BETWEEN ? AND ? AND product_id IS NOT NULL AND event_name IN ('product_view','add_to_cart')
+    GROUP BY product_id,event_name
+    UNION ALL
+    SELECT ep.product_id, e.event_name, COUNT(DISTINCT e.session_id) AS sessions
+    FROM analytics_event_products ep JOIN analytics_events e ON e.id=ep.event_id
+    WHERE e.timestamp BETWEEN ? AND ? AND e.event_name='checkout_started'
+    GROUP BY ep.product_id,e.event_name
+  `,args:[now-30*DAY,now,now-30*DAY,now]},
+  ];
+}
+
+function prepare([productRows, groupRows, invoices, events]: ResultSet[], previous: Run | null, now: number) {
+  const products = productRows.rows;
+  const groups = groupRows.rows;
+  if (products.length > 3000 || groups.length > 12000) {
+    throw new AppError(409,'Katalog melampaui batas pemrosesan promo mingguan.');
+  }
+  const actions = new Map(previous?.plan.map(item => [item.productId,item]));
+  const protectedGroups = new Set(invoices.rows.map(row => String(row.group_id)));
   const ownedDiscounts = previous
     ? [...previous.retained, ...previous.plan.flatMap(item => item.discounts.map(group => ({...group,productId:item.productId})))]
     : [];
@@ -78,17 +99,6 @@ async function prepare(tx: Transaction, previous: Run | null, now: number) {
     return Number(row.dismissed_until ?? 0) <= now ? [product] : [];
   });
 
-  const events = await tx.execute({sql:`
-    SELECT product_id, event_name, COUNT(DISTINCT session_id) AS sessions
-    FROM analytics_events
-    WHERE timestamp BETWEEN ? AND ? AND product_id IS NOT NULL AND event_name IN ('product_view','add_to_cart')
-    GROUP BY product_id,event_name
-    UNION ALL
-    SELECT ep.product_id, e.event_name, COUNT(DISTINCT e.session_id) AS sessions
-    FROM analytics_event_products ep JOIN analytics_events e ON e.id=ep.event_id
-    WHERE e.timestamp BETWEEN ? AND ? AND e.event_name='checkout_started'
-    GROUP BY ep.product_id,e.event_name
-  `,args:[now-30*DAY,now,now-30*DAY,now]});
   const signals = new Map<string,Signals>();
   for (const row of events.rows) {
     const id = String(row.product_id);
@@ -106,21 +116,19 @@ async function prepare(tx: Transaction, previous: Run | null, now: number) {
 }
 
 export async function previewWeeklyFeatured(now = Date.now()) {
-  const tx = await getSqlClient().transaction('read');
-  try {
-    const previous = await latest(tx);
-    const {plan,manualSlots,hasTracking} = await prepare(tx,previous,now);
-    return {plan,manualSlots,hasTracking,lastRun:previous};
-  } finally { tx.close(); }
+  const [latest, ...inputs] = await getSqlClient().batch([latestQuery, ...planQueries(now)], 'read');
+  const previous = parseRun(latest);
+  const {plan,manualSlots,hasTracking} = prepare(inputs,previous,now);
+  return {plan,manualSlots,hasTracking,lastRun:previous};
 }
 
 export async function applyWeeklyFeatured(now = Date.now()) {
   const tx = await getSqlClient().transaction('write');
   try {
     const period = weeklyPeriod(now);
-    const previous = await latest(tx);
+    const previous = parseRun(await tx.execute(latestQuery));
     if (previous && previous.period >= period) return {applied:false, period};
-    const {plan,positions,ownedDiscounts,protectedGroups} = await prepare(tx,previous,now);
+    const {plan,positions,ownedDiscounts,protectedGroups} = prepare(await tx.batch(planQueries(now)),previous,now);
     const stamp = new Date(now).toISOString();
 
     const writes: InStatement[] = [];
