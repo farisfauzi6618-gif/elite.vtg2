@@ -24,14 +24,25 @@ function parseRun(result: ResultSet): Run | null {
 function planQueries(now: number): InStatement[] {
   return [
     `
-    SELECT p.*, a.dismissed_until, w.period AS weekly_featured_period
+    SELECT p.id, p.name, p.price, p.sale_price, p.discount_title, p.sale_colors_shared,
+      p.status, p.published_at, p.orderable_at, p.sold_at, p.is_featured, p.featured_position,
+      '[]' AS warnings,
+      (SELECT json_group_array(json_object(
+        'id', json_extract(value,'$.id'),
+        'active', value -> '$.active',
+        'price', json_extract(value,'$.price'),
+        'salePrice', json_extract(value,'$.salePrice'),
+        'discountTitle', json_extract(value,'$.discountTitle')
+      )) FROM json_each(p.color_variants)) AS color_variants,
+      a.dismissed_until, w.period AS weekly_featured_period
     FROM products p LEFT JOIN sales_product_actions a ON a.product_id=p.id
     LEFT JOIN weekly_featured_products w ON w.product_id=p.id
     WHERE p.deleted_at IS NULL AND (p.status='published' OR p.is_featured=1)
     ORDER BY p.id LIMIT 3001
   `,
     `
-    SELECT g.*, ${reservedQuantitySql('g')} AS reserved_qty
+    SELECT g.id, g.product_id, g.color_variant_id, g.qty, g.price, g.sale_price,
+      g.discount_title, '[]' AS fits, ${reservedQuantitySql('g')} AS reserved_qty
     FROM size_groups g JOIN products p ON p.id=g.product_id
     WHERE p.deleted_at IS NULL AND p.status='published' AND g.qty>0 LIMIT 12001
   `,
