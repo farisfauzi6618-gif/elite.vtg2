@@ -18,6 +18,7 @@ export async function setFeatured(input:any){
   const ordered=others.map(p=>String(p.id));if(input.featured)ordered.splice(Math.min(position==null?(current.is_featured?Math.max(0,active.findIndex(p=>p.id===id)):ordered.length):position-1,ordered.length),0,id);
   const now=new Date().toISOString();
   await tx.execute({sql:'UPDATE products SET is_featured=?,featured_position=?,version=version+1,updated_at=?,last_mutation=? WHERE id=? AND version=?',args:[Number(input.featured),input.featured?ordered.indexOf(id)+1:null,now,crypto.randomUUID(),id,version]});
+  await tx.execute({sql:'DELETE FROM weekly_featured_products WHERE product_id=?',args:[id]});
   // Renumber active entries atomically. Stock and publication timestamps are untouched.
   for(const [index,pid] of ordered.entries())if(pid!==id){const slot=index<FEATURED_LIMIT?index+1:null;await tx.execute({sql:'UPDATE products SET featured_position=?,version=version+1,updated_at=? WHERE id=? AND featured_position IS NOT ?',args:[slot,now,pid,slot]});}
   await tx.commit();

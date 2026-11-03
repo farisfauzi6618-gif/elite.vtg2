@@ -1,6 +1,7 @@
 import {validateMaterial} from './material';
 import {publicProductPhotoKeys,withdrawPublicProductMedia} from './public-product-media';
-import {salePriceIssue} from './sale-price';
+import {groupPricing,salePriceIssue} from './sale-price';
+import {WEEKLY_DISCOUNT_TITLE} from '@/modules/sales/weekly-featured';
 import {validateColors} from './color-validation';
 import {resolveColorGroups} from './color-variants';
 import {normalizeSchedule} from './product-schedule';
@@ -52,6 +53,23 @@ export async function saveProduct(input:any,actor:string){
  const category=textValue(input.category,100);if(category&&!CATEGORIES.includes(category))throw new AppError(400,'Pilih kategori utama dari daftar bersama.');const features=await validateFeatures(input.features??current.features??[]);
  const p={salePrice:integerValue(Object.hasOwn(input,'salePrice')?input.salePrice:current.salePrice,'Sale Price'),discountTitle:optionalText(Object.hasOwn(input,'discountTitle')?input.discountTitle:current.discountTitle,100),saleColorsShared:input.saleColorsShared??current.saleColorsShared??false,name:textValue(input.name,200),brand:textValue(input.brand,100),category,color:textValue(input.color,100),price:integerValue(input.price,'Harga'),condition:optionalText(input.condition),defects:optionalText(input.defects),photoKey:optionalText(input.photoKey,100),groups};
  if(typeof p.saleColorsShared!=='boolean')throw new AppError(400,'Pilih pengaturan diskon warna yang valid.');
+
+ // A manual price change retires the corresponding automatic sale. Keeping an
+ // old sale price against a new regular price could exceed the weekly cap.
+ if(groups.some(group=>group.discountTitle===WEEKLY_DISCOUNT_TITLE)){
+  const projected=resolveColorGroups({...current,...p,colorVariants:variants});
+  for(const group of groups){
+   const old=current.groups.find(candidate=>candidate.id===group.id);
+   if(group.discountTitle!==WEEKLY_DISCOUNT_TITLE||old?.discountTitle!==WEEKLY_DISCOUNT_TITLE||old.salePrice!==group.salePrice)continue;
+   const next=projected.groups.find(candidate=>candidate.id===group.id)!;
+   const pricing=groupPricing(projected,{...next,salePrice:null,discountTitle:null});
+   if(pricing.regular!==groupPricing(current,old).regular||pricing.sale!=null){
+    group.salePrice=null;
+    group.discountTitle=null;
+   }
+  }
+ }
+
  const issue=salePriceIssue(p.salePrice,p.price);if(issue)throw new AppError(400,issue);
  for(const color of variants){if(p.saleColorsShared&&color.salePrice==null){const error=salePriceIssue(p.salePrice,color.price??p.price);if(error)throw new AppError(400,color.name+': '+error);}}
  for(const g of groups){const color=variants.find(v=>v.id===g.colorVariantId),error=salePriceIssue(g.salePrice,g.price??color?.price??p.price);if(error)throw new AppError(400,'Size: '+error);}
