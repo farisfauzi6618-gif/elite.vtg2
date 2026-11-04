@@ -1,4 +1,4 @@
-import type {Product,SizeGroup} from './catalog-types';
+import {availableGroups,type Product,type SizeGroup} from './catalog-types';
 export type ColorVariant={id:string;name:string;hex:string;swatchType:'COLOR'|'IMAGE';swatchImage:string|null;active:boolean;price:number|null;salePrice?:number|null;discountTitle?:string|null;condition:string|null;defects:string|null;photoKey:string|null;photoKeys:string[]};
 export function activeColors(p:Product){return (p.colorVariants??[]).filter(v=>v.active)}
 export function groupColor(p:Product,g:SizeGroup){return (p.colorVariants??[]).find(v=>v.id===g.colorVariantId)}
@@ -20,3 +20,13 @@ export function regularColorPriceSql(g='g',p='p'){return `COALESCE(${g}.price,(S
 // The same server formula is used by reward preview and transaction price rechecks.
 export function colorSaleSql(g='g',p='p'){const v=`(SELECT json_extract(c.value,'$.salePrice') FROM json_each(${p}.color_variants) c WHERE json_extract(c.value,'$.id')=${g}.color_variant_id LIMIT 1)`;return `CASE WHEN ${g}.sale_price IS NOT NULL THEN ${g}.sale_price WHEN ${g}.price IS NOT NULL AND ${g}.price!=COALESCE((SELECT json_extract(c.value,'$.price') FROM json_each(${p}.color_variants) c WHERE json_extract(c.value,'$.id')=${g}.color_variant_id LIMIT 1),${p}.price) THEN NULL WHEN ${g}.color_variant_id IS NULL THEN ${p}.sale_price WHEN ${v} IS NOT NULL THEN ${v} WHEN ${p}.sale_colors_shared=1 THEN ${p}.sale_price ELSE NULL END`;}
 export function colorPriceSql(g='g',p='p'){const regular=regularColorPriceSql(g,p),sale=colorSaleSql(g,p);return `CASE WHEN (${sale})>0 AND (${sale})<${regular} THEN (${sale}) ELSE ${regular} END`;}
+
+// A cover previews a color. Only an explicit, active color ID is a choice.
+export function productColorSelection(parent:Product,id?:string|null){
+ const colors=activeColors(parent);
+ const availableIds=new Set(availableGroups(parent).map(group=>group.colorVariantId));
+ const available=colors.filter(color=>availableIds.has(color.id));
+ const selected=colors.find(color=>color.id===id);
+ const preview=selected??available.find(color=>color.id===parent.defaultColorVariantId)??available[0];
+ return {colors,available,selectedId:selected?.id??null,requiresChoice:available.length>1&&!selected,product:selectedColorProduct(parent,preview?.id)};
+}

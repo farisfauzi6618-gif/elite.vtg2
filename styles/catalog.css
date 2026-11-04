@@ -433,3 +433,19 @@ h3{font-size:1rem;font-weight:600}
 
 /* Product-level material stays off catalog cards. */
 .product-material-value>span{display:block}.product-material-value .material-secondary{font-size:.8125rem;line-height:1.55;color:#657483;margin-top:3px;white-space:pre-line;overflow-wrap:anywhere}.admin-material{border:0;border-top:1px solid var(--border);padding:18px 0 0;margin:20px 0 0;min-width:0}.admin-material legend{font-size:1rem;font-weight:500;padding:0 8px 0 0}.admin-material select,.admin-material input,.admin-material textarea{min-width:0;width:100%}.admin-material>div.form-grid{gap:12px 18px}.material-composition-editor{margin-top:12px}.material-composition-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(75px,100px) auto;gap:8px;align-items:center;margin-top:10px}.material-composition-row>label{display:flex;align-items:center;gap:5px}.material-composition-row input{text-align:right}.material-composition-row .text-button{font-size:.75rem;padding:8px 0;min-height:44px}.material-quick-actions{display:flex;flex-wrap:wrap;gap:8px 18px;margin:8px 0}.material-quick-actions button{font-size:.8125rem;min-height:40px}.material-details-field{margin-top:6px}.admin-material .help-text{margin-top:10px}.material-warning{color:#78623b}.admin-material:disabled{opacity:.65}
+
+/* Color controls stay outside card links so selecting never navigates. */
+.product-card-colors .product-card-link{height:auto}
+.product-card-info-link{display:block;color:inherit;text-decoration:none}
+.product-card-info-link:focus-visible{outline:3px solid var(--navy);outline-offset:-3px}
+.catalog-color-selector{border:0;margin:0;padding:6px 8px 0;min-width:0}
+.catalog-color-swatches{display:flex;align-items:center;flex-wrap:wrap;gap:0}
+.catalog-color-swatches .color-swatch{width:32px;height:32px;padding:4px;flex-shrink:0}
+.catalog-color-swatches .color-swatch span{width:22px;height:22px}
+.catalog-color-swatches .color-swatch:disabled{cursor:default;opacity:.4}
+.catalog-color-swatches .color-swatch:disabled span{position:relative}
+.catalog-color-swatches .color-swatch:disabled span::after{content:'';position:absolute;inset:50% -3px auto;height:1px;background:var(--navy);transform:rotate(-45deg)}
+.catalog-more-colors{border:0;background:transparent;color:var(--navy);font:12px Arial,sans-serif;width:28px;min-height:32px;cursor:pointer}
+.catalog-more-colors:focus-visible{outline:2px solid var(--navy);outline-offset:-2px}
+.catalog-color-caption{font:11px/1.5 Arial,sans-serif;color:#536271;margin:3px 4px 0;min-height:33px}
+.catalog-color-caption span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
