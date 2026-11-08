@@ -12,3 +12,11 @@ for(const failPreview of [false,true])test('Story export requests CORS before lo
  globalThis.document={createElement(name){assert.equal(name,'canvas');return{getContext(){return context},toBlob(callback,type){if(tainted)throw Error('Tainted canvas');assert.equal(type,'image/jpeg');callback(new Blob(['SIMULATED_STORY'],{type}))}}}};
  try{const file=await m.generateStoryCard(p);assert.equal(file.type,'image/jpeg');assert.ok(file.size>0);assert.equal(requests.length,failPreview?2:1);assert.ok(requests.every(value=>value.crossOrigin==='anonymous'));if(failPreview)assert.equal(requests[1].src,'/api/photos/photo')}finally{if(previousImage===undefined)delete globalThis.Image;else globalThis.Image=previousImage;if(previousDocument===undefined)delete globalThis.document;else globalThis.document=previousDocument}
 });
+
+test('a stalled clipboard cannot block Story readiness or claim a copied link',async t=>{
+ t.mock.timers.enable({apis:['setTimeout']});
+ let reject;const copying=m.copyProductLink(p,()=>new Promise((_resolve,fail)=>{reject=fail}));
+ t.mock.timers.tick(1500);assert.equal(await copying,false);
+ reject(Error('Late clipboard denial'));await Promise.resolve();
+ assert.equal(await m.copyProductLink(p,async()=>{}),true);
+});

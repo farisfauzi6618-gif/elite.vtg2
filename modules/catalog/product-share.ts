@@ -15,7 +15,15 @@ export function productShareSummary(product:Product){
 }
 export function productShareData(product:Product,story=false){return {title:product.name,text:product.name+'\n'+productShareSummary(product)+'\nELITE.VTG',url:productShareUrl(product,story)}}
 export function whatsappShareUrl(product:Product){const text=product.name+'\n'+productShareSummary(product)+'\n\nView at ELITE.VTG:\n'+productShareUrl(product);return 'https://wa.me/?text='+encodeURIComponent(text)}
-export async function copyProductLink(product:Product,copy?:((url:string)=>Promise<void>)){try{if(!copy)return false;await copy(productShareUrl(product));return true}catch{return false}}
+export async function copyProductLink(product:Product,copy?:((url:string)=>Promise<void>)){
+ let timer:ReturnType<typeof setTimeout>|undefined;
+ try{
+  if(!copy)return false;
+  // Clipboard permission/focus can leave the browser promise pending. It must
+  // never prevent an already-generated Story from being displayed or saved.
+  return await Promise.race([Promise.resolve(copy(productShareUrl(product))).then(()=>true),new Promise<boolean>(resolve=>{timer=setTimeout(()=>resolve(false),1500)})]);
+ }catch{return false}finally{if(timer!==undefined)clearTimeout(timer)}
+}
 export async function shareStoryFile(file:File,title:string,adapter:{canShare?:(data:{files:File[]})=>boolean;share?:(data:{files:File[];title:string})=>Promise<void>}){
  try{if(!adapter.share||!adapter.canShare?.({files:[file]}))return 'fallback' as const;await adapter.share({files:[file],title});return 'shared' as const}catch(e){return (e as {name?:string})?.name==='AbortError'?'cancelled' as const:'fallback' as const}
 }
