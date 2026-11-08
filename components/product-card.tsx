@@ -1,4 +1,5 @@
 'use client';
+import {brandLabel} from '@/modules/catalog/brands';
 import {ProductPrice} from './product-price';
 import {useState} from 'react';
 import {productColorSelection} from '@/modules/catalog/color-variants';
@@ -32,7 +33,7 @@ export function ProductCard({product:parent, onNavigate,now=Date.now()}: {now?:n
       </div>;
   const info=<div className="product-info">
         <div className="product-card-meta">
-          {product.brand && <p className="product-brand">{product.brand}</p>}
+          {product.brand && <p className="product-brand">{brandLabel(product.brand)}</p>}
           <p className="product-card-size">Size {sizes.length ? sizes.join(' / ') : 'belum tercantum'}</p>
         </div>
         <h2>{product.name}</h2>

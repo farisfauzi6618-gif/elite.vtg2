@@ -1,5 +1,6 @@
 'use client';
 
+import {catalogBrands} from '@/modules/catalog/brands';
 import {useEffect,useId,useMemo,useRef,useState} from 'react';
 import {Search,SlidersHorizontal,X} from 'lucide-react';
 import {FilterChoices} from '@/components/filter-choices';
@@ -12,7 +13,7 @@ type Filters=Record<FilterKey,string>;
 function BrandSelector({brands,value,onChange}:{brands:string[];value:string;onChange:(value:string)=>void}){
  const id=useId(),input=useRef<HTMLInputElement>(null),container=useRef<HTMLDivElement>(null),list=useRef<HTMLDivElement>(null);
  const [query,setQuery]=useState(''),[open,setOpen]=useState(false),[highlight,setHighlight]=useState(-1);
- const selected=selectedValues(value);
+ const selected=catalogBrands(selectedValues(value));
  const suggestions=useMemo(()=>{
   const words=plainText(query).split(' ').filter(Boolean);
   return words.length?brands.filter(brand=>words.every(word=>plainText(brand).includes(word))).slice(0,8):[];
@@ -61,7 +62,7 @@ export function CatalogFilters({filters,onChange,onReset,sizes,brands,categories
    <div className="catalog-filter-body">
     <FilterChoices label="Size" value={filters.size} onChange={value=>onChange('size',value)} options={sizes.map(size=>({value:size,label:size}))}/>
     <label className="catalog-filter-label" htmlFor={categoryId}>Category<select id={categoryId} className="input" value={filters.category} onChange={event=>onChange('category',event.target.value)}><option value="all">Semua</option>{preservedCategory&&<option value={filters.category}>{selectedCategories.join(', ')}</option>}{categories.map(category=><option key={category} value={category}>{category}</option>)}</select></label>
-    <BrandSelector key={resetVersion} brands={brands} value={filters.brand} onChange={value=>onChange('brand',value)}/>
+    <BrandSelector key={resetVersion} brands={catalogBrands(brands)} value={filters.brand} onChange={value=>onChange('brand',value)}/>
     <fieldset className="catalog-price-filter"><legend>Price</legend><div className="catalog-price-range"><label><span>Min (Rp)</span><input className="input" inputMode="numeric" type="number" min="0" placeholder="Min" aria-label="Harga minimum" value={filters.min} onChange={event=>onChange('min',event.target.value)}/></label><span aria-hidden="true">—</span><label><span>Max (Rp)</span><input className="input" inputMode="numeric" type="number" min="0" placeholder="Max" aria-label="Harga maksimum" value={filters.max} onChange={event=>onChange('max',event.target.value)}/></label></div>{invalidRange&&<p className="field-error" role="alert">Harga minimum melebihi maksimum.</p>}</fieldset>
    </div>
    <div className="catalog-filter-actions"><button type="button" className="text-button" onClick={()=>{onReset();setResetVersion(version=>version+1)}}>Reset</button><button type="button" className="button primary" disabled={loading||invalidRange} onClick={()=>setOpen(false)}>{loading?'Memuat barang…':`Lihat ${count} barang`}</button></div>

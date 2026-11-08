@@ -1,3 +1,4 @@
+import {catalogBrands} from './brands';
 import {publicProduct,isSold,isReserved,FITS,type Product} from './catalog-types';
 import {catalogInventory,catalogListing} from './sold-lifecycle';
 import {featuredProducts,featuredLanding,browseWithoutFeatured,featuredCatalogPage} from './featured';
@@ -36,5 +37,5 @@ export function listingPage(products:Product[],taxonomy:Taxonomy,input:ListingRe
   const featured=featuredProducts(products,now),landing=!input.archive&&featuredLanding(input.filters,input.explicitSort)&&featured.length>0;
   const browse=browseWithoutFeatured(shown,featured,landing),page=featuredCatalogPage(browse,input.page,landing?featured.length:0);
   const base=['S','M','L','XL','XXL'];
-  return {products:page.items.map(listingProduct),featured:landing&&page.page===1?featured.map(listingProduct):[],selected:products.filter(p=>input.ids.includes(p.id)).map(listingProduct),taxonomy,asOf:new Date(now).toISOString(),listing:{total:shown.length,availableCount:shown.filter(p=>!isSold(p)&&!isReserved(p)).length,browseTotal:browse.length,page:page.page,pageCount:page.pageCount,start:page.start,landing,hasRecentlySold:inventory.recentlySold.length>0||inventory.main.some(isSold),brands:[...new Set(products.map(p=>p.brand))].filter(Boolean).sort(),sizes:[...base,...FITS.filter(size=>!base.includes(size)&&products.some(product=>product.groups.some(group=>group.fits.includes(size))))],latestRelease:Math.max(0,...products.map(p=>p.orderableAt?Date.parse(p.orderableAt)||0:0))}};
+  return {products:page.items.map(listingProduct),featured:landing&&page.page===1?featured.map(listingProduct):[],selected:products.filter(p=>input.ids.includes(p.id)).map(listingProduct),taxonomy,asOf:new Date(now).toISOString(),listing:{total:shown.length,availableCount:shown.filter(p=>!isSold(p)&&!isReserved(p)).length,browseTotal:browse.length,page:page.page,pageCount:page.pageCount,start:page.start,landing,hasRecentlySold:inventory.recentlySold.length>0||inventory.main.some(isSold),brands:catalogBrands(products.map(p=>p.brand)),sizes:[...base,...FITS.filter(size=>!base.includes(size)&&products.some(product=>product.groups.some(group=>group.fits.includes(size))))],latestRelease:Math.max(0,...products.map(p=>p.orderableAt?Date.parse(p.orderableAt)||0:0))}};
 }

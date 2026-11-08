@@ -198,3 +198,10 @@ export async function applyWeeklyFeatured(now = Date.now()) {
     return {applied:true, period, products:applied.length};
   } finally { tx.close(); }
 }
+
+// Lightweight owner status: one ledger read, never computes or applies a plan.
+export async function weeklyFeaturedStatus(now=Date.now()){
+ const previous=parseRun(await getSqlClient().execute(latestQuery));
+ const period=weeklyPeriod(now),nextRunAt=Date.UTC(2026,0,5,2)+(period+1)*7*DAY;
+ return {enabled:process.env.VERCEL_ENV==='production'&&process.env.WEEKLY_FEATURED_ENABLED==='1',nextRunAt,lastRun:previous?{period:previous.period,appliedAt:previous.appliedAt,products:previous.plan.length,discountedVariants:previous.plan.reduce((sum,item)=>sum+item.discounts.length,0)}:null,overdue:!!previous&&previous.period<period&&now>Date.UTC(2026,0,5,2)+period*7*DAY+10*60000};
+}

@@ -26,3 +26,13 @@ export async function versionedCatalogResponse(request:Request,render:(snapshot:
  if(before===after)headers.set('ETag',etag);else if(cached?.key===before)cached=undefined;
  return Response.json(data,{headers});
 }
+
+// Server-rendered listings use the same revision/time guards as the public API.
+export async function readCatalogSnapshot(){
+ for(let attempt=0;attempt<2;attempt++){
+  const before=await catalogStamp(),snapshot=await loadSnapshot(before);
+  if(before===await catalogStamp())return snapshot;
+  if(cached?.key===before)cached=undefined;
+ }
+ throw Error('Catalog changed while reading');
+}

@@ -2,7 +2,7 @@
 import {useEffect,useState} from 'react';
 // Use the API's time and a monotonic clock while the page is open.
 export function useSaleClock(asOf:string,latestRelease:number) {
- const [now,setNow]=useState(0);
+ const [now,setNow]=useState(()=>Date.parse(asOf)||0);
  useEffect(()=>{
   const serverTime=Date.parse(asOf)||Date.now(),started=performance.now();
   const tick=()=>setNow(serverTime+performance.now()-started);tick();

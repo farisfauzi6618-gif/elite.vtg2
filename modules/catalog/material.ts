@@ -47,7 +47,7 @@ export function materialWarning(rows:MaterialComposition[]){
 export function materialPresentation(product:ProductMaterial){
  const primary=product.primaryMaterial;if(!primary)return null;
  const details=product.materialDetails?.trim()||null;
- if(primary==='unknown')return {title:'Not specified',composition:null,details};
+ if(primary==='unknown')return {title:'Belum diverifikasi',composition:null,details};
  const rows=(product.materialComposition??[]).filter(row=>row.percentage!==0);
  const description=rows.map(row=>(row.percentage===null?'':row.percentage+'% ')+materialLabel(row.material)).join(' · ');
  return {title:rows.length>1?materialLabel(primary)+' Blend':description||materialLabel(primary),composition:rows.length>1?description:null,details};

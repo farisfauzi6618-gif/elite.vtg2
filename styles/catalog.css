@@ -449,3 +449,9 @@ h3{font-size:1rem;font-weight:600}
 .catalog-more-colors:focus-visible{outline:2px solid var(--navy);outline-offset:-2px}
 .catalog-color-caption{font:11px/1.5 Arial,sans-serif;color:#536271;margin:3px 4px 0;min-height:33px}
 .catalog-color-caption span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* One summary is shared by desktop, mobile, SEO and assistive technology. */
+.product-detail{row-gap:0}.product-summary{grid-column:2;grid-row:1;min-width:0;padding-top:8px;margin-bottom:18px}.product-summary h1{font-size:2.125rem;overflow-wrap:anywhere;line-height:1.2}.product-gallery{grid-column:1;grid-row:1/span 2}.detail-info{grid-column:2;grid-row:2}.mobile-purchase-jump{display:none}
+#product-purchase-options,#product-color-options{scroll-margin-top:24px}
+@media(max-width:760px){.product-detail{row-gap:24px}.product-summary,.product-gallery,.detail-info{grid-column:auto;grid-row:auto}.product-summary{padding-top:0;margin-bottom:0}.product-summary h1{font-size:1.75rem;line-height:1.2;margin:8px 0 12px}.product-summary .product-brand{margin:0}.mobile-purchase-jump{display:flex;position:fixed;bottom:calc(12px + env(safe-area-inset-bottom,0px));left:20px;right:80px;z-index:30;align-items:center;justify-content:center;min-height:48px;border-radius:6px;background:var(--navy);color:white;font-size:.875rem;text-decoration:none;box-shadow:0 3px 14px #071f3a25}.catalog-shell:has(.mobile-purchase-jump){padding-bottom:100px}.catalog-shell:has(.cart-shortcut) .mobile-purchase-jump{bottom:calc(90px + env(safe-area-inset-bottom,0px))}}
+.sold-alternatives{margin:36px 0}.sold-alternatives h2{font-size:1.4rem;margin-bottom:8px}.sold-alternatives>p{color:#657483;margin-bottom:20px}

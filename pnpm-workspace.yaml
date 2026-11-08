@@ -1,4 +1,8 @@
 allowBuilds:
   esbuild: true
-  unrs-resolver: true
   sharp: true
+  unrs-resolver: true
+# Scoped patches for existing Blob SDK dependencies; do not override all Zod consumers.
+overrides:
+  '@vercel/cli-config>zod': 4.6.7
+  '@vercel/blob>undici': 6.29.1

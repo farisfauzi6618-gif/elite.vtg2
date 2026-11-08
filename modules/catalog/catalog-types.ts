@@ -1,3 +1,4 @@
+import {brandKey} from './brands';
 import {publicMaterial,type ProductMaterial} from './material';
 import {transactionPrice,parentPricing,groupPricing} from './sale-price';
 import {colorAvailable,type ColorVariant} from './color-variants';
@@ -23,7 +24,7 @@ export function matchesProduct(p:Product,f:CatalogFilters,terms:Feature[]=DEFAUL
  const haystack=normalizeSearch([p.name,p.brand,p.category,p.legacyCategory??'',p.color,...(p.colorVariants??[]).filter(v=>v.active).map(v=>v.name),p.description??'',...(p.features??[]),...selected.map(t=>t.label)].join(' '),terms);
  if(f.q&&!normalizeSearch(f.q,terms).split(' ').filter(Boolean).every(word=>haystack.includes(word)))return false;
  const brands=selectedValues(f.brand),categories=selectedValues(f.category);
- if(brands.length&&!brands.includes(p.brand))return false;
+ if(brands.length&&!brands.some(brand=>brandKey(brand)===brandKey(p.brand)))return false;
  if(categories.length&&!categories.includes(p.category))return false;
  if(!matchesFeatures(p.features??[],f.features,terms))return false;
  return (includeSold&&(isSold(p)||isReserved(p))?p.groups.filter(g=>colorAvailable(p,g)):availableGroups(p)).some(g=>matchesSizePrice(p,g,f));

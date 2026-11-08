@@ -7,7 +7,7 @@ import {recommendations} from '@/modules/sales/inventory';
 import {productsToPush,recordProductAction} from '@/modules/sales/push';
 import {prepareDraft,saveOutreach,outreachHistory} from '@/modules/sales/outreach';
 import {salesOverview,checkoutDiagnostics} from '@/modules/sales/report';
-import {previewWeeklyFeatured} from '@/modules/sales/weekly-featured-server';
+import {previewWeeklyFeatured,weeklyFeaturedStatus} from '@/modules/sales/weekly-featured-server';
 import {validated,id} from '@/modules/sales/validation';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -20,6 +20,7 @@ export const GET=(request:Request)=>privateResponse(async()=>{
  if(view==='history')return response(await outreachHistory(Number(params.get('page')??1)));
  if(['matches','push','diagnostics','weekly-featured'].includes(view))await publicRate(request,'sales-compute',60,owner.userId);
  if(view==='matches')return response(await recommendations(params.get('leadId')?validated(id,params.get('leadId')):undefined));
+ if(view==='weekly-status')return response(await weeklyFeaturedStatus());
  if(view==='weekly-featured')return response(await previewWeeklyFeatured());
  if(view==='push')return response(await productsToPush());
  if(view==='diagnostics')return response(await checkoutDiagnostics());
