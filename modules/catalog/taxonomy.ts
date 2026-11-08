@@ -20,6 +20,9 @@ function escaped(s:string){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 function aliasPattern(s:string){return new RegExp('(?:^| )'+[...termKey(s)].map(escaped).join(' *')+'(?= |$)','g')}
 export function hasFeatureText(s:string,f:Feature){const text=plainText(s);return [f.label,...f.aliases].some(a=>aliasPattern(a).test(text))}
 export function normalizeSearch(s:string,features:Feature[]=DEFAULT_FEATURES){let text=plainText(s);const replacements=features.flatMap(f=>[f.label,...f.aliases].map(a=>({a,label:plainText(f.label)}))).sort((a,b)=>b.a.length-a.a.length);for(const {a,label} of replacements)text=text.replace(aliasPattern(a),match=>(match.startsWith(' ')?' ':'')+label);return text}
+export function catalogSearchText(s:string,features:Feature[]=DEFAULT_FEATURES){
+ return normalizeSearch(s,features).replace(/\bprl\b/g,'polo ralph lauren').replace(/\b(?:cap|caps|hat|hats|topi)\b/g,'topi');
+}
 export function mainCategory(s:string){const key=termKey(s);const direct=CATEGORIES.find(c=>termKey(c)===key);if(direct)return direct;const legacy:Record<string,string>={shirt:'Kemeja',shirts:'Kemeja',kemeja:'Kemeja',polo:'Polo',tshirt:'Kaos',tshirts:'Kaos',kaos:'Kaos',knitwear:'Sweater & Knitwear',sweater:'Sweater & Knitwear',sweaters:'Sweater & Knitwear',sweatshirt:'Sweatshirt & Hoodie',sweatshirts:'Sweatshirt & Hoodie',jaket:'Jaket & Outerwear',jacket:'Jaket & Outerwear',jackets:'Jaket & Outerwear',outerwear:'Jaket & Outerwear',cap:'Topi',caps:'Topi',hat:'Topi',hats:'Topi',beanie:'Topi',accessory:'Aksesoris',accessories:'Aksesoris'};return legacy[key]??''}
 export function suggestTaxonomy(name:string,explicitCategory='',extra='',features:Feature[]=DEFAULT_FEATURES){
  const text=normalizeSearch(name+' '+extra,features).replace(/\bpolo ralph lauren\b|\bralph lauren\b/g,'');

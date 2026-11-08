@@ -6,8 +6,8 @@ import { currentCustomer, customerProfile, customerIdentity, customerSessionCook
 
 export const GET = (request: Request) => boundary(async () => {
   const customer = await currentCustomer(request.headers.get('cookie'));
-  const promotion=await purchasePromotion(request.headers.get('cookie'));
-  return response({ customer: customer ? customerProfile(customer) : null, promotion, rewardCount: await availableRewardCount(request.headers.get('cookie'),promotion) });
+  const promotion=await purchasePromotion(request.headers.get('cookie'),customer);
+  return response({ customer: customer ? customerProfile(customer) : null, promotion, rewardCount: await availableRewardCount(request.headers.get('cookie'),promotion,customer) });
 });
 export const POST = (request: Request) => boundary(async () => {
   checkAdminOrigin(request);

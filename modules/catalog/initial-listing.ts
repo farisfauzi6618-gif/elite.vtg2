@@ -1,3 +1,4 @@
+import {withListingMedia} from './ready-product-media';
 import {readCatalogSnapshot} from './catalog-read-snapshot';
 import {listingPage,listingRequest} from './catalog-listing-page';
 export type ListingSearch=Record<string,string|string[]|undefined>;
@@ -7,6 +8,6 @@ export async function initialListing(search:ListingSearch,archive=false){
  if(archive)params.set('archive','1');
  // Preserve explicit sorting on both the server and client.
  if(params.has('sort'))params.set('explicitSort','1');
- try{const input=listingRequest(params),{products,taxonomy}=await readCatalogSnapshot();return listingPage(products,taxonomy,input);}
+ try{const input=listingRequest(params),{products,taxonomy}=await readCatalogSnapshot();return await withListingMedia(listingPage(products,taxonomy,input));}
  catch{return undefined;} // Client retains its existing retry/error UI.
 }

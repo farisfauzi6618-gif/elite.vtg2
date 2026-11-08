@@ -31,7 +31,7 @@ import { prefetchCatalogSelection,resumeCatalogSelection,catalogReturnHref,recov
 const blank={name:"",phone:"",address:"",postcode:"",item:"",itemAmount:""};
 async function request<T>(path:string,init?:RequestInit):Promise<T>{try{const r=await fetch(path,init);const v=await r.json() as {error?:string};if(!r.ok||v.error)throw new Error(v.error||"Permintaan belum berhasil.");return v as T}catch(error){throw new Error(checkoutMessage(error))}}
 const shipping=<T,>(body:Record<string,unknown>)=>request<T>("/api/shipping",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
-export default function OrderForm(){
+export default function OrderForm({initialCatalogPending=false}:{initialCatalogPending?:boolean}){
  const {promotion,customer,loading:promotionLoading}=usePurchaseBenefit();
  const [previewItems,setPreviewItems]=useState<CheckoutPreview[]>([]),[checkoutId,setCheckoutId]=useState(''),[paymentChoice,setPaymentChoice]=useState<PaymentMethod>('bca_transfer'),[initialized,setInitialized]=useState(false),[resumeReady,setResumeReady]=useState(true),[draftReady,setDraftReady]=useState(false),[prefilled,setPrefilled]=useState(false),[fieldErrors,setFieldErrors]=useState<Partial<Record<keyof Recipient|'destination',string>>>({});
  const submitFlight=useRef(false),requestKey=useRef(''),draftScope=useRef(''),actorScope=useRef<string|null>(null),dirty=useRef(new Set<string>()),discardDraft=useRef(false);
@@ -43,7 +43,7 @@ export default function OrderForm(){
  const [shippingPayment,setShippingPayment]=useState<ShippingPayment>('prepaid');
  const [preparingProof,setPreparingProof]=useState(false),[proofNote,setProofNote]=useState("");
  const [reserveMode,setReserveMode]=useState(false),[deposit,setDeposit]=useState(''),[reserveAuthorization,setReserveAuthorization]=useState('');
- const [catalogToken,setCatalogToken]=useState(""),[linked,setLinked]=useState(false),[catalogLoading,setCatalogLoading]=useState(false);
+ const [catalogToken,setCatalogToken]=useState(""),[linked,setLinked]=useState(initialCatalogPending),[catalogLoading,setCatalogLoading]=useState(initialCatalogPending);
  const [paymentAssetFailed,setPaymentAssetFailed]=useState(false);
  const method=storedPaymentMethod(order?.payment_method);
  const selectedAvailable=!!(config?.payment&&(method==="bca_transfer"?config.payment.bca:config.payment.qris&&!paymentAssetFailed));

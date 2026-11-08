@@ -26,8 +26,8 @@ async function promotion(tx:Transaction,customerId:string):Promise<PurchasePromo
  if(claim?.redeemed_at||confirmed)return {state:'redeemed',percent:5};
  return claim?{state:'reserved',percent:5,orderId:String(claim.order_id)}:{state:'available',percent:5};
 }
-export async function purchasePromotion(cookie:string|null):Promise<PurchasePromotion> {
- const customer=await currentCustomer(cookie);if(!customer)return {state:'guest',percent:5};
+export async function purchasePromotion(cookie:string|null,knownCustomer?:Awaited<ReturnType<typeof currentCustomer>>):Promise<PurchasePromotion> {
+ const customer=knownCustomer===undefined?await currentCustomer(cookie):knownCustomer;if(!customer)return {state:'guest',percent:5};
  const tx=await db().client.transaction('write');
  try{await expireUnpaidClaim(tx,customer.id);const result=await promotion(tx,customer.id);await tx.commit();return result;}finally{tx.close();}
 }

@@ -89,3 +89,15 @@ test('capped first purchase uses inherited color price through actual invoice an
 });
 test('first purchase cap applies once to whole multi-unit order',async()=>{await client.execute("UPDATE products SET price=800000 WHERE id='product'");const q=await preview({context:'cart',lines:[{productId:product.id,groupId:'group',quantity:2}]});assert.equal(q.subtotal,1600000);assert.equal(q.discount,50000);});
 test('manual first order also preserves shipping with capped discount',async()=>{const r=await create(buyerCookie,{itemAmount:2000000}),o=await r.json();assert.equal(r.status,201,JSON.stringify(o));assert.equal(o.discount_amount,50000);assert.equal(o.total,1988000);});
+
+test('customer overview resolves its session once per request and keeps separate accounts and guest eligibility',async()=>{
+ const other=await m.registerCustomer({name:'Other Buyer',identity:'second@example.test',password:'SIMULATED_PASSWORD_123',consent:true},null),otherCookie='elite_customer='+other.token;
+ await voucher({owner_user_id:buyer.id});
+ const execute=client.execute;let sessionReads=0;
+ client.execute=function(statement){const sql=typeof statement==='string'?statement:statement.sql;if(sql.includes('FROM customer_sessions s JOIN customers c'))sessionReads++;return execute.call(this,statement)};
+ try{
+  const first=await(await m.customerGet(request('/api/customer',undefined,buyerCookie))).json();assert.equal(first.customer.identity,'buyer@example.test');assert.equal(first.promotion.state,'available');assert.equal(sessionReads,1);
+  const second=await(await m.customerGet(request('/api/customer',undefined,otherCookie))).json();assert.equal(second.customer.identity,'second@example.test');assert.equal(sessionReads,2);assert.equal(first.rewardCount,second.rewardCount+1);
+  const guest=await(await m.customerGet(request('/api/customer'))).json();assert.equal(guest.customer,null);assert.equal(guest.promotion.state,'guest');assert.equal(guest.rewardCount,0);assert.equal(sessionReads,2);
+ }finally{client.execute=execute}
+});

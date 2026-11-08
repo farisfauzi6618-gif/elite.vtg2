@@ -1,3 +1,5 @@
+import {reportCache} from '@/modules/admin/report-cache';
+import {catalogStamp} from '@/modules/catalog/catalog-read-snapshot';
 import {z} from 'zod';
 import {boundary,requireOwner,response,db,AppError} from '@/modules/catalog/server';
 import {readLimitedText} from '@/modules/catalog/request-limits';
@@ -11,6 +13,7 @@ import {previewWeeklyFeatured,weeklyFeaturedStatus} from '@/modules/sales/weekly
 import {validated,id} from '@/modules/sales/validation';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
+const computations=reportCache<unknown>(30_000,16);
 async function privateResponse(action:()=>Promise<Response>){const reply=await boundary(action);reply.headers.set('Cache-Control','private, no-store');reply.headers.set('Vary','Cookie');reply.headers.set('X-Robots-Tag','noindex, nofollow');return reply}
 export const GET=(request:Request)=>privateResponse(async()=>{
  const owner=await requireOwner(request),params=new URL(request.url).searchParams,view=params.get('view')??'overview';
@@ -21,9 +24,16 @@ export const GET=(request:Request)=>privateResponse(async()=>{
  if(['matches','push','diagnostics','weekly-featured'].includes(view))await publicRate(request,'sales-compute',60,owner.userId);
  if(view==='matches')return response(await recommendations(params.get('leadId')?validated(id,params.get('leadId')):undefined));
  if(view==='weekly-status')return response(await weeklyFeaturedStatus());
- if(view==='weekly-featured')return response(await previewWeeklyFeatured());
- if(view==='push')return response(await productsToPush());
- if(view==='diagnostics')return response(await checkoutDiagnostics());
+ if(['weekly-featured','push','diagnostics'].includes(view)){
+  const stamp=await catalogStamp(),key=JSON.stringify([owner.userId,view,stamp]);
+  const data=await computations.read(key,async()=>{
+   const start=performance.now();
+   const result=view==='weekly-featured'?await previewWeeklyFeatured():view==='push'?await productsToPush():await checkoutDiagnostics();
+   // Aggregate timing only: no leads, cookies, or customer data in logs.
+   console.info('sales-read',view,Math.round(performance.now()-start));
+   return result;
+  });return response(data);
+ }
  throw new AppError(400,'Tampilan Sales Intelligence tidak dikenal.');
 });
 export const POST=(request:Request)=>privateResponse(async()=>{
@@ -38,4 +48,4 @@ export const POST=(request:Request)=>privateResponse(async()=>{
  if(input.op==='draft'){const value=validated(z.object({requestId:id,productId:id.nullable().optional(),groupId:id.nullable().optional()}).strict(),input.value);return response(await prepareDraft(value.requestId,value.productId,value.groupId))}
  if(input.op==='product'){const value=validated(z.object({productId:id,action:z.enum(['review','promote','dismiss','reset'])}).strict(),input.value);return response(await recordProductAction(value.productId,value.action,owner.userId))}
  const value=validated(z.object({days:z.number().int().min(0).max(90)}).strict(),input.value);await db().prepare('UPDATE sales_config SET cooldown_days=? WHERE id=1').bind(value.days).run();return response({cooldownDays:value.days});
-});
+}).then(reply=>{if(reply.ok)computations.clear();return reply});

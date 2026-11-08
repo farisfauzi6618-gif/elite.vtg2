@@ -1,13 +1,14 @@
+import type {PhotoUrls} from './photo-url';
 import {brandKey} from './brands';
 import {publicMaterial,type ProductMaterial} from './material';
 import {transactionPrice,parentPricing,groupPricing} from './sale-price';
 import {colorAvailable,type ColorVariant} from './color-variants';
-import {CATEGORIES,DEFAULT_FEATURES,normalizeSearch,selectedValues,matchesFeatures,type Feature} from '@/modules/catalog/taxonomy';
+import {CATEGORIES,DEFAULT_FEATURES,catalogSearchText,selectedValues,matchesFeatures,type Feature} from '@/modules/catalog/taxonomy';
 export {CATEGORIES} from '@/modules/catalog/taxonomy';
 export const MAX_PRODUCT_PHOTOS=17;
 export const FITS=['XXS','XS','S','M','L','XL','XXL','3XL','4XL','One size'];
 export type SizeGroup={regularPrice?:number|null;salePrice?:number|null;discountTitle?:string|null;colorPriceInherited?:boolean;colorConditionInherited?:boolean;colorDefectsInherited?:boolean;colorVariantId?:string|null;colorName?:string;colorActive?:boolean;reservedQty?:number;reserved?:boolean;id:string;productId?:string;label:string;tagSize:string;fits:string[];lengthCm:number|null;widthCm:number|null;qty:number|null;price:number|null;condition:string|null;defects:string|null;revision:number;sortOrder:number};
-export type Product=ProductMaterial & {deletedAt?:string|null;regularPrice?:number|null;salePrice?:number|null;discountTitle?:string|null;saleColorsShared?:boolean;isFeatured?:boolean;featuredPosition?:number|null;colorVariants?:ColorVariant[];defaultColorVariantId?:string|null;selectedColorVariantId?:string|null;id:string;shortcode:string;instagramUrl:string;name:string;brand:string;category:string;legacyCategory?:string;features?:string[];categoryNeedsReview?:boolean;color:string;price:number|null;condition:string|null;defects:string|null;photoKey:string|null;photoKeys?:string[];description?:string;caption:string;warnings:string[];reviewed:boolean;status:'draft'|'published';createdAt:string;updatedAt:string;orderableAt?:string|null;publishedAt:string|null;soldAt?:string|null;soldHidden?:boolean;version:number;groups:SizeGroup[]};
+export type Product=ProductMaterial & {photoUrls?:PhotoUrls;deletedAt?:string|null;regularPrice?:number|null;salePrice?:number|null;discountTitle?:string|null;saleColorsShared?:boolean;isFeatured?:boolean;featuredPosition?:number|null;colorVariants?:ColorVariant[];defaultColorVariantId?:string|null;selectedColorVariantId?:string|null;id:string;shortcode:string;instagramUrl:string;name:string;brand:string;category:string;legacyCategory?:string;features?:string[];categoryNeedsReview?:boolean;color:string;price:number|null;condition:string|null;defects:string|null;photoKey:string|null;photoKeys?:string[];description?:string;caption:string;warnings:string[];reviewed:boolean;status:'draft'|'published';createdAt:string;updatedAt:string;orderableAt?:string|null;publishedAt:string|null;soldAt?:string|null;soldHidden?:boolean;version:number;groups:SizeGroup[]};
 export const money=(n:number|null|undefined)=>n==null?'Harga belum diisi':new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(n);
 export const totalStock=(p:Product)=>p.groups.reduce((sum,g)=>sum+(colorAvailable(p,g)?(g.qty??0):0),0);
 export function hasReserve(g:SizeGroup){return !!g.reserved||(g.reservedQty??0)>0}
@@ -21,8 +22,8 @@ export function matchesProduct(p:Product,f:CatalogFilters,terms:Feature[]=DEFAUL
  if(p.status!=='published'||(!availableGroups(p).length&&!(includeSold&&(isSold(p)||isReserved(p)))))return false;
  if(f.availability==='available'&&!availableGroups(p).length)return false;
  const selected=terms.filter(t=>(p.features??[]).includes(t.id));
- const haystack=normalizeSearch([p.name,p.brand,p.category,p.legacyCategory??'',p.color,...(p.colorVariants??[]).filter(v=>v.active).map(v=>v.name),p.description??'',...(p.features??[]),...selected.map(t=>t.label)].join(' '),terms);
- if(f.q&&!normalizeSearch(f.q,terms).split(' ').filter(Boolean).every(word=>haystack.includes(word)))return false;
+ const haystack=catalogSearchText([p.name,p.brand,p.category,p.legacyCategory??'',p.color,...(p.colorVariants??[]).filter(v=>v.active).map(v=>v.name),p.description??'',...(p.features??[]),...selected.map(t=>t.label)].join(' '),terms);
+ if(f.q&&!catalogSearchText(f.q,terms).split(' ').filter(Boolean).every(word=>haystack.includes(word)))return false;
  const brands=selectedValues(f.brand),categories=selectedValues(f.category);
  if(brands.length&&!brands.some(brand=>brandKey(brand)===brandKey(p.brand)))return false;
  if(categories.length&&!categories.includes(p.category))return false;

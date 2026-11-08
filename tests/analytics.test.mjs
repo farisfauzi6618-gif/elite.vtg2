@@ -43,3 +43,25 @@ test('Featured impressions batch, dedupe by session and preserve verified positi
  await m.collectPost(req({event:'featured_product_click',productId:'featured-one',position:8,id:crypto.randomUUID()},cookie));await client.execute("UPDATE products SET is_featured=0 WHERE id='featured-one'");await m.collectPost(req({event:'featured_product_click',productId:'featured-one',position:1,id:crypto.randomUUID()},cookie));assert.equal((await rows('featured_product_click')).length,1);
  await m.collectPost(req({event:'featured_product_view',products:Array.from({length:9},()=>({productId:'featured-two',position:2})),id:crypto.randomUUID()},cookie));assert.equal((await rows('featured_product_view')).length,2);
 });
+
+test('each analytics tab reads only its reports and preserves the legacy all-report totals',async()=>{
+ await seedProduct();const cookie=await visit(),session=await m.analyticsSession(req(undefined,cookie));await m.event(session,'product_view','split-view',{productId:'p'});
+ const all=await m.analyticsReport(new URLSearchParams({range:'today'})),adapter=m.db(),prepare=adapter.prepare;
+ for(const view of ['overview','products','search','traffic']){
+  const sql=[];adapter.prepare=function(text){sql.push(text);return prepare.call(this,text)};
+  let data;try{data=await m.analyticsReport(new URLSearchParams({range:'today',view}))}finally{adapter.prepare=prepare}
+  assert.equal(data.view,view);
+  if(view==='overview'){assert.deepEqual(data.kpis,all.kpis);assert.deepEqual(data.checkoutFlow,all.checkoutFlow);assert.ok(!sql.some(q=>q.includes('WITH metrics')));assert.ok(!sql.some(q=>q.includes('GROUP BY search_query')))}
+  else assert.equal(data.checkoutFlow,null);
+  if(view==='products'){assert.deepEqual(data.products,all.products);assert.equal(sql.length,2)}
+  if(view==='search'){assert.deepEqual(data.search,all.search);assert.equal(sql.length,3)}
+  if(view==='traffic'){assert.deepEqual(data.traffic,all.traffic);assert.equal(sql.length,2)}
+ }
+});
+test('high-interest availability excludes drafts, deleted, scheduled, empty and inactive-color stock',async()=>{
+ for(const id of ['live','draft','deleted','scheduled','empty','inactive']){await seedProduct(id,id==='empty'?0:1);const c=await visit(),session=await m.analyticsSession(req(undefined,c));await m.event(session,'product_view','status-'+id,{productId:id})}
+ await client.execute("UPDATE products SET status='draft' WHERE id='draft'");await client.execute("UPDATE products SET deleted_at='2026-01-01' WHERE id='deleted'");await client.execute({sql:"UPDATE products SET orderable_at=? WHERE id='scheduled'",args:[new Date(Date.now()+86400000).toISOString()]});
+ await client.execute(`UPDATE products SET color_variants='[{"id":"hidden","active":false,"name":"Hidden"}]' WHERE id='inactive'`);await client.execute("UPDATE size_groups SET color_variant_id='hidden' WHERE product_id='inactive'");
+ const data=await m.analyticsReport(new URLSearchParams({range:'today',view:'products'}));assert.deepEqual(data.leaderboards.interest.map(p=>p.id),['live']);
+ const status=Object.fromEntries(data.products.map(p=>[p.id,p.status]));assert.equal(status.draft,'Draft');assert.equal(status.deleted,'Deleted');assert.equal(status.scheduled,'Scheduled');assert.equal(status.empty,'Sold');assert.equal(status.inactive,'Unavailable');
+});

@@ -31,7 +31,7 @@ export function priceRewards(lines:RewardLine[],rules:RewardRule[],choice='auto'
 export async function rewardLines(tx:SqlReader,lines:CheckoutLine[]):Promise<RewardLine[]> {
  const result:RewardLine[]=[];for(const line of lines){const p=(await tx.execute({sql:'SELECT category FROM products WHERE id=?',args:[line.productId]})).rows[0];result.push({productId:line.productId,category:p?String(p.category):null,amount:line.unitPrice*line.quantity});}return result;
 }
-export async function availableRewardCount(cookie:string|null,state:PurchasePromotion){const customer=await currentCustomer(cookie);return customer?(await rewardRules(db().client,customer.id,state)).length:0;}
+export async function availableRewardCount(cookie:string|null,state:PurchasePromotion,knownCustomer?:Awaited<ReturnType<typeof currentCustomer>>){const customer=knownCustomer===undefined?await currentCustomer(cookie):knownCustomer;return customer?(await rewardRules(db().client,customer.id,state)).length:0;}
 export async function previewRewards(request:Request,input:any,trustedCheckout?:CatalogQuote):Promise<RewardQuote> {
  if(!input||typeof input!=='object'||Array.isArray(input)||!['cart','product','checkout','manual'].includes(input.context)||Object.keys(input).some(k=>!['context','lines','productId','catalogToken','itemAmount','choice','variantId'].includes(k)))throw new AppError(400,'Permintaan reward tidak valid.');
  if(input.variantId!=null&&(input.context!=='product'||typeof input.variantId!=='string'||!/^[A-Za-z0-9_-]{1,100}$/.test(input.variantId)))throw new AppError(400,'Warna tidak valid.');

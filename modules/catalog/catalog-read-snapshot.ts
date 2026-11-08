@@ -18,11 +18,11 @@ function loadSnapshot(key:string){
  void entry.promise.then(value=>{if(JSON.stringify(value).length>3*1024*1024&&cached===entry)cached=undefined},()=>{if(cached===entry)cached=undefined});
  return entry.promise;
 }
-export async function versionedCatalogResponse(request:Request,render:(snapshot:Snapshot)=>Record<string,unknown>){
+export async function versionedCatalogResponse(request:Request,render:(snapshot:Snapshot)=>Record<string,unknown>|Promise<Record<string,unknown>>){
  const before=await catalogStamp(),url=new URL(request.url),etag='W/"catalog-rev-'+createHash('sha256').update((process.env.VERCEL_GIT_COMMIT_SHA??'local-v1')+'\n'+url.pathname+url.search+'\n'+before).digest('hex')+'"';
  const headers=new Headers({'Cache-Control':'private, no-store','Vary':'Cookie','X-Content-Type-Options':'nosniff','X-ELITE-Server-Time':new Date().toISOString()});
  if(request.headers.get('if-none-match')?.split(',').some(value=>value.trim()===etag)){headers.set('ETag',etag);return new Response(null,{status:304,headers})}
- const value=await loadSnapshot(before),data=render(value),after=await catalogStamp();
+ const value=await loadSnapshot(before),data=await render(value),after=await catalogStamp();
  if(before===after)headers.set('ETag',etag);else if(cached?.key===before)cached=undefined;
  return Response.json(data,{headers});
 }

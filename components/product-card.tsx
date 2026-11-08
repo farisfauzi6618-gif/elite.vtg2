@@ -29,7 +29,7 @@ export function ProductCard({product:parent, onNavigate,now=Date.now()}: {now?:n
   })).values()].filter(Boolean);
   const condition = conditions.length > 1 ? 'Kondisi bervariasi' : conditions[0] || 'Kondisi belum tercantum';
   const image=<div className="product-photo">{reserved?<span className="sold-badge">RESERVED</span>:sold?<span className="sold-badge">SOLD</span>:orderingLocked(product,now)?<span className="scheduled-badge">Segera hadir</span>:isNewArrival(product,now)&&<span className="new-in-badge">NEW IN</span>}
-        {product.photoKey ? <picture>{!useOriginal&&<source media="(max-width: 600px)" srcSet={publicPhotoUrl(product.photoKey,'cardSmall')}/>}<img src={useOriginal?photoUrl(product.photoKey):publicPhotoUrl(product.photoKey,'card')} onError={()=>{if(!useOriginal)setFailedPhoto(product.photoKey!)}} alt="" width="600" height="750" loading="lazy" decoding="async"/></picture> : <span className="product-photo-empty">ELITE.VTG</span>}
+        {product.photoKey ? <picture>{!useOriginal&&<source media="(max-width: 600px)" srcSet={publicPhotoUrl(product.photoKey,'cardSmall',product.photoUrls)}/>}<img src={useOriginal?photoUrl(product.photoKey):publicPhotoUrl(product.photoKey,'card',product.photoUrls)} onError={()=>{if(!useOriginal)setFailedPhoto(product.photoKey!)}} alt="" width="600" height="750" loading="lazy" decoding="async"/></picture> : <span className="product-photo-empty">ELITE.VTG</span>}
       </div>;
   const info=<div className="product-info">
         <div className="product-card-meta">
@@ -52,7 +52,7 @@ export function ProductCard({product:parent, onNavigate,now=Date.now()}: {now?:n
           {shownColors.map(variant=>{
             const available=selection.available.some(color=>color.id===variant.id);
             return <button key={variant.id} type="button" className="color-swatch" disabled={!available} aria-label={variant.name+(available?'':' · Tidak tersedia')} title={variant.name+(available?'':' · Tidak tersedia')} aria-pressed={selection.selectedId===variant.id} onClick={()=>{setColor(variant.id);track('product_color_selected',{productId:parent.id,variantId:variant.id});}}>
-              <span style={{backgroundColor:variant.hex}}>{variant.swatchType==='IMAGE'&&variant.swatchImage&&<img src={publicPhotoUrl(variant.swatchImage,'thumb')} alt="" width={22} height={22} loading="lazy"/>}</span>
+              <span style={{backgroundColor:variant.hex}}>{variant.swatchType==='IMAGE'&&variant.swatchImage&&<img src={publicPhotoUrl(variant.swatchImage,'thumb',product.photoUrls)} alt="" width={22} height={22} loading="lazy"/>}</span>
             </button>;
           })}
           {!showAllColors&&selection.colors.length>4&&<button type="button" className="catalog-more-colors" aria-label={'Tampilkan '+(selection.colors.length-4)+' warna lainnya'} onClick={()=>setShowAllColors(true)}>+{selection.colors.length-4}</button>}
