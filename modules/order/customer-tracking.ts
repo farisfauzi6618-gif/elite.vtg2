@@ -3,6 +3,7 @@ import { env } from '@/lib/env';
 import { AppError,db,hash,random,encrypt,decrypt,session } from "@/modules/order/order-server";
 import { shippingClient,kiriminClient } from "@/modules/order/shipping-settings";
 import type { Shipment } from "@/modules/order/fulfilment-types";
+import { progressStatus } from '@/modules/order/order-progress';
 import { orderQuote,type Order } from "@/modules/order/order-types";
 import { quoteServiceName } from "@/modules/order/shipping-types";
 import { normalizeTrackingHistory,type TrackingHistory,type CustomerTracking } from "@/modules/order/tracking-types";
@@ -49,8 +50,9 @@ export async function lookupTracking(invoice:unknown,receiverPhone:unknown){
 function cacheHistory(c:Cache|null,awb:string):TrackingHistory|null{if(c?.awb!==awb||!c.payload)return null;try{return JSON.parse(c.payload) as TrackingHistory;}catch{return null;}}
 export async function customerTracking(o:Order):Promise<CustomerTracking>{
  let s=await shipment(o.id);const confirmed=o.payment_state==="payment_confirmed",quote=orderQuote(o),pendingCourier=quote?.courier==='jne'?"Pengiriman reguler":"J&T Express";
- const base:CustomerTracking={invoice:o.id,awb:s?.awb||null,courier:pendingCourier,paymentConfirmed:confirmed,checkedAt:null,stale:false,simulation:s?.environment==="sandbox",stage:confirmed?s?.provider_no?"preparing":"payment_confirmed":"proof_received",lastStatus:"",events:[],message:confirmed?"Pesanan sedang disiapkan oleh ELITE.VTG.":"Bukti pembayaran sudah diterima dan menunggu pemeriksaan ELITE.VTG."};
- if(confirmed&&(o.preparing_at||o.shipped_at)){const shipped=confirmed&&!!o.shipped_at&&!!o.tracking_number;return {...base,awb:shipped?o.tracking_number!:null,courier:shipped?o.courier_name||(quote?quoteServiceName(quote):"J&T Regular"):quote?.courier==='jne'?"Pengiriman reguler":o.courier_name||"J&T Regular",stage:shipped?"in_transit":"preparing",message:shipped?"Pesanan sudah dikirim. Nomor resi tersedia di bawah.":"Pesanan sedang dipacking oleh ELITE.VTG. Nomor resi akan tersedia setelah dikirim."};}
+ const progress=progressStatus(o),preparing=progress==='PREPARING',shipped=progress==='SHIPPED';
+ const base:CustomerTracking={invoice:o.id,awb:s?.awb||null,courier:pendingCourier,paymentConfirmed:confirmed,checkedAt:null,stale:false,simulation:s?.environment==="sandbox",stage:preparing?"preparing":confirmed?"payment_confirmed":"proof_received",lastStatus:"",events:[],message:preparing?"Pesanan sedang disiapkan oleh ELITE.VTG. Nomor resi akan tersedia setelah dikirim.":confirmed?"Pembayaran sudah dikonfirmasi. Pesanan akan segera dipersiapkan.":"Bukti pembayaran sudah diterima dan menunggu pemeriksaan ELITE.VTG."};
+ if(shipped||(preparing&&o.preparing_at)){return {...base,awb:shipped?o.tracking_number!:null,courier:shipped?o.courier_name||(quote?quoteServiceName(quote):"J&T Regular"):quote?.courier==='jne'?"Pengiriman reguler":o.courier_name||"J&T Regular",stage:shipped?"in_transit":"preparing",message:shipped?"Pesanan sudah dikirim. Nomor resi tersedia di bawah.":base.message};}
  // Read-only provider lookup may discover a delayed AWB. Never create a booking or pickup here.
  if(confirmed&&s?.provider_no&&!s.awb){
   const now=Date.now();await db().prepare("INSERT INTO shipment_tracking(order_id,awb) VALUES(?,'') ON CONFLICT(order_id) DO NOTHING").bind(o.id).run();

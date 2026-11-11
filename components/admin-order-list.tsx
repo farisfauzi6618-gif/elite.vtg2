@@ -15,10 +15,16 @@ export function AdminOrderList({onReserveCount}:{onReserveCount:(count:number)=>
   const [data,setData]=useState<AdminOrderPage|null>(null),[loading,setLoading]=useState(true),[busy,setBusy]=useState(false),[error,setError]=useState(''),[info,setInfo]=useState(''),[revision,setRevision]=useState(0);
   const path='/api/admin/order/list?'+new URLSearchParams({q:search,status,page:String(page)});
   async function read(signal?:AbortSignal){const response=await fetch(path,{cache:'no-store',signal}),value=await response.json();if(!response.ok)throw Error(value.error||'Pesanan belum dapat dimuat.');return value as AdminOrderPage}
-  async function refresh(){const value=await read();setData(value);onReserveCount(value.reserveCount)}
+  async function refresh(keepInvoice?:string){
+    const value=await read();
+    if(keepInvoice&&status!=='all'&&!value.orders.some(order=>order.id===keepInvoice)){
+      setQ(keepInvoice);setSearch(keepInvoice);setStatus('all');setPage(1);
+    }
+    setData(value);onReserveCount(value.reserveCount);
+  }
   useEffect(()=>{const abort=new AbortController();setLoading(true);setError('');read(abort.signal).then(value=>{if(!abort.signal.aborted){setData(value);onReserveCount(value.reserveCount)}}).catch(error=>{if(!abort.signal.aborted)setError(error.message)}).finally(()=>{if(!abort.signal.aborted)setLoading(false)});return()=>abort.abort()},[path,revision]);
   useEffect(()=>visibleRefresh(()=>setRevision(value=>value+1)),[]);
-  async function action(id:string,kind:string){setBusy(true);setError('');setInfo('');try{const response=await fetch('/api/admin/order/orders/'+encodeURIComponent(id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:kind})}),value=await response.json();if(!response.ok||value.error||kind==='retry'&&value.ok!==true)throw Error(value.error||'Pesanan belum dapat diperbarui.');await refresh();setInfo(kind==='retry'?'Invoice, bukti, dan penerima terkirim ke Telegram.':'Stok berhasil disinkronkan.')}catch(error){setError((error as Error).message)}finally{setBusy(false)}}
+  async function action(id:string,kind:string){setBusy(true);setError('');setInfo('');try{const response=await fetch('/api/admin/order/orders/'+encodeURIComponent(id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:kind})}),value=await response.json();if(!response.ok||value.error||kind==='retry'&&value.ok!==true)throw Error(value.error||'Pesanan belum dapat diperbarui.');await refresh(kind==='stock-sync'?id:undefined);setInfo(kind==='retry'?'Invoice, bukti, dan penerima terkirim ke Telegram.':'Stok berhasil disinkronkan.')}catch(error){setError((error as Error).message)}finally{setBusy(false)}}
   function find(event:FormEvent){event.preventDefault();setSearch(q.trim());setPage(1);setRevision(value=>value+1)}
   const locked=busy||loading;
   return <section className="panel orders-panel" aria-busy={loading}>
