@@ -4,7 +4,7 @@ import {Ruler,ChevronDown} from 'lucide-react';
 import {useId,useState} from 'react';
 import {Dialog,DialogContent,DialogTitle,DialogDescription,DialogTrigger} from './ui/dialog';
 import {WHATSAPP_URL} from '@/modules/catalog/customer-support';
-import {RESERVE_HOURS} from '@/modules/order/reserve-types';
+import {RESERVE_DAYS} from '@/modules/order/reserve-types';
 
 export function SizeGuideContent(){
   const id='size-guide-'+useId().replace(/[^a-zA-Z0-9_-]/g,''),[dimension,setDimension]=useState<'width'|'length'>('width');
@@ -50,7 +50,7 @@ export const SHOPPING_FAQ=[
   {question:'Apakah harus membuat akun?',answer:'Anda bisa checkout tanpa akun. Dengan akun, Anda dapat membuka Pesanan saya untuk melihat pesanan dan resi. Untuk checkout tanpa akun, simpan tautan invoice agar mudah kembali ke pesanan.'},
   {question:'Apakah wishlist atau keranjang menahan stok?',answer:'Tidak. Wishlist menyimpan pilihan di browser ini dan tidak tersinkron ke perangkat lain. Barang di wishlist atau keranjang tetap dapat dibeli pelanggan lain. Status pembayaran dan Reserve mengikuti konfirmasi ELITE.VTG.'},
   {question:'Apa pilihan pembayaran dan pengirimannya?',answer:'Pilihan rekening, QRIS, tarif, dan opsi pengiriman yang tersedia ditampilkan saat checkout. Jika memilih ongkir di tempat, harga barang tetap dibayar melalui website dan ongkir dibayar kepada kurir saat paket tiba.'},
-  {question:'Bagaimana cara Reserve dengan DP?',answer:`Pilih Pesan dengan DP pada detail produk jika tersedia, lalu ikuti petunjuk pembayaran. Barang di-reserve ${RESERVE_HOURS} jam setelah DP dikonfirmasi. Reserve tidak memakai diskon; ikuti nominal dan batas pelunasan pada halaman pesanan.`},
+  {question:'Bagaimana cara Reserve dengan DP?',answer:`Pilih Pesan dengan DP pada detail produk jika tersedia, lalu ikuti petunjuk pembayaran. Barang di-reserve ${RESERVE_DAYS} hari setelah DP dikonfirmasi. Reserve tidak memakai diskon; ikuti nominal dan batas pelunasan pada halaman pesanan.`},
   {question:'Di mana saya melihat resi?',answer:'Jika memiliki akun, buka Pesanan saya / lacak pesanan. Jika membeli tanpa akun, buka kembali tautan invoice yang Anda simpan. Resi akan tampil setelah ditambahkan oleh ELITE.VTG. Jika tautan tidak ditemukan, hubungi kami dengan informasi pesanan Anda.'},
   {question:'Bagaimana memastikan kondisi dan ukurannya?',answer:'Periksa foto detail, kondisi, minus, Size on tag, Size fit to, dan ukuran aktual pada produk. Gunakan Panduan ukuran untuk membandingkan dengan pakaian Anda. Tanyakan detail yang belum jelas melalui WhatsApp atau DM.'},
 ];
