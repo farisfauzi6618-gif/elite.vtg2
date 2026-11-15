@@ -82,3 +82,19 @@ test('automatic voucher expiry changes payment amount without invalidating prote
 test('saved legacy net-value quotes remain payable and retain their accounting',async()=>{
  await policy();const token=await selection([await seed('legacy-net',850000)]),q=(await quote(token,memberCookie)).value.quotes[0];delete q.protection.valueBasis;q.protection.declaredValue=807500;q.protection.fee=1615;await client.execute({sql:'UPDATE shipping_quotes SET payload=? WHERE id=?',args:[JSON.stringify(q),q.id]});const r=await checkout(token,q,memberCookie);assert.equal(r.status,201);const o=await r.json();assert.equal(o.total,829115);assert.equal(o.declared_shipping_value,807500);assert.equal(o.shipping_protection_fee,1615);await proof(o);const saved=await read(o.id);assert.equal(saved.total,829115);assert.equal(saved.shipping_protection_fee,1615);
 });
+
+test('member Reserve uses automatic first-purchase price while keeping protection based on gross merchandise',async()=>{
+ await policy();
+ const token=await selection([await seed('reserve-voucher',400000)],'reserve');
+ const {value}=await quote(token,memberCookie);
+ const q=value.quotes[0];
+ const r=await checkout(token,q,memberCookie,{depositAmount:95000,rewardChoice:'auto',expectedReserveDiscount:20000});
+ assert.equal(r.status,201,await r.clone().text());
+ const o=await r.json();
+ assert.equal(o.discount_voucher_id,'first-purchase-5');
+ assert.equal(o.reservation.depositMinimum,95000);
+ assert.equal(o.item_amount,380000);
+ assert.equal(o.declared_shipping_value,400000);
+ assert.equal(o.shipping_protection_fee,800);
+ assert.equal(o.total,400800);
+});

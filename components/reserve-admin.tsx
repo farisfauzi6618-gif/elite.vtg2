@@ -88,7 +88,11 @@ export function ReserveAdmin(){
     {s.reviewAfterDeadline&&<p className="notice">Bukti masuk sebelum tenggat. Tinjau bukti untuk menyelesaikan pembayaran atau melepas stok.</p>}
     {s.forfeitedAmount>0&&<p className="notice">DP hangus: {rupiah(s.forfeitedAmount)}.</p>}
     <dl className="reserve-values">
-     <dt>Nilai barang</dt><dd>{rupiah(s.orderValue)}</dd>
+     <dt>Nilai barang</dt><dd>{rupiah(o.item_subtotal??s.orderValue)}</dd>
+     {!!o.discount_amount&&<>
+      <dt>{o.discount_label||'Voucher'}</dt><dd>−{rupiah(o.discount_amount)}</dd>
+      <dt>Harga setelah voucher</dt><dd>{rupiah(s.orderValue)}</dd>
+     </>}
      <dt>DP minimum</dt><dd>{rupiah(s.depositMinimum)}</dd>
      <dt>DP awal terverifikasi</dt><dd>{rupiah(s.depositPaid)}</dd>
      <dt>Total terverifikasi</dt><dd>{rupiah(s.totalPaid)}</dd>

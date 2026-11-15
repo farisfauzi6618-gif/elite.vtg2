@@ -217,3 +217,101 @@ test('a stale admin cancellation cannot bypass expiry and the forfeiture ledger'
  assert.equal(s.status,'EXPIRED');
  assert.equal(s.forfeitedAmount,50000);
 });
+
+async function memberForVoucher(){
+ const account=await m.registerCustomer({name:'Simulated Buyer',identity:'reserve-voucher@example.test',password:'SIMULATED_BUYER_PASSWORD_123',consent:true},null);
+ const cookie='elite_customer='+account.token;
+ return {cookie,id:(await m.currentCustomer(cookie)).id};
+}
+
+async function createDiscountedReserve(line,deposit,cookie,expectedDiscount,choice='auto'){
+ const checkout=await m.createCheckout({mode:'reserve',lines:[line]});
+ const token=new URL(checkout.url,'https://elite.test').searchParams.get('catalog');
+ const quote=await m.quoteCheckout(token);
+ const request=new Request('https://elite.test/api/order',{headers:{cookie}});
+ return m.createReserveOrder(request,{
+  name:'Simulated Buyer',phone:'081234567890',address:'Simulated address number 10',postcode:'12345',
+  item:'Simulated item',quantity:1,items:['Simulated item'],itemAmount:quote.amount
+ },quote,{amount:25000,paymentMode:'prepaid',courier:'jnt',service:'EZ',grams:1000,destination:{label:'Simulated'}},
+ deposit,'bca_transfer',token,choice,expectedDiscount);
+}
+
+async function confirmFixtureDeposit(o){
+ const paymentId=o.reservation.payments[0].id;
+ await client.execute({sql:"UPDATE orders SET proof_key='fixture-proof',status='submitted' WHERE id=?",args:[o.id]});
+ await client.execute({sql:"UPDATE reserve_payments SET state='submitted',proof_key='fixture-proof',submitted_at=? WHERE id=?",args:[Date.now(),paymentId]});
+ await m.confirmReservePayment(paymentId,'owner');
+}
+
+const firstClaim=orderId=>client.execute({sql:'SELECT redeemed_at FROM first_purchase_discounts WHERE order_id=?',args:[orderId]}).then(r=>r.rows[0]);
+const voucherClaim=orderId=>client.execute({sql:'SELECT redeemed_at FROM purchase_voucher_claims WHERE order_id=?',args:[orderId]}).then(r=>r.rows[0]);
+
+test('automatic first-purchase discount sets net DP and top-up, and redeems only on verified settlement',async()=>{
+ const buyer=await memberForVoucher();
+ const line=await seed('first-reserve-voucher',1,400000);
+ await assert.rejects(createDiscountedReserve(line,95000,buyer.cookie,0),/Diskon berubah/);
+ assert.equal((await client.execute('SELECT COUNT(*) AS n FROM orders')).rows[0].n,0);
+ await assert.rejects(createDiscountedReserve(line,94999,buyer.cookie,20000),/DP minimum/);
+
+ const o=await (await createDiscountedReserve(line,95000,buyer.cookie,20000)).json();
+ assert.equal(o.discount_voucher_id,'first-purchase-5');
+ assert.equal(o.item_subtotal,400000);
+ assert.equal(o.item_amount,380000);
+ assert.equal(o.total,405000);
+ assert.equal(o.reservation.depositMinimum,95000);
+ assert.equal((await firstClaim(o.id)).redeemed_at,null);
+ const another=await seed('duplicate-first-reserve',1,400000);
+ await assert.rejects(createDiscountedReserve(another,95000,buyer.cookie,20000),/Diskon berubah/);
+
+ await confirmFixtureDeposit(o);
+ const active=await m.reserveSummary(await order(o.id));
+ assert.equal(active.extension.requiredTopUp,95000);
+ assert.equal(active.remaining,310000);
+ assert.equal((await firstClaim(o.id)).redeemed_at,null);
+ const payment=await m.newReservePayment(await order(o.id),active.remaining,'bca_transfer','owner','Verified fixture balance');
+ await m.confirmReservePayment(payment,'owner');
+ const redeemed=(await firstClaim(o.id)).redeemed_at;
+ assert.ok(redeemed);
+ await m.confirmReservePayment(payment,'owner');
+ assert.equal((await firstClaim(o.id)).redeemed_at,redeemed);
+ assert.equal((await order(o.id)).total,405000);
+});
+
+test('highest eligible voucher is locked, remains priced past voucher expiry, and releases on Reserve expiry',async()=>{
+ const buyer=await memberForVoucher();
+ const line=await seed('personal-reserve-voucher',2,400000);
+ await client.execute({sql:`INSERT INTO purchase_vouchers(id,label,owner_user_id,type,fixed_amount,minimum_order,usage_limit,valid_from,valid_until)
+ VALUES('voucher-fixture','Simulated voucher',?,'fixed',80000,300000,1,0,?)`,args:[buyer.id,Date.now()+86400000]});
+ const o=await (await createDiscountedReserve(line,80000,buyer.cookie,80000)).json();
+ assert.equal(o.discount_voucher_id,'voucher-fixture');
+ assert.equal(o.reservation.orderValue,320000);
+ assert.equal((await voucherClaim(o.id)).redeemed_at,null);
+ assert.equal(await firstClaim(o.id),undefined);
+ await assert.rejects(createDiscountedReserve(line,80000,buyer.cookie,80000,'voucher-fixture'),/Reward sudah tidak berlaku/);
+ await confirmFixtureDeposit(o);
+ await client.execute("UPDATE purchase_vouchers SET valid_until=1 WHERE id='voucher-fixture'");
+ const active=await order(o.id);
+ assert.equal(active.total,345000);
+ assert.equal((await m.reserveSummary(active)).remaining,265000);
+ await m.expireReservations(active.reservation_deadline);
+ assert.equal(await voucherClaim(o.id),undefined);
+ assert.equal((await m.reserveSummary(await order(o.id))).forfeitedAmount,80000);
+ assert.equal((await client.execute("SELECT usage_count FROM purchase_vouchers WHERE id='voucher-fixture'")).rows[0].usage_count,0);
+});
+
+test('a discounted Reserve below Rp50.000 creates no invoice or voucher claim',async()=>{
+ const buyer=await memberForVoucher();
+ await assert.rejects(createDiscountedReserve(await seed('small-reserve',1,50000),50000,buyer.cookie,2500),/pembayaran penuh/);
+ assert.equal((await client.execute('SELECT COUNT(*) AS n FROM orders')).rows[0].n,0);
+ assert.equal((await client.execute('SELECT COUNT(*) AS n FROM first_purchase_discounts')).rows[0].n,0);
+});
+
+test('cancelling a discounted Reserve releases the first purchase reward',async()=>{
+ const buyer=await memberForVoucher();
+ const line=await seed('cancel-reserve-voucher',1,400000);
+ const first=await (await createDiscountedReserve(line,95000,buyer.cookie,20000)).json();
+ await m.cancelReserve(first.id,'owner');
+ assert.equal(await firstClaim(first.id),undefined);
+ const second=await (await createDiscountedReserve(line,95000,buyer.cookie,20000)).json();
+ assert.equal(second.discount_amount,20000);
+});

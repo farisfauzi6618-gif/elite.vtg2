@@ -1,3 +1,6 @@
+import {purchaseRewardInTransaction,savePurchaseRewardClaim,releasePurchaseRewardClaim} from './first-purchase-server';
+import {rewardChoice} from './rewards';
+import {protectionGoodsValue} from './shipping-protection-types';
 import {protectionConfig,protectionFields,protectedOrderTotal} from './shipping-protection';
 import {activeColorSql,colorPriceSql} from '@/modules/catalog/color-variants';
 import type {Transaction,InValue} from '@libsql/client';
@@ -5,7 +8,7 @@ import {db,AppError,hash,random,myOrder,publicOrder,json} from './order-server';
 import type {Order} from './order-types';
 import type {CatalogQuote} from './catalog-bridge';
 import {shippingPayable,shippingCollect,type ShippingQuote} from './shipping-types';
-import {orderQuote} from './order-types';
+import {orderQuote,rupiah} from './order-types';
 import {currentCustomer} from '@/modules/catalog/customers';
 import {reservedQuantitySql,timelyReserveProofSql} from '@/modules/catalog/reserve-inventory';
 import {minimumReserveDeposit,validReserveDeposit,RESERVE_DAY_MS,RESERVE_DAYS,RESERVE_POLICY_VERSION,RESERVE_TERMS,reserveExtensionDeadline,reserveTopUp,type ReserveSummary,type ReserveStatus,type ReserveExtensionState} from './reserve-types';
@@ -74,16 +77,54 @@ export async function reserveSummary(o:Order):Promise<ReserveSummary|null>{
  };
 }
 export async function publicReserveOrder(o:Order){return {...publicOrder(o),reservation:await reserveSummary(o)}}
-export async function createReserveOrder(r:Request,v:{name:string;phone:string;address:string;postcode:string;item:string;quantity:number;items:string[];itemAmount:number},linked:CatalogQuote,quote:ShippingQuote,amount:unknown,paymentMethod:string,catalogToken:string){
- if(typeof amount!=='number'||!validReserveDeposit(linked.amount,amount))throw new AppError(400,'Deposit harus memenuhi minimum Reserve dan tidak melebihi nilai barang.');
+export async function createReserveOrder(r:Request,v:{name:string;phone:string;address:string;postcode:string;item:string;quantity:number;items:string[];itemAmount:number},linked:CatalogQuote,quote:ShippingQuote,amount:unknown,paymentMethod:string,catalogToken:string,selectedReward:unknown='none',expectedDiscount?:unknown,expectedVoucher?:unknown){
+ let choice:string;
+ try{choice=rewardChoice(selectedReward)}catch{throw new AppError(400,'Pilihan reward tidak valid.');}
+ if((expectedDiscount!==undefined&&(typeof expectedDiscount!=='number'||!Number.isSafeInteger(expectedDiscount)||expectedDiscount<0))||
+  (expectedVoucher!=null&&(typeof expectedVoucher!=='string'||!/^[a-zA-Z0-9_-]{1,100}$/.test(expectedVoucher)))){
+  throw new AppError(400,'Ringkasan diskon belum valid. Muat ulang checkout.');
+ }
  const customer=await currentCustomer(r.headers.get('cookie'));let existing:Order|null=null;try{existing=await myOrder(r)}catch(e){if(!(e instanceof AppError)||e.status!==404)throw e}
  if(existing&&(existing.order_type!=='reserve'||existing.reservation_status!=='AWAITING_DEPOSIT'||existing.proof_key||existing.catalog_checkout_id!==linked.id))throw new AppError(409,'Selesaikan atau tutup invoice sebelumnya terlebih dahulu. Reserve dan pesanan biasa memakai invoice terpisah.');
- const now=Date.now(),token=random(),id=existing?.id||'EV-'+new Date(now).toISOString().slice(2,10).replaceAll('-','')+'-'+crypto.randomUUID().slice(0,8).toUpperCase(),sessionHash=existing?.session_hash||await hash(token),minimum=minimumReserveDeposit(linked.amount),shippingAmount=shippingPayable(quote),protection=protectionFields(quote,linked.amount,await protectionConfig(),existing),protectionFee=protection.shipping_protection_fee??0;
+ if(existing?.discount_amount&&existing.customer_id!==customer?.id)throw new AppError(409,'Masuk kembali ke akun yang digunakan untuk invoice diskon ini.');
+ const now=Date.now(),token=random(),id=existing?.id||'EV-'+new Date(now).toISOString().slice(2,10).replaceAll('-','')+'-'+crypto.randomUUID().slice(0,8).toUpperCase();
+ const sessionHash=existing?.session_hash||await hash(token),shippingAmount=shippingPayable(quote),protectionPolicy=await protectionConfig();
  await atomic(async tx=>{
-  for(const line of linked.lines){const row=(await execute(tx,`SELECT p.status,${colorPriceSql('g','p')} AS price,g.qty-${reservedQuantitySql('g')} AS qty FROM products p JOIN size_groups g ON g.product_id=p.id WHERE p.id=? AND g.id=? AND ${activeColorSql('g','p')}`,[line.productId,line.groupId])).rows[0];if(!row||row.status!=='published'||Number(row.price)!==line.unitPrice||Number(row.qty)<line.quantity)throw new AppError(409,'Stok atau harga berubah. Pilih kembali di katalog.');}
+ for(const line of linked.lines){const row=(await execute(tx,`SELECT p.status,${colorPriceSql('g','p')} AS price,g.qty-${reservedQuantitySql('g')} AS qty FROM products p JOIN size_groups g ON g.product_id=p.id WHERE p.id=? AND g.id=? AND ${activeColorSql('g','p')}`,[line.productId,line.groupId])).rows[0];if(!row||row.status!=='published'||Number(row.price)!==line.unitPrice||Number(row.qty)<line.quantity)throw new AppError(409,'Stok atau harga berubah. Pilih kembali di katalog.');}
   const used=(await execute(tx,'SELECT id FROM orders WHERE catalog_checkout_id=? AND id!=?',[linked.id,id])).rows[0];if(used)throw new AppError(409,'Pilihan barang sudah digunakan invoice lain. Pilih kembali di katalog.');
-  if(existing){const changed=await execute(tx,"UPDATE orders SET name=?,phone=?,address=?,postcode=?,shipping_amount=?,shipping_json=?,total=?,deposit_amount=?,shipping_protection_fee=?,declared_shipping_value=?,shipping_protection_source=? WHERE id=? AND reservation_status='AWAITING_DEPOSIT' AND proof_key IS NULL",[v.name,v.phone,v.address,v.postcode,shippingAmount,JSON.stringify(quote),protectedOrderTotal(linked.amount,shippingAmount,protectionFee),amount,protection.shipping_protection_fee,protection.declared_shipping_value,protection.shipping_protection_source,id]);if(!changed.rowsAffected)throw new AppError(409,'Invoice berubah. Muat ulang halaman.');await execute(tx,"UPDATE reserve_payments SET amount=? WHERE order_id=? AND state='awaiting_proof'",[amount,id]);}
-  else {await execute(tx,"INSERT INTO orders(id,session_hash,created_at,name,phone,address,postcode,item,quantity,items_json,total,item_amount,shipping_amount,shipping_json,catalog_checkout_id,catalog_token,catalog_items_json,stock_sync_state,payment_method,customer_id,item_subtotal,discount_amount,order_type,reservation_status,deposit_minimum,deposit_amount,shipping_protection_fee,declared_shipping_value,shipping_protection_source,reserve_policy_version) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending',?,?,?,0,'reserve','AWAITING_DEPOSIT',?,?,?,?,?,?)",[id,sessionHash,now,v.name,v.phone,v.address,v.postcode,v.item,v.quantity,JSON.stringify(v.items),protectedOrderTotal(linked.amount,shippingAmount,protectionFee),linked.amount,shippingAmount,JSON.stringify(quote),linked.id,catalogToken,JSON.stringify(linked.lines),paymentMethod,customer?.id??null,linked.amount,minimum,amount,protection.shipping_protection_fee,protection.declared_shipping_value,protection.shipping_protection_source,RESERVE_POLICY_VERSION]);await execute(tx,'INSERT INTO reserve_payments(id,order_id,amount,payment_method,created_at) VALUES(?,?,?,?,?)',[crypto.randomUUID(),id,amount,paymentMethod,now]);await audit(tx,id,'created',customer?.id??'guest');}
+  const priced=existing?null:await purchaseRewardInTransaction(tx,customer,id,linked.amount,linked.lines,choice,false);
+  const gross=existing?.item_subtotal??priced?.subtotal??linked.amount;
+  const net=existing?.item_amount??priced?.net??linked.amount;
+  const discount=existing?.discount_amount??priced?.discount??0;
+  const voucherId=existing?.discount_voucher_id??priced?.selected?.id??null;
+  if((expectedDiscount!==undefined&&discount!==expectedDiscount)||(expectedVoucher!==undefined&&voucherId!==expectedVoucher))throw new AppError(409,'Diskon berubah. Periksa ulang voucher dan nominal DP.');
+  if(net<50000)throw new AppError(400,'Harga setelah voucher kurang dari Rp50.000. Lanjutkan dengan pembayaran penuh untuk memakai voucher.');
+  if(typeof amount!=='number'||!validReserveDeposit(net,amount)){
+   throw new AppError(400,`DP minimum ${rupiah(minimumReserveDeposit(net))} dan paling tinggi ${rupiah(net)} berdasarkan harga setelah diskon.`);
+  }
+  const protection=protectionFields(quote,protectionGoodsValue(gross,net,quote.protection?.valueBasis),protectionPolicy,existing);
+  const total=protectedOrderTotal(net,shippingAmount,protection.shipping_protection_fee);
+  if(existing){
+   const changed=await execute(tx,`UPDATE orders SET name=?,phone=?,address=?,postcode=?,shipping_amount=?,shipping_json=?,total=?,deposit_amount=?,
+    shipping_protection_fee=?,declared_shipping_value=?,shipping_protection_source=?
+    WHERE id=? AND reservation_status='AWAITING_DEPOSIT' AND status='awaiting_proof' AND proof_key IS NULL`,
+    [v.name,v.phone,v.address,v.postcode,shippingAmount,JSON.stringify(quote),total,amount,protection.shipping_protection_fee,protection.declared_shipping_value,protection.shipping_protection_source,id]);
+   if(!changed.rowsAffected)throw new AppError(409,'Invoice berubah. Muat ulang halaman.');
+   await execute(tx,"UPDATE reserve_payments SET amount=? WHERE order_id=? AND state='awaiting_proof'",[amount,id]);
+  }else{
+   await execute(tx,`INSERT INTO orders(id,session_hash,created_at,name,phone,address,postcode,item,quantity,items_json,total,item_amount,
+    shipping_amount,shipping_json,catalog_checkout_id,catalog_token,catalog_items_json,stock_sync_state,payment_method,customer_id,
+    item_subtotal,discount_amount,discount_voucher_id,discount_label,order_type,reservation_status,deposit_minimum,deposit_amount,
+    shipping_protection_fee,declared_shipping_value,shipping_protection_source,reserve_policy_version)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'pending',?,?,?,?,?,?,'reserve','AWAITING_DEPOSIT',?,?,?,?,?,?)`,
+    [id,sessionHash,now,v.name,v.phone,v.address,v.postcode,v.item,v.quantity,JSON.stringify(v.items),total,net,
+     shippingAmount,JSON.stringify(quote),linked.id,catalogToken,JSON.stringify(linked.lines),paymentMethod,customer?.id??null,
+     gross,discount,voucherId,priced?.selected?.label??null,minimumReserveDeposit(net),amount,
+     protection.shipping_protection_fee,protection.declared_shipping_value,protection.shipping_protection_source,RESERVE_POLICY_VERSION]);
+   if(discount)await savePurchaseRewardClaim(tx,id,customer?.id??null,voucherId);
+   await execute(tx,'INSERT INTO reserve_payments(id,order_id,amount,payment_method,created_at) VALUES(?,?,?,?,?)',[crypto.randomUUID(),id,amount,paymentMethod,now]);
+   await audit(tx,id,'created',customer?.id??'guest');
+  }
  });
  const o=await db().prepare('SELECT * FROM orders WHERE id=?').bind(id).first<Order>();if(!o)throw new AppError(503,'Invoice belum dapat dibuka.');
  const {observe,attachOrder}=await import('@/modules/analytics/server');await observe(()=>attachOrder(r,id));await observe(()=>atomic(tx=>reserveEvent(tx,o as ReserveRow,'reserve_started')));
@@ -115,6 +156,7 @@ export async function confirmReservePayment(paymentId:string,actor:string){
    for(const line of lines){const result=await execute(tx,'INSERT INTO stock_history(id,group_id,product_id,before_qty,after_qty,before_revision,after_revision,reason,actor,created_at) SELECT ?,id,product_id,qty,qty-?,revision,revision+1,?,?,? FROM size_groups WHERE id=? AND product_id=? AND qty>=?',[crypto.randomUUID(),Number(line.quantity),'Reserve lunas '+o.id,actor,new Date(now).toISOString(),String(line.group_id),String(line.product_id),Number(line.quantity)]);if(!result.rowsAffected)throw new AppError(409,'Stok Reserve perlu diperiksa pemilik.');await execute(tx,'UPDATE size_groups SET qty=qty-?,revision=revision+1 WHERE id=?',[Number(line.quantity),String(line.group_id)]);}
    await execute(tx,'INSERT INTO catalog_sales(order_id,checkout_id,marker,created_at) VALUES(?,?,?,?)',[o.id,o.catalog_checkout_id!,crypto.randomUUID(),new Date(now).toISOString()]);
    await execute(tx,"UPDATE orders SET reservation_status='PAID',payment_state='payment_confirmed',confirmed_at=?,confirmed_by=?,stock_sync_state='applied',stock_sync_error=NULL,post_purchase_revision=post_purchase_revision+1 WHERE id=?",[now,actor,o.id]);
+   if(o.discount_amount)await execute(tx,'UPDATE first_purchase_discounts SET redeemed_at=COALESCE(redeemed_at,?) WHERE order_id=?',[now,o.id]);
    await execute(tx,"INSERT INTO shipments(order_id,updated_at) VALUES(?,?) ON CONFLICT(order_id) DO UPDATE SET state='payment_confirmed',updated_at=excluded.updated_at WHERE shipments.state='awaiting_confirmation'",[o.id,now]);await touchProducts(tx,o.id);await reserveEvent(tx,o,'reserve_completed');
   }else {
    await execute(tx,"UPDATE orders SET reservation_status=? WHERE id=?",[paid>0?'PARTIALLY_PAID':'RESERVED',o.id]);
@@ -126,6 +168,7 @@ export async function confirmReservePayment(paymentId:string,actor:string){
 async function expireReserve(tx:Transaction,o:ReserveRow,paid:number){
  const forfeited=o.reserve_policy_version===RESERVE_POLICY_VERSION?paid:null;
  await execute(tx,"UPDATE orders SET reservation_status='EXPIRED' WHERE id=?",[o.id]);
+ if(o.discount_amount)await releasePurchaseRewardClaim(tx,o.id);
  await execute(tx,"UPDATE reserve_items SET state='released' WHERE order_id=? AND state='active'",[o.id]);
  await touchProducts(tx,o.id);
  await audit(tx,o.id,'expired','system',{
@@ -216,6 +259,7 @@ export async function cancelReserve(id:string,actor:string){
    return;
   }
   await execute(tx,"UPDATE orders SET reservation_status='CANCELLED' WHERE id=?",[id]);
+  if(o.discount_amount)await releasePurchaseRewardClaim(tx,id);
   await execute(tx,"UPDATE reserve_items SET state='released' WHERE order_id=? AND state='active'",[id]);
   await touchProducts(tx,id);
   await audit(tx,id,'cancelled',actor);

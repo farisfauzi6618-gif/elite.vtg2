@@ -15,9 +15,9 @@ import type {CheckoutLine} from '@/modules/catalog/checkout';
 
 // A write transaction serializes eligibility, the invoice, and its single-use claim.
 async function expireUnpaidClaim(tx:Transaction,customerId:string) {
- await tx.execute({sql:"UPDATE orders SET status='expired',payment_state='expired' WHERE customer_id=? AND status='awaiting_proof' AND proof_key IS NULL AND created_at<? AND id IN (SELECT order_id FROM first_purchase_discounts WHERE redeemed_at IS NULL)",args:[customerId,Date.now()-7*86400000]});
+ await tx.execute({sql:"UPDATE orders SET status='expired',payment_state='expired',reservation_status=CASE WHEN order_type='reserve' THEN 'EXPIRED' ELSE reservation_status END WHERE customer_id=? AND status='awaiting_proof' AND proof_key IS NULL AND created_at<? AND id IN (SELECT order_id FROM first_purchase_discounts WHERE redeemed_at IS NULL)",args:[customerId,Date.now()-7*86400000]});
  await tx.execute({sql:"DELETE FROM first_purchase_discounts WHERE customer_id=? AND redeemed_at IS NULL AND order_id IN (SELECT id FROM orders WHERE status IN ('expired','cancelled') AND proof_key IS NULL)",args:[customerId]});
- await tx.execute({sql:"UPDATE orders SET status='expired',payment_state='expired' WHERE customer_id=? AND status='awaiting_proof' AND proof_key IS NULL AND created_at<? AND id IN (SELECT order_id FROM purchase_voucher_claims WHERE redeemed_at IS NULL)",args:[customerId,Date.now()-7*86400000]});
+ await tx.execute({sql:"UPDATE orders SET status='expired',payment_state='expired',reservation_status=CASE WHEN order_type='reserve' THEN 'EXPIRED' ELSE reservation_status END WHERE customer_id=? AND status='awaiting_proof' AND proof_key IS NULL AND created_at<? AND id IN (SELECT order_id FROM purchase_voucher_claims WHERE redeemed_at IS NULL)",args:[customerId,Date.now()-7*86400000]});
  await tx.execute({sql:"DELETE FROM purchase_voucher_claims WHERE customer_id=? AND redeemed_at IS NULL AND order_id IN (SELECT id FROM orders WHERE status IN ('expired','cancelled') AND proof_key IS NULL)",args:[customerId]});
 }
 async function promotion(tx:Transaction,customerId:string):Promise<PurchasePromotion> {
@@ -30,6 +30,35 @@ export async function purchasePromotion(cookie:string|null,knownCustomer?:Awaite
  const customer=knownCustomer===undefined?await currentCustomer(cookie):knownCustomer;if(!customer)return {state:'guest',percent:5};
  const tx=await db().client.transaction('write');
  try{await expireUnpaidClaim(tx,customer.id);const result=await promotion(tx,customer.id);await tx.commit();return result;}finally{tx.close();}
+}
+export async function purchaseRewardInTransaction(
+ tx:Transaction,customer:{id:string}|null,orderId:string,subtotal:number,lines:CheckoutLine[]|undefined,
+ choice:string,blockReservedFirst=true
+){
+ let state:PurchasePromotion={state:'guest',percent:5};
+ if(customer){
+  await expireUnpaidClaim(tx,customer.id);
+  state=await promotion(tx,customer.id);
+  if(blockReservedFirst&&state.state==='reserved'&&state.orderId!==orderId&&(choice==='auto'||choice===FIRST_REWARD_ID))throw new AppError(409,'Diskon 5% sudah ada pada invoice yang belum selesai. Klik “Lanjutkan pesanan diskon”, atau batalkan invoice itu jika belum dibayar.');
+ }
+ const pricedLines=lines?await rewardLines(tx,lines):[{productId:null,category:null,amount:subtotal}],rules=customer?await rewardRules(tx,customer.id,state,orderId):[],quote=priceRewards(pricedLines,rules,choice,!!customer);
+ if(quote.subtotal!==subtotal)throw new AppError(409,'Harga barang berubah. Pilih kembali barang dari katalog.');
+ return quote;
+}
+
+export async function releasePurchaseRewardClaim(tx:Transaction,orderId:string){
+ await tx.execute({sql:'DELETE FROM first_purchase_discounts WHERE order_id=? AND redeemed_at IS NULL',args:[orderId]});
+ await tx.execute({sql:'DELETE FROM purchase_voucher_claims WHERE order_id=? AND redeemed_at IS NULL',args:[orderId]});
+}
+
+export async function savePurchaseRewardClaim(tx:Transaction,orderId:string,customerId:string|null,voucherId:string|null){
+ await releasePurchaseRewardClaim(tx,orderId);
+ if(!customerId||!voucherId)return;
+ if(voucherId===FIRST_REWARD_ID){
+  await tx.execute({sql:'INSERT INTO first_purchase_discounts(customer_id,order_id) VALUES(?,?)',args:[customerId,orderId]});
+ }else{
+  await tx.execute({sql:'INSERT INTO purchase_voucher_claims(voucher_id,order_id,customer_id,reserved_at) VALUES(?,?,?,?)',args:[voucherId,orderId,customerId,Date.now()]});
+ }
 }
 export type DiscountPricing={customerId:string|null;subtotal:number;discount:number;net:number;voucherId:string|null;voucherLabel:string|null}&ProtectionFields;
 export async function persistPurchase(request:Request,existing:Order|null,orderId:string,subtotal:number,lines:CheckoutLine[]|undefined,statement:(pricing:DiscountPricing)=>{sql:string;args:InValue[]},selectedReward?:unknown,protection?:{quote:ShippingQuote;policy:ProtectionConfig}) {
@@ -44,22 +73,12 @@ export async function persistPurchase(request:Request,existing:Order|null,orderI
    if(!row||row.status!=='published'||Number(row.qty)<line.quantity||Number(row.group_price??row.price)!==line.unitPrice)throw new AppError(409,'Stok atau harga berubah. Pilih kembali di katalog.');
    if(orderingLocked({orderableAt:row.orderable_at as string|null}))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(String(row.orderable_at))+'.');
   }
-  let state:PurchasePromotion={state:'guest',percent:5};
-  if(customer){
-   await expireUnpaidClaim(tx,customer.id);
-   state=await promotion(tx,customer.id);
-   if(state.state==='reserved'&&state.orderId!==orderId&&(choice==='auto'||choice===FIRST_REWARD_ID))throw new AppError(409,'Diskon 5% sudah ada pada invoice yang belum selesai. Klik “Lanjutkan pesanan diskon”, atau batalkan invoice itu jika belum dibayar.');
-  }
-  const pricedLines=lines?await rewardLines(tx,lines):[{productId:null,category:null,amount:subtotal}],rules=customer?await rewardRules(tx,customer.id,state,orderId):[],quote=priceRewards(pricedLines,rules,choice,!!customer);
-  if(quote.subtotal!==subtotal)throw new AppError(409,'Harga barang berubah. Pilih kembali barang dari katalog.');
+  const quote=await purchaseRewardInTransaction(tx,customer,orderId,subtotal,lines,choice);
   const protectedPrice=protection?protectionFields(protection.quote,protectionGoodsValue(subtotal,subtotal-quote.discount,protection.quote.protection?.valueBasis),protection.policy,existing):legacyProtection;
   const pricing={...protectedPrice,customerId:customer?.id??null,subtotal,discount:quote.discount,net:subtotal-quote.discount,voucherId:quote.selected?.id??null,voucherLabel:quote.selected?.label??null};
   const saved=await tx.execute(statement(pricing));
   if(saved.rowsAffected!==1)throw new AppError(409,'Pesanan berubah dari tab lain. Muat ulang halaman sebelum melanjutkan.');
-  await tx.execute({sql:'DELETE FROM first_purchase_discounts WHERE order_id=? AND redeemed_at IS NULL',args:[orderId]});
-  await tx.execute({sql:'DELETE FROM purchase_voucher_claims WHERE order_id=? AND redeemed_at IS NULL',args:[orderId]});
-  if(pricing.discount&&pricing.voucherId===FIRST_REWARD_ID)await tx.execute({sql:'INSERT INTO first_purchase_discounts(customer_id,order_id) VALUES(?,?)',args:[customer!.id,orderId]});
-  else if(pricing.discount)await tx.execute({sql:'INSERT INTO purchase_voucher_claims(voucher_id,order_id,customer_id,reserved_at) VALUES(?,?,?,?)',args:[pricing.voucherId!,orderId,customer!.id,Date.now()]});
+  await savePurchaseRewardClaim(tx,orderId,pricing.customerId,pricing.voucherId);
   await tx.commit();return pricing;
  }catch(error){await tx.rollback();throw error;}finally{tx.close();}
 }

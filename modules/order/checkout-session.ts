@@ -4,7 +4,7 @@ export type CatalogSelection = {
   id?:string;
   preview?:import('./checkout-ux').CheckoutPreview[];
   orderType?: string;
-  lines: { name: string; label: string; quantity: number }[];
+  lines: { productId: string; groupId: string; name: string; label: string; quantity: number }[];
   amount: number;
   customer?: { name: string; phone: string | null };
 };
