@@ -3,22 +3,58 @@ import {CheckoutFlowReport} from '@/components/checkout-flow-report';
 import {useEffect,useState} from 'react';
 import {BrandLogo} from '@/components/brand-logo';
 import {ERROR_LABELS} from '@/modules/analytics/common';
+import type {wishlistInterest} from '@/modules/analytics/wishlist';
 import type {AnalyticsReport} from '@/modules/analytics/report';
 import './analytics.css';
 const number=(v:number)=>v.toLocaleString('id-ID'),pct=(v:number|null)=>v===null?'—':v>0&&v<0.1?'<0,1%':v.toLocaleString('id-ID',{maximumFractionDigits:1})+'%',money=(v:number)=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v);
 const date=(v:string|number|null)=>v?new Date(v).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Jakarta'}):'—';
 type Product=AnalyticsReport['products'][number];
 function ProductBoard({title,rows,metric}:{title:string;rows:Product[];metric:'views'|'adds'}){return <section className="an-panel an-board"><h2>{title}</h2>{rows.length?<ol>{rows.map(p=><li key={p.id}><a href={'/produk/'+p.id}>{p.name}</a><span>{number(p[metric])} {metric==='views'?'views':'adds'}</span></li>)}</ol>:<p className="an-muted">Belum ada aktivitas.</p>}</section>}
+type WishlistReport=Awaited<ReturnType<typeof wishlistInterest>>;
+const wishlistAvailability={
+ available:'Tersedia',reserved:'Di-reserve',sold:'Stok habis',scheduled:'Segera hadir',
+ unpublished:'Tidak tayang',removed:'Dihapus'
+};
+
+function WishlistBoard({report,onPage}:{report:WishlistReport;onPage:(page:number)=>void}){
+ const {products,page,hasNext}=report;
+ return <section className="an-panel">
+  <h2>Produk yang disimpan ke wishlist</h2>
+  <p className="an-muted">Satu browser dihitung sekali per produk dalam rentang yang dipilih. Laporan mencatat aktivitas simpan.</p>
+  {products.length===0?<p className="an-muted">{page===1?'Belum ada aktivitas simpan dalam rentang ini.':'Tidak ada produk pada halaman ini.'}</p>:
+   <div className="an-scroll"><table className="an-table">
+    <thead><tr><th scope="col">Produk</th><th scope="col">Browser unik</th><th scope="col">Status stok</th><th scope="col">Terakhir disimpan</th></tr></thead>
+    <tbody>{products.map(row=><tr key={row.productId}>
+     <th scope="row">{row.availability==='removed'||row.availability==='unpublished'?row.name:
+      <a href={'/produk/'+encodeURIComponent(row.productId)}>{row.name}</a>}
+      {row.brand&&<div className="an-muted">{row.brand}</div>}
+     </th>
+     <td>{number(row.browsers)}</td>
+     <td>{wishlistAvailability[row.availability]}</td>
+     <td>{date(row.lastSavedAt)}</td>
+    </tr>)}</tbody>
+   </table></div>}
+  {(page>1||hasNext)&&<nav className="an-presets" aria-label="Halaman laporan wishlist">
+   <button type="button" disabled={page<=1} onClick={()=>onPage(page-1)}>Sebelumnya</button>
+   <span>Halaman {page}</span>
+   <button type="button" disabled={!hasNext} onClick={()=>onPage(page+1)}>Berikutnya</button>
+  </nav>}
+ </section>;
+}
+
 export default function Analytics(){
  const [range,setRange]=useState('7d'),[start,setStart]=useState(''),[end,setEnd]=useState(''),[applied,setApplied]=useState(''),[tab,setTab]=useState('Overview'),[data,setData]=useState<AnalyticsReport|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(''),[refresh,setRefresh]=useState(0);
- useEffect(()=>{let active=true;const abort=new AbortController();setBusy(true);setData(null);setError('');const params=new URLSearchParams({range,view:tab.toLowerCase()});if(range==='custom'){const values=new URLSearchParams(applied);params.set('start',values.get('start')||'');params.set('end',values.get('end')||'');if(!applied){setData(null);setBusy(false);return}}
- fetch('/api/admin/analytics?'+params,{cache:'no-store',signal:abort.signal}).then(async r=>{const v=await r.json();if(!r.ok)throw new Error(v.error||'Analytics belum dapat dimuat.');if(active)setData(v)}).catch(e=>{if(active)setError(e.message)}).finally(()=>{if(active)setBusy(false)});return()=>{active=false;abort.abort()}},[range,applied,refresh,tab]);
+ const [wishlist,setWishlist]=useState<WishlistReport|null>(null),[wishlistPage,setWishlistPage]=useState(1);
+ useEffect(()=>{let active=true;const abort=new AbortController();setBusy(true);setData(null);setWishlist(null);setError('');const params=new URLSearchParams({range,view:tab.toLowerCase()});if(tab==='Wishlist')params.set('page',String(wishlistPage));if(range==='custom'){const values=new URLSearchParams(applied);params.set('start',values.get('start')||'');params.set('end',values.get('end')||'');if(!applied){setData(null);setBusy(false);return}}
+ fetch('/api/admin/analytics?'+params,{cache:'no-store',signal:abort.signal}).then(async r=>{const v=await r.json();if(!r.ok)throw new Error(v.error||'Analytics belum dapat dimuat.');if(active){if(v.view==='wishlist')setWishlist(v);else setData(v)}}).catch(e=>{if(active)setError(e.message)}).finally(()=>{if(active)setBusy(false)});return()=>{active=false;abort.abort()}},[range,applied,refresh,tab,wishlistPage]);
  const k=data?.kpis;
+ const displayedRange=(tab==='Wishlist'?wishlist:data)?.range;
  return <main className="analytics-shell"><header className="an-header"><div><a href="/admin" className="an-brand"><BrandLogo/></a><h1>Website Analytics</h1><p>Performa katalog dan perjalanan pembelian.</p></div><button className="an-button" onClick={()=>setRefresh(v=>v+1)} disabled={busy}>{busy?'Memuat…':'Perbarui data'}</button></header>
- <section className="an-filters" aria-label="Rentang tanggal"><div className="an-presets">{[['today','Today'],['7d','7 Days'],['30d','30 Days'],['custom','Custom Date Range']].map(([value,label])=><button key={value} aria-pressed={range===value} onClick={()=>setRange(value)}>{label}</button>)}</div>{range==='custom'&&<form onSubmit={e=>{e.preventDefault();setApplied(new URLSearchParams({start,end}).toString())}}><label>Dari<input type="date" required value={start} onChange={e=>setStart(e.target.value)}/></label><label>Sampai<input type="date" required value={end} onChange={e=>setEnd(e.target.value)}/></label><button className="an-button" disabled={busy}>Terapkan</button></form>}<p className="an-muted">{data?`${date(data.range.start)} – ${date(data.range.end-1)} · WIB`:'Waktu Indonesia Barat (WIB)'}</p></section>
- <nav className="an-tabs" aria-label="Analytics tabs">{['Overview','Products','Search','Traffic'].map(t=><button key={t} aria-current={tab===t?'page':undefined} onClick={()=>setTab(t)}>{t}</button>)}</nav>
+ <section className="an-filters" aria-label="Rentang tanggal"><div className="an-presets">{[['today','Today'],['7d','7 Days'],['30d','30 Days'],['custom','Custom Date Range']].map(([value,label])=><button key={value} aria-pressed={range===value} onClick={()=>{setWishlistPage(1);setRange(value)}}>{label}</button>)}</div>{range==='custom'&&<form onSubmit={e=>{e.preventDefault();setWishlistPage(1);setApplied(new URLSearchParams({start,end}).toString())}}><label>Dari<input type="date" required value={start} onChange={e=>setStart(e.target.value)}/></label><label>Sampai<input type="date" required value={end} onChange={e=>setEnd(e.target.value)}/></label><button className="an-button" disabled={busy}>Terapkan</button></form>}<p className="an-muted">{displayedRange?`${date(displayedRange.start)} – ${date(displayedRange.end-1)} · WIB`:'Waktu Indonesia Barat (WIB)'}</p></section>
+ <nav className="an-tabs" aria-label="Analytics tabs">{['Overview','Products','Wishlist','Search','Traffic'].map(t=><button key={t} aria-current={tab===t?'page':undefined} onClick={()=>setTab(t)}>{t}</button>)}</nav>
  {error&&<p className="an-error" role="alert">{error}</p>}{busy&&<p className="an-muted" role="status">Memuat data terbaru…</p>}
- {!data&&!busy&&!error&&<p className="an-muted">Pilih rentang tanggal untuk melihat data.</p>}
+ {!displayedRange&&!busy&&!error&&<p className="an-muted">Pilih rentang tanggal untuk melihat data.</p>}
+ {tab==='Wishlist'&&wishlist&&!busy&&<WishlistBoard report={wishlist} onPage={setWishlistPage}/>}
  {data&&data.view===tab.toLowerCase()&&<div aria-busy={busy}>
  {tab==='Overview'&&<><div className="an-kpis">{[
   ['Unique Visitors',number(k!.visitors),'Pengunjung unik dalam periode'],['Completed Orders',number(k!.completedOrders),'Pembayaran dikonfirmasi pemilik'],['Website Conversion Rate',pct(k!.conversion),'Completed orders ÷ unique visitors'],['Website Revenue',money(k!.revenue),'Total pembayaran, termasuk ongkir dan Shipping Protection'],['Add to Cart Rate',pct(k!.addRate),'Pengunjung menambah ÷ melihat produk'],['Checkout Cohort',number(data.checkoutFlow?.stages[0]?.count??0),'Checkout yang dilihat; lihat progres cohort di bawah']

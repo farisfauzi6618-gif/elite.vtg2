@@ -30,6 +30,17 @@ export async function event(s:Session|null,name:string,key:string,v:Detail={},pr
 export async function collect(r:Request,v:Record<string,unknown>){
  if(v.event==='checkout_progress'){await (await import('./checkout-flow')).checkoutProgress(r,v);return;}
  const s=await analyticsSession(r);if(!s)return;
+ if(v.event==='wishlist_saved'){
+  const productId=v.productId;
+  if(typeof productId!=='string'||!/^[A-Za-z0-9_-]{1,100}$/.test(productId))return;
+  const now=Date.now(),day=Math.floor((now+25200000)/86400000);
+  // One anonymous browser/product signal per WIB day. The report deduplicates across days.
+  await db().prepare(`
+   INSERT OR IGNORE INTO analytics_events(id,dedupe_key,event_name,timestamp,visitor_id,product_id,traffic_source)
+   SELECT ?,?,'wishlist_saved',?,?,id,? FROM products WHERE id=? AND status='published' AND deleted_at IS NULL
+  `).bind(crypto.randomUUID(),'wishlist:'+s.visitor_id+':'+productId+':'+day,now,s.visitor_id,s.traffic_source,productId).run();
+  return;
+ }
  await db().prepare('UPDATE analytics_sessions SET last_seen_at=? WHERE id=?').bind(Date.now(),s.id).run();
  const customer=await currentCustomer(r.headers.get('cookie'));if(customer)s.user_id=customer.id;
  const productId=typeof v.productId==='string'&&v.productId.length<=100?v.productId:undefined;

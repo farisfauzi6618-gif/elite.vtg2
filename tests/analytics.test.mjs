@@ -65,3 +65,38 @@ test('high-interest availability excludes drafts, deleted, scheduled, empty and 
  const data=await m.analyticsReport(new URLSearchParams({range:'today',view:'products'}));assert.deepEqual(data.leaderboards.interest.map(p=>p.id),['live']);
  const status=Object.fromEntries(data.products.map(p=>[p.id,p.status]));assert.equal(status.draft,'Draft');assert.equal(status.deleted,'Deleted');assert.equal(status.scheduled,'Scheduled');assert.equal(status.empty,'Sold');assert.equal(status.inactive,'Unavailable');
 });
+
+test('Website Analytics ranks wishlist interest by distinct browsers in the selected period',async()=>{
+ await seedProduct('wishlist-cap');
+ await seedProduct('wishlist-sold',0);
+ const first=await visit(),second=await visit(),older=await visit();
+ const save=async(cookie,productId)=>assert.equal((await m.collectPost(req({event:'wishlist_saved',productId},cookie))).status,204);
+ await save(first,'wishlist-cap');await save(first,'wishlist-cap');await save(second,'wishlist-cap');
+ await save(first,'wishlist-sold');await save(first,'nonexistent');await save('','wishlist-cap');
+ await save(older,'wishlist-cap');
+ const today=m.dateRange(new URLSearchParams({range:'today'}));
+ const olderSession=await m.analyticsSession(req(undefined,older)),previous=today.start-13*86400000;
+ await client.execute({sql:"UPDATE analytics_events SET timestamp=? WHERE event_name='wishlist_saved' AND visitor_id=?",args:[previous,olderSession.visitor_id]});
+ const firstSession=await m.analyticsSession(req(undefined,first));
+ await client.execute({sql:"INSERT INTO analytics_events(id,dedupe_key,event_name,timestamp,visitor_id,product_id,traffic_source) VALUES('earlier','earlier','wishlist_saved',?,?,'wishlist-cap','Direct')",args:[today.start-86400000,firstSession.visitor_id]});
+ const events=await rows('wishlist_saved');assert.equal(events.length,5);
+ for(const event of events){assert.equal(event.user_id,null);assert.equal(event.session_id,null);}
+ const login=req({},'','/api/auth/owner');
+ const owner=m.ownerCookie(login,await m.loginOwner(login,{email:'owner@elite.test',password:'SIMULATED_ANALYTICS_PASSWORD_123'})).split(';')[0];
+ const report=(query,cookie=owner)=>m.reportGet(req(undefined,cookie,'/api/admin/analytics?view=wishlist&'+query));
+ assert.equal((await report('range=7d','')).status,401);
+ const member=(await m.listTeam('https://elite.test'))[0],session=await m.startTeamSession(member.link.split('#')[1]);
+ const staff=m.sessionCookie(login,session.session,session.expires).split(';')[0];
+ assert.equal((await report('range=7d',staff)).status,403);
+ await m.editTeam({id:member.id,action:'analytics',allowed:true});
+ assert.equal((await report('range=7d',staff)).status,200);
+ const response=await report('range=7d');assert.equal(response.status,200);
+ assert.equal(response.headers.get('cache-control'),'private, no-store');
+ const weekly=await response.json();assert.equal(weekly.view,'wishlist');
+ assert.deepEqual(weekly.products.map(p=>[p.productId,p.browsers,p.availability]),[['wishlist-cap',2,'available'],['wishlist-sold',1,'sold']]);
+ assert.deepEqual(Object.keys(weekly.products[0]).sort(),['availability','brand','browsers','lastSavedAt','name','productId']);
+ assert.equal((await (await report('range=30d')).json()).products[0].browsers,3);
+ assert.equal((await (await report('range=custom&start='+today.startDate+'&end='+today.endDate)).json()).products[0].browsers,2);
+ assert.equal((await report('range=7d&page=0')).status,400);
+ assert.deepEqual((await (await report('range=7d&page=2')).json()).products,[]);
+});

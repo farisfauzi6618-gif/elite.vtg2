@@ -9,6 +9,7 @@ import {publicPhotoUrl} from '@/modules/catalog/photo-url';
 import {isSold,isReserved,type Product} from '@/modules/catalog/catalog-types';
 import {orderingLocked} from '@/modules/catalog/product-schedule';
 import {WISHLIST_KEY,WISHLIST_LIMIT,wishlistIds,toggleWishlist,wishlistPage} from '@/modules/catalog/wishlist';
+import {track} from '@/modules/analytics/client';
 import {ProductPrice} from './product-price';
 
 type WishlistState={ids:string[];ready:boolean;persistent:boolean;notice:string;toggle:(id:string)=>void;remove:(id:string)=>void};
@@ -35,7 +36,10 @@ export function WishlistProvider({children}:{children:ReactNode}){
     if(!ready)return;
     const before=current.current,next=toggleWishlist(before,id);
     if(next===before){if(before.length>=WISHLIST_LIMIT)setNotice(`Wishlist penuh. Hapus salah satu dari ${WISHLIST_LIMIT} barang untuk menyimpan pilihan baru.`);return}
-    save(next);setNotice(next.includes(id)?'Barang disimpan ke wishlist. Menyimpan barang tidak menahan stok.':'Barang dihapus dari wishlist.');
+    const saved=next.includes(id);
+    save(next);
+    if(saved)track('wishlist_saved',{productId:id});
+    setNotice(saved?'Barang disimpan ke wishlist. Menyimpan barang tidak menahan stok.':'Barang dihapus dari wishlist.');
   }
   function remove(id:string){save(current.current.filter(value=>value!==id));setNotice('Barang dihapus dari wishlist.')}
   return <WishlistContext.Provider value={{ids,ready,persistent,notice,toggle,remove}}>{children}<p className="sr-only" role="status" aria-live="polite">{notice}</p></WishlistContext.Provider>;
@@ -64,7 +68,7 @@ export function WishlistPanel({onNavigate}:{onNavigate:()=>void}){
   if(!wishlist)return null;
   const byId=new Map(products.map(product=>[product.id,product]));
   return <Sheet open={open} onOpenChange={value=>{setOpen(value);if(value)setPage(1)}}><SheetTrigger asChild><button type="button" className="wishlist-open" aria-label={'Buka wishlist, '+wishlist.ids.length+' barang'}><Heart size={18} strokeWidth={1.5} aria-hidden="true"/><span>Wishlist</span>{wishlist.ids.length>0&&<small aria-hidden="true">{wishlist.ids.length}</small>}</button></SheetTrigger>
-    <SheetContent className="wishlist-sheet"><SheetHeader><SheetTitle>Wishlist Anda</SheetTitle><SheetDescription>Disimpan di browser ini. Stok tetap tersedia untuk pembeli lain.</SheetDescription></SheetHeader>
+    <SheetContent className="wishlist-sheet"><SheetHeader><SheetTitle>Wishlist Anda</SheetTitle><SheetDescription>Disimpan di browser ini. Toko melihat jumlah penyimpanan per produk. Stok tetap tersedia untuk pembeli lain.</SheetDescription></SheetHeader>
       {!wishlist.persistent&&<p className="wishlist-notice" role="status">Browser tidak mengizinkan penyimpanan. Wishlist hanya tersedia selama halaman ini terbuka.</p>}
       {wishlist.notice&&<p className="wishlist-notice" role="status">{wishlist.notice}</p>}
       {!wishlist.ids.length?<div className="wishlist-empty"><Heart size={25} strokeWidth={1.3} aria-hidden="true"/><h3>Simpan yang Anda suka.</h3><p>Ketuk ikon hati pada produk untuk melihatnya lagi di sini.</p><button type="button" className="button secondary" onClick={()=>setOpen(false)}>Lanjut belanja</button></div>:loading?<p className="wishlist-loading" role="status">Memuat pilihan Anda…</p>:error?<div className="wishlist-error" role="alert"><p>{error}</p><button type="button" className="button secondary" onClick={()=>setRetry(value=>value+1)}>Coba lagi</button></div>:<ul className="wishlist-items">{selection.ids.map(id=>{
