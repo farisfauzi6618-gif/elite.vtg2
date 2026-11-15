@@ -21,10 +21,12 @@ async function expireUnpaidClaim(tx:Transaction,customerId:string) {
  await tx.execute({sql:"DELETE FROM purchase_voucher_claims WHERE customer_id=? AND redeemed_at IS NULL AND order_id IN (SELECT id FROM orders WHERE status IN ('expired','cancelled') AND proof_key IS NULL)",args:[customerId]});
 }
 async function promotion(tx:Transaction,customerId:string):Promise<PurchasePromotion> {
- const claim=(await tx.execute({sql:'SELECT order_id,redeemed_at FROM first_purchase_discounts WHERE customer_id=?',args:[customerId]})).rows[0];
+ const claim=(await tx.execute({sql:`SELECT c.order_id,c.redeemed_at,o.order_type,o.proof_key IS NOT NULL AS has_proof
+  FROM first_purchase_discounts c JOIN orders o ON o.id=c.order_id WHERE c.customer_id=?`,args:[customerId]})).rows[0];
+ if(claim?.redeemed_at!=null)return {state:'redeemed',percent:5};
  const confirmed=(await tx.execute({sql:"SELECT id FROM orders WHERE customer_id=? AND (confirmed_at IS NOT NULL OR payment_state='payment_confirmed') LIMIT 1",args:[customerId]})).rows[0];
- if(claim?.redeemed_at||confirmed)return {state:'redeemed',percent:5};
- return claim?{state:'reserved',percent:5,orderId:String(claim.order_id)}:{state:'available',percent:5};
+ if(confirmed)return {state:'ineligible',percent:5};
+ return claim?{state:'reserved',percent:5,orderId:String(claim.order_id),orderType:claim.order_type==='reserve'?'reserve':'normal',hasProof:Boolean(claim.has_proof)}:{state:'available',percent:5};
 }
 export async function purchasePromotion(cookie:string|null,knownCustomer?:Awaited<ReturnType<typeof currentCustomer>>):Promise<PurchasePromotion> {
  const customer=knownCustomer===undefined?await currentCustomer(cookie):knownCustomer;if(!customer)return {state:'guest',percent:5};
@@ -61,7 +63,7 @@ export async function savePurchaseRewardClaim(tx:Transaction,orderId:string,cust
  }
 }
 export type DiscountPricing={customerId:string|null;subtotal:number;discount:number;net:number;voucherId:string|null;voucherLabel:string|null}&ProtectionFields;
-export async function persistPurchase(request:Request,existing:Order|null,orderId:string,subtotal:number,lines:CheckoutLine[]|undefined,statement:(pricing:DiscountPricing)=>{sql:string;args:InValue[]},selectedReward?:unknown,protection?:{quote:ShippingQuote;policy:ProtectionConfig}) {
+export async function persistPurchase(request:Request,existing:Order|null,orderId:string,subtotal:number,lines:CheckoutLine[]|undefined,statement:(pricing:DiscountPricing)=>{sql:string;args:InValue[]},selectedReward?:unknown,protection?:{quote:ShippingQuote;policy:ProtectionConfig},expectedReward?:{discount:number;voucherId:string}) {
  const customer=await currentCustomer(request.headers.get('cookie'));
  let choice:string;try{choice=rewardChoice(selectedReward)}catch{throw new AppError(400,'Pilihan reward tidak valid.')}
  if(existing?.discount_amount&&existing.customer_id!==customer?.id)throw new AppError(409,'Masuk kembali ke akun yang digunakan untuk invoice diskon ini sebelum mengubahnya.');
@@ -74,6 +76,9 @@ export async function persistPurchase(request:Request,existing:Order|null,orderI
    if(orderingLocked({orderableAt:row.orderable_at as string|null}))throw new AppError(409,'Pemesanan dibuka '+scheduleLabel(String(row.orderable_at))+'.');
   }
   const quote=await purchaseRewardInTransaction(tx,customer,orderId,subtotal,lines,choice);
+  if(expectedReward&&(quote.discount!==expectedReward.discount||quote.selected?.id!==expectedReward.voucherId)){
+   throw new AppError(409,'Diskon berubah. Pastikan Anda masuk dengan akun yang sama, lalu periksa ringkasan sebelum melanjutkan.');
+  }
   const protectedPrice=protection?protectionFields(protection.quote,protectionGoodsValue(subtotal,subtotal-quote.discount,protection.quote.protection?.valueBasis),protection.policy,existing):legacyProtection;
   const pricing={...protectedPrice,customerId:customer?.id??null,subtotal,discount:quote.discount,net:subtotal-quote.discount,voucherId:quote.selected?.id??null,voucherLabel:quote.selected?.label??null};
   const saved=await tx.execute(statement(pricing));

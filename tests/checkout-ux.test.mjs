@@ -2,7 +2,7 @@ import test,{beforeEach,after} from 'node:test';import assert from 'node:assert/
 import {mkdtemp,mkdir,writeFile,rm,readdir,copyFile} from 'node:fs/promises';import os from 'node:os';import path from 'node:path';import {pathToFileURL} from 'node:url';import {createHash} from 'node:crypto';import {createClient} from '@libsql/client';import {build} from 'esbuild';import {migrate} from '../scripts/migration-core.mjs';
 const dir=await mkdtemp(path.join(os.tmpdir(),'elite-checkout-ux-')),png=new Uint8Array(80);png.set([137,80,78,71,13,10,26,10]);
 Object.assign(process.env,{TURSO_DATABASE_URL:'file:'+path.join(dir,'qa.db'),TURSO_AUTH_TOKEN:'',SITE_ORIGIN:'https://elite.test',CONFIG_SECRET:'a'.repeat(64),AUTH_SECRET:'b'.repeat(64),STORAGE_DRIVER:'local',LOCAL_STORAGE_PATH:path.join(dir,'files'),PAYMENT_BCA_ACCOUNT_NUMBER:'0000000000',PAYMENT_BCA_ACCOUNT_HOLDER:'SIMULATION ONLY',PAYMENT_QRIS_KEY:'qris/simulation',PAYMENT_QRIS_MIME:'image/png',PAYMENT_QRIS_MERCHANT:'SIMULATION ONLY',PAYMENT_QRIS_SHA256:createHash('sha256').update(png).digest('hex')});delete process.env.VERCEL;delete process.env.BLOB_READ_WRITE_TOKEN;
-const bundle=await build({stdin:{contents:`export {getSqlClient} from './lib/database';export {hash,encrypt,bucket} from './modules/order/order-server';export * from './modules/order/checkout-ux';export * from './modules/analytics/checkout-flow';export {checkoutObserved,proofObserved} from './modules/analytics/server';export {createCheckout,quoteCheckout} from './modules/catalog/checkout';export {configuredJntProtection,protectionConfig} from './modules/order/shipping-protection';export {POST as orderPost,PATCH as orderPatch} from './app/api/order/route';export {GET as trackingGet} from './app/api/order/tracking/route';export {GET as defaultsGet} from './app/api/customer/checkout/route';export {POST as analyticsPost} from './app/api/analytics/events/route';`,resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'esm',platform:'node',packages:'external',write:false,banner:{js:"import {createRequire} from 'node:module';const require=createRequire(import.meta.url);"},plugins:[{name:'next',setup(b){b.onResolve({filter:/^next\/(headers|navigation)$/},a=>({path:a.path+'.js',external:true}))}}]});
+const bundle=await build({stdin:{contents:`export {getSqlClient} from './lib/database';export {previewRewards} from './modules/order/rewards-server';export {hash,encrypt,bucket} from './modules/order/order-server';export * from './modules/order/checkout-ux';export * from './modules/analytics/checkout-flow';export {checkoutObserved,proofObserved} from './modules/analytics/server';export {createCheckout,quoteCheckout} from './modules/catalog/checkout';export {configuredJntProtection,protectionConfig} from './modules/order/shipping-protection';export {POST as orderPost,PATCH as orderPatch} from './app/api/order/route';export {GET as trackingGet} from './app/api/order/tracking/route';export {GET as defaultsGet} from './app/api/customer/checkout/route';export {POST as analyticsPost} from './app/api/analytics/events/route';`,resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'esm',platform:'node',packages:'external',write:false,banner:{js:"import {createRequire} from 'node:module';const require=createRequire(import.meta.url);"},plugins:[{name:'next',setup(b){b.onResolve({filter:/^next\/(headers|navigation)$/},a=>({path:a.path+'.js',external:true}))}}]});
 await mkdir('.test-runtime/tests',{recursive:true});const file=path.resolve('.test-runtime/tests/checkout-ux.mjs');await writeFile(file,bundle.outputFiles[0].contents);const m=await import(pathToFileURL(file)),db=m.getSqlClient();await migrate(db,new URL('../migrations/',import.meta.url));await m.bucket().put('qris/simulation',png,{httpMetadata:{contentType:'image/png'}});
 const originalFetch=globalThis.fetch;globalThis.fetch=()=>{throw Error('No real network/provider allowed in checkout UX tests')};
 after(async()=>{globalThis.fetch=originalFetch;db.close();global.gc?.();await new Promise(r=>setTimeout(r,100));assert.equal(path.dirname(dir),os.tmpdir());assert.ok(path.basename(dir).startsWith('elite-checkout-ux-'));await rm(dir,{recursive:true,force:true,maxRetries:8,retryDelay:200})});
@@ -56,4 +56,30 @@ test('additive migration preserves every legacy order/event field and all existi
  const legacy=createClient({url:'file::memory:'}),folder=path.join(dir,'legacy-migrations');await mkdir(folder);for(const name of(await readdir('migrations')).filter(n=>n.endsWith('.sql')&&n!=='release_0022_checkout_ux.sql'))await copyFile('migrations/'+name,path.join(folder,name));const url=pathToFileURL(folder+path.sep);await migrate(legacy,url);
  await legacy.execute("INSERT INTO orders(id,session_hash,created_at,name,phone,address,postcode,item,total) VALUES('EV-261028-12345678','SIMULATED_SESSION',1,'SIMULATION','081234567890','SIMULATED ADDRESS','10110','SIMULATED ITEM',1000)");await legacy.execute("INSERT INTO analytics_events(id,dedupe_key,event_name,timestamp,traffic_source) VALUES('legacy','legacy','checkout_started',1,'Direct')");const beforeOrder={...(await legacy.execute('SELECT * FROM orders')).rows[0]},beforeEvent={...(await legacy.execute('SELECT * FROM analytics_events')).rows[0]},triggers=(await legacy.execute("SELECT name,sql FROM sqlite_master WHERE type='trigger' ORDER BY name")).rows;
  await copyFile('migrations/release_0022_checkout_ux.sql',path.join(folder,'release_0022_checkout_ux.sql'));await migrate(legacy,url);const afterOrder={...(await legacy.execute('SELECT * FROM orders')).rows[0]},afterEvent={...(await legacy.execute('SELECT * FROM analytics_events')).rows[0]};for(const key of ['checkout_request_hash','checkout_request_fingerprint']){assert.equal(afterOrder[key],null);delete afterOrder[key]}for(const key of ['checkout_id','checkout_entry','checkout_actor','device_class']){assert.equal(afterEvent[key],null);delete afterEvent[key]}assert.deepEqual(afterOrder,beforeOrder);assert.deepEqual(afterEvent,beforeEvent);assert.deepEqual((await legacy.execute("SELECT name,sql FROM sqlite_master WHERE type='trigger' ORDER BY name")).rows,triggers);assert.equal((await migrate(legacy,url)).pending.length,0);legacy.close();
+});
+
+
+test('a regular checkout does not create an invoice after the displayed first-order voucher disappears',async()=>{
+ const member='elite_customer='+'1'.repeat(64);
+ const body={...await payload(),rewardChoice:'auto'};
+ const input={context:'checkout',catalogToken:body.catalogToken};
+ const preview=await m.previewRewards(request('/api/rewards/quote',input,member),input);
+ assert.equal(preview.selected.id,'first-purchase-5');
+ assert.equal(preview.discount,8750);
+ const submitted={...body,expectedOrderReward:{discount:preview.discount,voucherId:preview.selected.id}};
+ await db.execute("UPDATE customer_sessions SET expires_at=0 WHERE customer_id='member'");
+ const rejected=await post(submitted,nonce,member);
+ assert.equal(rejected.status,409);
+ assert.match((await rejected.json()).error,/Diskon berubah/);
+ assert.equal(await count('orders'),0);
+ assert.equal(await count('first_purchase_discounts'),0);
+ await db.execute({sql:"UPDATE customer_sessions SET expires_at=? WHERE customer_id='member'",args:[Date.now()+86400000]});
+ const forged=await post({...submitted,expectedOrderReward:{...submitted.expectedOrderReward,discount:175000}},nonce,member);
+ assert.equal(forged.status,409);
+ assert.equal(await count('orders'),0);
+ const accepted=await post(submitted,nonce,member);
+ assert.equal(accepted.status,201);
+ assert.equal((await accepted.json()).discount_amount,8750);
+ assert.equal((await post(submitted,nonce,member)).status,200);
+ assert.equal(await count('orders'),1);
 });

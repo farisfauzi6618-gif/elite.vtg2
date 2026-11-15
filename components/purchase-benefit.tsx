@@ -18,5 +18,14 @@ export function PurchaseBenefit({promotion,currentOrderId}:{promotion:PurchasePr
  const [busy,setBusy]=useState(false),[error,setError]=useState('');
  async function resume(){setBusy(true);setError('');try{const reply=await fetch('/api/order/first-purchase',{method:'POST'});const value=await reply.json();if(!reply.ok)throw Error(value.error||'Invoice belum dapat dibuka.');window.location.assign('/order');}catch(e){setError((e as Error).message);setBusy(false);}}
  if(!promotion||promotion.state!=='reserved'||promotion.orderId===currentOrderId)return null;
- return <div className="purchase-benefit"><div><p>ELITE Reward tersimpan di invoice sebelumnya</p><small>Selesaikan invoice itu, atau batalkan jika belum dibayar.</small>{error&&<small role="alert">{error}</small>}</div><button type="button" className="text-button" disabled={busy} onClick={()=>void resume()}>{busy?'Membuka…':'Lanjutkan pesanan diskon'}</button></div>;
+ const invoice=encodeURIComponent(promotion.orderId);
+ return <div className="purchase-benefit">
+  <div><p>Voucher pembelian pertama masih tersimpan di invoice {promotion.orderType==='reserve'?'Reserve':'sebelumnya'}</p>
+   <small>Diskon tetap ada di invoice itu dan belum bisa dipakai di checkout baru.</small>
+   {error&&<small role="alert">{error}</small>}
+  </div>
+  {promotion.orderType==='reserve'?<a className="text-button" href={'/order?reserveInvoice='+invoice}>Buka Reserve</a>:
+   promotion.hasProof?<a className="text-button" href={'/lacak?invoice='+invoice}>Lihat status pembayaran</a>:
+   <button type="button" className="text-button" disabled={busy} onClick={()=>void resume()}>{busy?'Membuka…':'Lanjutkan pesanan diskon'}</button>}
+ </div>;
 }

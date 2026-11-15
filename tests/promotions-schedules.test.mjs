@@ -1,5 +1,7 @@
 import test,{after,beforeEach} from 'node:test';
 import assert from 'node:assert/strict';
+import {createElement} from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
 import {build} from 'esbuild';
 import {mkdtemp,mkdir,writeFile,rm,readFile,readdir} from 'node:fs/promises';
 import path from 'node:path';
@@ -19,8 +21,9 @@ const compiled=await build({stdin:{contents:`
  export {encrypt,hash,myOrder} from './modules/order/order-server';export {invoiceText} from './modules/order/order-types';
  export {confirmPayment} from './modules/order/fulfilment';export {POST as orderPost,DELETE as orderDelete} from './app/api/order/route';
  export {GET as catalogQuoteGet} from './app/api/order/catalog/route';export {POST as resumePost} from './app/api/order/first-purchase/route';
+ export {PurchaseBenefit} from './components/purchase-benefit';
  export {GET as customerGet} from './app/api/customer/route';export {POST as proofPost} from './app/api/order/proof/route';
-`,resolveDir:process.cwd(),loader:'ts'},bundle:true,platform:'node',format:'esm',write:false,external:['@libsql/client','@vercel/blob','@hyzyla/pdfium'],banner:{js:"import {createRequire} from 'node:module';const require=createRequire(import.meta.url);"},plugins:[{name:'next',setup(b){b.onResolve({filter:/^next\/(headers|navigation)$/},a=>({path:a.path+'.js',external:true}))}}]});
+`,resolveDir:process.cwd(),loader:'ts'},bundle:true,platform:'node',format:'esm',write:false,jsx:'automatic',external:['react','react-dom','@libsql/client','@vercel/blob','@hyzyla/pdfium'],banner:{js:"import {createRequire} from 'node:module';const require=createRequire(import.meta.url);"},plugins:[{name:'next',setup(b){b.onResolve({filter:/^next\/(headers|navigation)$/},a=>({path:a.path+'.js',external:true}))}}]});
 await writeFile('.test-runtime/promotions.mjs',compiled.outputFiles[0].contents);
 const m=await import(pathToFileURL(path.resolve('.test-runtime/promotions.mjs'))),client=m.getSqlClient();
 await migrate(client,new URL('../migrations/',import.meta.url));
@@ -72,6 +75,10 @@ test('only owner confirmation consumes the benefit, and confirmation is idempote
  const {order,cookie}=await discounted();assert.equal((await m.purchasePromotion(buyerCookie)).state,'reserved');
  const form=new FormData(),png=new Uint8Array(80);png.set([137,80,78,71,13,10,26,10]);form.set('file',new File([png],'proof.png',{type:'image/png'}));form.set('paymentMethod','bca_transfer');
  const proof=await m.proofPost(new Request('https://elite.test/api/order/proof',{method:'POST',headers:{Origin:'https://elite.test',Cookie:cookie},body:form}));assert.equal(proof.status,200);assert.equal((await m.purchasePromotion(buyerCookie)).state,'reserved');
+ const pending=await m.purchasePromotion(buyerCookie);
+ assert.equal(pending.hasProof,true);
+ const notice=renderToStaticMarkup(createElement(m.PurchaseBenefit,{promotion:pending}));
+ assert.ok(notice.includes('/lacak?invoice='+order.id));
  assert.ok(messages.some(message=>/Diskon: -Rp\s*9\.250/.test(message.caption||'')));
  await assert.rejects(m.confirmPayment(order.id,'other-owner',50));assert.equal((await client.execute('SELECT redeemed_at FROM first_purchase_discounts')).rows[0].redeemed_at,null);
  await m.confirmPayment(order.id,'123456',50);await m.confirmPayment(order.id,'123456',50);assert.equal((await m.purchasePromotion(buyerCookie)).state,'redeemed');
@@ -79,6 +86,13 @@ test('only owner confirmation consumes the benefit, and confirmation is idempote
 });
 test('account recovery requires the same authenticated customer',async()=>{
  const {order}=await discounted();assert.equal((await m.resumePost(request('/api/order/first-purchase',{},''))).status,401);
+ const reserved=(await (await m.customerGet(request('/api/customer',undefined,buyerCookie))).json()).promotion;
+ assert.deepEqual(reserved,{state:'reserved',percent:5,orderId:order.id,orderType:'normal',hasProof:false});
+ const original=renderToStaticMarkup(createElement(m.PurchaseBenefit,{promotion:reserved}));
+ assert.match(original,/Lanjutkan pesanan diskon/);
+ assert.equal(renderToStaticMarkup(createElement(m.PurchaseBenefit,{promotion:reserved,currentOrderId:order.id})),'');
+ const reserve=renderToStaticMarkup(createElement(m.PurchaseBenefit,{promotion:{...reserved,orderType:'reserve'}}));
+ assert.ok(reserve.includes('/order?reserveInvoice='+order.id));
  const other=await m.registerCustomer({name:'Other Buyer',identity:'other@example.test',password:'SIMULATED_PASSWORD_123',consent:true},null);
  assert.equal((await m.resumePost(request('/api/order/first-purchase',{},'elite_customer='+other.token))).status,404);
  const resumed=await m.resumePost(request('/api/order/first-purchase',{},buyerCookie));assert.equal(resumed.status,200);assert.equal((await resumed.json()).id,order.id);
@@ -91,7 +105,7 @@ test('expired unpaid drafts release their claim, submitted proof never does',asy
  const {order}=await discounted();await client.execute({sql:'UPDATE orders SET created_at=? WHERE id=?',args:[Date.now()-8*86400000,order.id]});assert.equal((await m.purchasePromotion(buyerCookie)).state,'available');
  const again=await discounted();await client.execute({sql:"UPDATE orders SET created_at=?,status='submitted',proof_key='proof' WHERE id=?",args:[Date.now()-8*86400000,again.order.id]});assert.equal((await m.purchasePromotion(buyerCookie)).state,'reserved');
 });
-test('existing customers with confirmed purchases are ineligible',async()=>{const {order}=await discounted();await client.execute('DELETE FROM first_purchase_discounts');await client.execute({sql:"UPDATE orders SET confirmed_at=?,payment_state='payment_confirmed',discount_amount=0 WHERE id=?",args:[Date.now(),order.id]});assert.equal((await m.purchasePromotion(buyerCookie)).state,'redeemed');const next=await create();assert.equal((await next.json()).discount_amount,0);});
+test('existing customers with confirmed purchases are ineligible',async()=>{const {order}=await discounted();await client.execute('DELETE FROM first_purchase_discounts');await client.execute({sql:"UPDATE orders SET confirmed_at=?,payment_state='payment_confirmed',discount_amount=0 WHERE id=?",args:[Date.now(),order.id]});assert.equal((await m.purchasePromotion(buyerCookie)).state,'ineligible');const next=await create();assert.equal((await next.json()).discount_amount,0);});
 test('scheduled products remain public with details and stock, but cannot checkout early',async()=>{
  product=await m.saveProduct({...product,orderableAt:new Date(Date.now()+86400000).toISOString(),reviewed:true},'simulated-owner');assert.equal((await m.readProducts()).length,1);assert.equal(product.groups[0].qty,10);
  await assert.rejects(m.createCheckout(selection),/Pemesanan dibuka/);const rows=m.cartAvailability([{...selection.lines[0],name:'Polo',label:'M'}],[product],true);assert.equal(rows[0].available,true);assert.equal(rows[0].scheduled,true);assert.equal(m.cartSummary(rows).canCheckout,false);
