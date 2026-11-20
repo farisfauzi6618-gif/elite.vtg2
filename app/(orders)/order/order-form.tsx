@@ -180,7 +180,7 @@ export default function OrderForm({initialCatalogPending=false}:{initialCatalogP
  },[step,destination,quote,quoting,rewards.loading,rewards.quote,customer,protectionStale,protectedValue,goods]);
  const choiceAvailable=paymentChoice==='bca_transfer'?!!config?.payment.bca:!!config?.payment.qris;
  const uxSteps=JSON.stringify(['checkout_viewed',...(destination&&Object.keys(recipientErrors(form)).length===0?['recipient_info_completed']:[]),...(quote&&!expired&&!protectionStale?['shipping_quote_success','shipping_option_selected']:[]),...(quote&&choiceAvailable?['payment_method_selected']:[])]);
- useEffect(()=>{if(step!==1||!draftReady||!checkoutId||catalogLoading||reserveMode)return;const entry=new URLSearchParams(window.location.search).get('entry');track('checkout_progress',{checkoutId,steps:JSON.parse(uxSteps),entry,manual:!linked},'checkout-ux-v1:'+checkoutId+':'+uxSteps)},[step,draftReady,checkoutId,catalogLoading,reserveMode,uxSteps,linked]);
+ useEffect(()=>{if(step!==1||!draftReady||!checkoutId||catalogLoading)return;const entry=new URLSearchParams(window.location.search).get('entry');track('checkout_progress',{checkoutId,steps:JSON.parse(uxSteps),entry,manual:!linked,flow:reserveMode?'reserve':'normal'},'checkout-ux-v1:'+checkoutId+':'+uxSteps)},[step,draftReady,checkoutId,catalogLoading,reserveMode,uxSteps,linked]);
  const currentQuote=step>1?order?.quote:selectedQuote,collect=shippingCollect(currentQuote),shippingTitle=currentQuote?`Ongkir ${quoteServiceName(currentQuote)}`:'Ongkir J&T';
  const returnHref=order&&typeof window!=="undefined"?catalogReturnHref(order,window.location.search):"/";
  async function checkoutWithoutReserve(){

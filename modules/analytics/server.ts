@@ -1,7 +1,7 @@
 import {db,AppError,requireAdmin} from '@/modules/catalog/server';
 import {currentCustomer} from '@/modules/catalog/customers';
 import {myOrder} from '@/modules/order/order-server';
-import {traffic,normalizeSearch,ERROR_CODES} from './common';
+import {traffic,normalizeSearch,ERROR_CODES,CART_REJECTIONS} from './common';
 type Session={id:string;visitor_id:string;user_id:string|null;started_at:number;last_seen_at:number;traffic_source:string;utm_source:string|null;utm_medium:string|null;utm_campaign:string|null;utm_content:string|null};
 const SHARE_METHODS:Record<string,string>={product_share_opened:'opened',product_share_instagram_story:'instagram_story',product_share_whatsapp:'whatsapp',product_share_copy_link:'copy_link',product_share_more:'more'};
 const ID=/^[a-f0-9-]{36}$/;
@@ -28,8 +28,8 @@ export async function event(s:Session|null,name:string,key:string,v:Detail={},pr
  const id=crypto.randomUUID(),d=db();await d.batch([d.prepare('INSERT OR IGNORE INTO analytics_events(id,dedupe_key,event_name,timestamp,session_id,visitor_id,user_id,product_id,order_id,search_query,result_count,traffic_source,utm_source,utm_medium,utm_campaign,utm_content,error_code,share_method) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)').bind(id,key,name,Date.now(),s?.id,s?.visitor_id,v.userId??s?.user_id,v.productId,v.orderId,v.query,v.resultCount,s?.traffic_source??'Other',s?.utm_source,s?.utm_medium,s?.utm_campaign,s?.utm_content,v.errorCode,v.shareMethod??null),...products.map(p=>d.prepare('INSERT OR IGNORE INTO analytics_event_products(event_id,product_id) SELECT id,? FROM analytics_events WHERE dedupe_key=?').bind(p,key))]);
 }
 export async function collect(r:Request,v:Record<string,unknown>){
- if(v.event==='checkout_progress'){await (await import('./checkout-flow')).checkoutProgress(r,v);return;}
- const s=await analyticsSession(r);if(!s)return;
+ if(v.event==='checkout_progress')return (await import('./checkout-flow')).checkoutProgress(r,v);
+ const s=await analyticsSession(r);if(!s)return false;
  if(v.event==='wishlist_saved'){
   const productId=v.productId;
   if(typeof productId!=='string'||!/^[A-Za-z0-9_-]{1,100}$/.test(productId))return;
@@ -44,6 +44,11 @@ export async function collect(r:Request,v:Record<string,unknown>){
  await db().prepare('UPDATE analytics_sessions SET last_seen_at=? WHERE id=?').bind(Date.now(),s.id).run();
  const customer=await currentCustomer(r.headers.get('cookie'));if(customer)s.user_id=customer.id;
  const productId=typeof v.productId==='string'&&v.productId.length<=100?v.productId:undefined;
+ if(v.event==='image_recovered'||v.event==='cart_rejected'){
+  const name=v.event==='image_recovered'?'image_recovered':typeof v.reason==='string'&&(CART_REJECTIONS as readonly string[]).includes(v.reason)?'cart_rejected_'+v.reason:null;
+  if(!name||!productId||!await db().prepare("SELECT id FROM products WHERE id=? AND status='published' AND deleted_at IS NULL").bind(productId).first())return;
+  await event(s,name,name+':'+s.id+':'+productId+':'+Math.floor(Date.now()/300000),{productId});return;
+ }
  if(v.event==='featured_product_view'||v.event==='featured_product_click'){
   const view=v.event==='featured_product_view',input=view?v.products:[{productId:v.productId,position:v.position}];
   if(!Array.isArray(input)||!input.length||input.length>8)return;
@@ -76,7 +81,10 @@ export async function collect(r:Request,v:Record<string,unknown>){
   const o=await myOrder(r);if(o.status!=='awaiting_proof'||o.proof_key)return;
   await attachOrder(r,o.id);const context=await orderSession(o.id);await event(context,'payment_reached','payment:'+o.id,{orderId:o.id,userId:o.customer_id});return;
  }
- if(v.event==='error'&&typeof v.code==='string'&&(ERROR_CODES as readonly string[]).includes(v.code))await event(s,'error','error:'+s.id+':'+v.code+':'+(productId??'')+':'+Math.floor(Date.now()/300000),{productId,errorCode:v.code});
+ if(v.event==='error'&&typeof v.code==='string'&&(ERROR_CODES as readonly string[]).includes(v.code)){
+  const safeProductId=productId&&await db().prepare("SELECT id FROM products WHERE id=? AND status='published' AND deleted_at IS NULL").bind(productId).first()?productId:undefined;
+  await event(s,'error','error:'+s.id+':'+v.code+':'+(safeProductId??'')+':'+Math.floor(Date.now()/300000),{productId:safeProductId,errorCode:v.code});
+ }
  // Client-supplied completion, proof, money, metadata and source fields are ignored.
 }
 export async function checkoutObserved(r:Request,checkoutId:string,products:string[]){const s=await analyticsSession(r);if(!s)return;await db().prepare('INSERT OR IGNORE INTO analytics_checkout_context VALUES(?,?)').bind(checkoutId,s.id).run();await event(s,'checkout_started','checkout:'+checkoutId,{},products)}

@@ -8,14 +8,20 @@ async function write(s:Context,name:string,checkoutId:string,entry:string,actor:
  await db().prepare(`INSERT OR IGNORE INTO analytics_events(id,dedupe_key,event_name,timestamp,session_id,visitor_id,user_id,order_id,traffic_source,utm_source,utm_medium,utm_campaign,utm_content,checkout_id,checkout_entry,checkout_actor,device_class) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).bind(crypto.randomUUID(),'checkout-ux-v1:'+checkoutId+':'+name,name,Date.now(),s.id,s.visitor_id,s.user_id,orderId,s.traffic_source,s.utm_source,s.utm_medium,s.utm_campaign,s.utm_content,checkoutId,entry,actor,device).run();
 }
 export async function checkoutProgress(request:Request,value:Record<string,unknown>){
- const s=await analyticsSession(request),id=value.checkoutId;if(!s||typeof id!=='string'||!ID.test(id)||!Array.isArray(value.steps)||!value.steps.length||value.steps.length>CHECKOUT_STEPS.length||value.steps.some(step=>!(CHECKOUT_STEPS as readonly unknown[]).includes(step)))return;
- if(value.manual!==true&&!await db().prepare('SELECT checkout_id FROM analytics_checkout_context WHERE checkout_id=? AND session_id=?').bind(id,s.id).first())return;
+ const s=await analyticsSession(request),id=value.checkoutId;if(!s)return false;
+ if(typeof id!=='string'||!ID.test(id)||!Array.isArray(value.steps)||!value.steps.length||value.steps.length>CHECKOUT_STEPS.length||value.steps.some(step=>!(CHECKOUT_STEPS as readonly unknown[]).includes(step)))return;
+ const reserve=value.flow==='reserve';
+ if(value.manual===true&&reserve)return;
+ if(value.manual!==true){
+  const checkout=await db().prepare('SELECT c.order_type FROM analytics_checkout_context a JOIN catalog_checkouts c ON c.id=a.checkout_id WHERE a.checkout_id=? AND a.session_id=?').bind(id,s.id).first<{order_type:string}>();
+  if(!checkout||(checkout.order_type==='reserve')!==reserve)return;
+ }
  if(value.manual===true){if(await db().prepare('SELECT checkout_id FROM analytics_checkout_context WHERE checkout_id=?').bind(id).first())return;const previous=await db().prepare("SELECT session_id FROM analytics_events WHERE checkout_id=? AND event_name='checkout_viewed'").bind(id).first<{session_id:string}>();if(previous&&previous.session_id!==s.id)return;}
  const customer=await currentCustomer(request.headers.get('cookie')),actor=customer?'member':'guest',ua=request.headers.get('user-agent')??'',device=!ua?'unknown':/mobile|android|iphone|ipad/i.test(ua)?'mobile':'desktop';
  const entry=value.manual===true?'manual':value.entry==='buy_now'?'buy_now':value.entry==='cart'?'cart':'unknown';
  // Always write the view first. Retries/refreshes cannot create another view or
  // overwrite the original attribution, account kind, device or entry method.
- for(const step of new Set(['checkout_viewed',...value.steps]))await write({...s,user_id:customer?.id??null},String(step),id,entry,actor,device);
+ for(const step of new Set(['checkout_viewed',...value.steps]))await write({...s,user_id:customer?.id??null},reserve?'reserve_'+String(step):String(step),id,entry,actor,device);
 }
 export async function checkoutOrderSubmitted(request:Request,orderId:string){
  const o=await db().prepare('SELECT catalog_checkout_id,customer_id FROM orders WHERE id=?').bind(orderId).first<{catalog_checkout_id:string|null;customer_id:string|null}>();if(!o)return;
@@ -41,4 +47,19 @@ export async function checkoutFlowReport(start:number,end:number){
  const durations=rows.filter(r=>r.submitted!=null&&r.submitted>=r.viewed).map(r=>r.submitted!-r.viewed);
  const segments=(['entry','actor','device','source'] as const).map(dimension=>({dimension,rows:[...new Set(rows.map(r=>r[dimension]))].map(value=>{const selected=rows.filter(r=>r[dimension]===value);return {value,viewed:selected.length,submitted:selected.filter(r=>r.submitted!=null&&r.submitted>=r.viewed).length}})}));
  return {version:'checkout-ux-v1',cohort:'First checkout_viewed within selected dates; progression observed as of report time',stages,shippingSuccess:rows.filter(r=>r.shipping).length,recipientCompleted:rows.filter(r=>r.recipient).length,averageSubmitSeconds:durations.length?Math.round(durations.reduce((a,b)=>a+b,0)/durations.length/1000):null,segments};
+}
+
+export async function reserveFlowReport(start:number,end:number){
+ const rows=(await db().prepare(`SELECT v.checkout_id,v.timestamp AS viewed,
+ MIN(CASE WHEN e.event_name='reserve_started' THEN e.timestamp END) AS submitted,
+ MIN(CASE WHEN e.event_name='reserve_deposit_submitted' THEN e.timestamp END) AS proof,
+ MIN(CASE WHEN e.event_name='reserve_confirmed' THEN e.timestamp END) AS confirmed,
+ MIN(CASE WHEN e.event_name='reserve_completed' THEN e.timestamp END) AS paid
+ FROM analytics_events v LEFT JOIN analytics_events e ON e.checkout_id=v.checkout_id AND e.timestamp>=v.timestamp
+ AND e.event_name IN ('reserve_started','reserve_deposit_submitted','reserve_confirmed','reserve_completed')
+ WHERE v.event_name='reserve_checkout_viewed' AND v.timestamp>=? AND v.timestamp<? GROUP BY v.checkout_id`).bind(start,end).all<{checkout_id:string;viewed:number;submitted:number|null;proof:number|null;confirmed:number|null;paid:number|null}>()).results;
+ const submitted=rows.filter(r=>r.submitted!=null&&r.submitted>=r.viewed);
+ const proof=submitted.filter(r=>r.proof!=null&&r.proof>=r.submitted!);
+ const confirmed=proof.filter(r=>r.confirmed!=null&&r.confirmed>=r.proof!);
+ return {stages:[{key:'viewed',label:'Checkout DP ditampilkan',count:rows.length},{key:'submitted',label:'Invoice DP tersimpan',count:submitted.length},{key:'proof',label:'Bukti DP tersimpan',count:proof.length},{key:'confirmed',label:'DP dikonfirmasi',count:confirmed.length},{key:'paid',label:'Pelunasan dikonfirmasi',count:confirmed.filter(r=>r.paid!=null&&r.paid>=r.confirmed!).length}]};
 }

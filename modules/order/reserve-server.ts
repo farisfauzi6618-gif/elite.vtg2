@@ -27,7 +27,7 @@ async function reserveEvent(tx:Transaction,o:ReserveRow,name:string,payment?:Pay
  try{
  const metadata=JSON.stringify({reserve_id:o.id,item_count:o.quantity??1,order_value:o.item_amount,deposit_value:payment?.amount??o.deposit_amount});
  // Only business values, never recipient details. Existing attribution is reused.
- await execute(tx,"INSERT OR IGNORE INTO analytics_events(id,dedupe_key,event_name,timestamp,session_id,visitor_id,user_id,order_id,traffic_source) SELECT ?,?,?,?,s.id,s.visitor_id,NULL,?,COALESCE(s.traffic_source,'Other') FROM (SELECT 1) LEFT JOIN analytics_order_context c ON c.order_id=? LEFT JOIN analytics_sessions s ON s.id=c.session_id",['reserve:'+name+':'+(payment?.id??o.id),'reserve:'+name+':'+(payment?.id??o.id),name,Date.now(),o.id,o.id]);
+ await execute(tx,"INSERT OR IGNORE INTO analytics_events(id,dedupe_key,event_name,timestamp,session_id,visitor_id,user_id,order_id,traffic_source,checkout_id) SELECT ?,?,?,?,s.id,s.visitor_id,NULL,?,COALESCE(s.traffic_source,'Other'),? FROM (SELECT 1) LEFT JOIN analytics_order_context c ON c.order_id=? LEFT JOIN analytics_sessions s ON s.id=c.session_id",['reserve:'+name+':'+(payment?.id??o.id),'reserve:'+name+':'+(payment?.id??o.id),name,Date.now(),o.id,o.catalog_checkout_id??null,o.id]);
  await execute(tx,'INSERT OR IGNORE INTO reserve_event_values(event_id,values_json) VALUES(?,?)',['reserve:'+name+':'+(payment?.id??o.id),metadata]);
  }catch{console.warn('Reserve analytics observer unavailable');}
 }

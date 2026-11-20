@@ -1,5 +1,17 @@
 'use client';
 import {useEffect} from 'react';
 import {usePathname} from 'next/navigation';
-import {initAnalytics,trackError} from '@/modules/analytics/client';
-export function AnalyticsClient(){const path=usePathname();useEffect(()=>{void initAnalytics();const handler=(e:Event)=>{const el=e.target;if(el instanceof HTMLImageElement&&(el.classList.contains('detail-main-photo')||el.closest('.qris-frame')))trackError('critical_image')};document.addEventListener('error',handler,true);return()=>document.removeEventListener('error',handler,true)},[path]);return null}
+import {initAnalytics,resumeAnalytics,track} from '@/modules/analytics/client';
+import {imageObservers} from '@/modules/analytics/images';
+export function AnalyticsClient(){
+ const path=usePathname();
+ useEffect(()=>{
+  void initAnalytics();const observer=imageObservers(track);
+  const error=(event:Event)=>{if(event.target instanceof HTMLImageElement)observer.error(event.target)};
+  const load=(event:Event)=>{if(event.target instanceof HTMLImageElement)observer.load(event.target)};
+  const online=()=>{void resumeAnalytics()};
+  document.addEventListener('error',error,true);document.addEventListener('load',load,true);window.addEventListener('online',online);
+  return()=>{document.removeEventListener('error',error,true);document.removeEventListener('load',load,true);window.removeEventListener('online',online)};
+ },[path]);
+ return null;
+}

@@ -1,8 +1,9 @@
 export const SOURCES=['Instagram','Instagram Ads','Threads','Google','Direct','Referral','Other'] as const;
 export const STAGES=['visit','product_view','add_to_cart','checkout_started','payment_reached','payment_proof_uploaded','order_completed'] as const;
 export const STAGE_LABELS=['Unique Visitors','Product View','Add to Cart','Checkout Started','Payment Reached','Payment Proof Uploaded','Order Completed'];
-export const ERROR_CODES=['checkout_error','proof_upload_error','shipping_api_error','add_to_cart_error','sold_attempt','critical_image','critical_404'] as const;
-export const ERROR_LABELS:Record<string,string>={checkout_error:'Checkout Error',proof_upload_error:'Payment Proof Upload Error',shipping_api_error:'Shipping API Error',add_to_cart_error:'Add to Cart Error',sold_attempt:'Attempt to purchase SOLD item',critical_image:'Broken critical image',critical_404:'Critical 404'};
+export const ERROR_CODES=['checkout_error','proof_upload_error','shipping_api_error','add_to_cart_error','sold_attempt','critical_image','critical_404','qris_image_error','reserve_proof_upload_error','reserve_payment_error','product_load_error'] as const;
+export const ERROR_LABELS:Record<string,string>={checkout_error:'Checkout Error',proof_upload_error:'Payment Proof Upload Error',shipping_api_error:'Shipping API Error',add_to_cart_error:'Cart Storage Error',sold_attempt:'Attempt to purchase SOLD item',critical_image:'Product image failed after fallback / legacy image error',critical_404:'Critical 404 · legacy',qris_image_error:'QRIS Image Error',reserve_proof_upload_error:'Reserve Proof Upload Error',reserve_payment_error:'Reserve Payment / Extension Error',product_load_error:'Product Detail Load Error'};
+export const CART_REJECTIONS=['sold','scheduled','quantity_limit'] as const;
 export const percent=(n:number,d:number)=>d>0?n/d*100:0;
 export function normalizeSearch(value:unknown){return typeof value==='string'?value.normalize('NFKC').toLowerCase().trim().replace(/\s+/g,' ').replace(/[\x00-\x1f]/g,'').slice(0,120):''}
 // Never collect the full landing URL or referrer: these may contain order capabilities.
