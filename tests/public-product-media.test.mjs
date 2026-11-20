@@ -114,3 +114,19 @@ test('catalog media outage and disabled publishing fall back without retaining s
  try{assert.equal((await m.withReadyProductMedia([value]))[0].photoUrls,undefined)}finally{client.execute=execute}
  process.env.PRODUCT_MEDIA_DISABLED='1';assert.equal((await m.withReadyProductMedia([value]))[0].photoUrls,undefined);
 });
+
+test('ready media uses complete primary-key lookups instead of the state cleanup index',async()=>{
+ const product=await m.readProduct(id);await m.publicProductMediaUrl(key,'thumb');
+ const execute=client.execute;let statement;
+ client.execute=function(query,...rest){if(typeof query==='object'&&query.sql.includes('photo_public_derivatives'))statement=query;return execute.call(this,query,...rest)};
+ let result;
+ try{result=(await m.withReadyProductMedia([product]))[0]}finally{client.execute=execute}
+ assert.ok(result.photoUrls[key].thumb);assert.ok(statement);
+ const plan=await client.execute({sql:'EXPLAIN QUERY PLAN '+statement.sql,args:statement.args});
+ const steps=plan.rows.map(row=>String(row.detail)).join('\n');
+ assert.match(steps,/SEARCH d USING INDEX .*\(photo_key=\? AND preset=\? AND pipeline=\?\)/);
+ assert.doesNotMatch(steps,/photo_public_derivatives_cleanup/);
+ // The live publication gate still applies to a previously ready rendition.
+ await client.execute({sql:"UPDATE products SET status='draft' WHERE id=?",args:[id]});
+ assert.equal((await m.withReadyProductMedia([result]))[0].photoUrls[key],undefined);
+});

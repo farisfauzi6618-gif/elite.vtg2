@@ -12,7 +12,9 @@ export async function withReadyProductMedia<T extends MediaProduct>(products:T[]
   const all=[...new Set(clean.flatMap(keys))],urls:PhotoUrls={};
   for(let i=0;i<all.length;i+=200){
    const batch=all.slice(i,i+200);
-   const result=await getSqlClient().execute({sql:`SELECT d.photo_key,d.preset,d.public_url FROM photo_public_derivatives d WHERE d.photo_key IN (${batch.map(()=>'?').join(',')}) AND d.pipeline=? AND d.state='ready' AND EXISTS (SELECT 1 FROM photo_public_references r JOIN products p ON p.id=r.product_id WHERE r.photo_key=d.photo_key AND p.status='published' AND p.deleted_at IS NULL)`,args:[...batch,PUBLIC_MEDIA_PIPELINE]});
+   // Look up the complete existing primary key for each requested rendition.
+   // Filtering by state alone can choose the cleanup index and scan all ready media.
+   const result=await getSqlClient().execute({sql:`WITH requested_photos(photo_key) AS (VALUES ${batch.map(()=>'(?)').join(',')}), requested_presets(preset) AS (VALUES ('thumb'),('cardSmall'),('card'),('detail')) SELECT d.photo_key,d.preset,d.public_url FROM requested_photos k CROSS JOIN requested_presets s CROSS JOIN photo_public_derivatives d ON d.photo_key=k.photo_key AND d.preset=s.preset AND d.pipeline=? WHERE d.state='ready' AND EXISTS (SELECT 1 FROM photo_public_references r JOIN products p ON p.id=r.product_id WHERE r.photo_key=d.photo_key AND p.status='published' AND p.deleted_at IS NULL)`,args:[...batch,PUBLIC_MEDIA_PIPELINE]});
    for(const row of result.rows){const key=String(row.photo_key),size=String(row.preset) as PhotoSize,url=validatedPhotoUrl(row.public_url,key,size);if(url)(urls[key]??={})[size]=url;}
   }
   return clean.map(p=>({...p,photoUrls:Object.fromEntries(keys(p).filter(k=>urls[k]).map(k=>[k,urls[k]]))}));

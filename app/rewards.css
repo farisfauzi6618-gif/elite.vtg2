@@ -2,4 +2,4 @@
 
 .order-header-actions{display:flex;align-items:center;gap:16px}.order-header-actions .account-trigger{color:#092139;font:12px Arial,sans-serif}.order-header-actions .account-trigger span{display:inline}@media(max-width:520px){.order-header-actions{gap:10px}.order-header-actions .header-note{display:none}}
 
-.payment-reward-breakdown{margin:0 0 14px;font:13px/1.6 Arial,sans-serif;color:#092139;text-align:left}.payment-reward-breakdown>div{display:flex;justify-content:space-between;gap:14px;margin:5px 0}.payment-reward-breakdown dt{max-width:68%;overflow-wrap:anywhere}.payment-reward-breakdown dd{margin:0;white-space:nowrap}
+.payment-reward-breakdown{margin:0 0 14px;font:13px/1.6 Arial,sans-serif;color:#092139;text-align:left}.payment-reward-breakdown>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 14px;margin:5px 0;align-items:start}.payment-reward-breakdown dt,.payment-reward-breakdown dd{min-width:0;overflow-wrap:anywhere}.payment-reward-breakdown dd{margin:0;text-align:right;white-space:normal;text-wrap:pretty}
